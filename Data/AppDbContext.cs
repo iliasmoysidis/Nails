@@ -10,7 +10,7 @@ namespace Nails.Data
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Professional> Professionals => Set<Professional>();
         public DbSet<Store> Stores => Set<Store>();
-        public DbSet<StoreOwner> StoreOwners => Set<StoreOwner>();
+        public DbSet<StoreManager> StoreManagers => Set<StoreManager>();
         public DbSet<StoreProfessional> StoreProfessionals => Set<StoreProfessional>();
         public DbSet<Service> Services => Set<Service>();
         public DbSet<ProfessionalService> ProfessionalServices => Set<ProfessionalService>();

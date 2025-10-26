@@ -1,6 +1,6 @@
 namespace Nails.Models
 {
-    public class Store
+    public class Store : BaseEntity
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;
@@ -9,7 +9,7 @@ namespace Nails.Models
         public string Email { get; set; } = null!;
         public string Phone { get; set; } = null!;
 
-        public ICollection<StoreOwner> Owners { get; set; } = new List<StoreOwner>();
+        public ICollection<StoreManager> Managers { get; set; } = new List<StoreManager>();
         public ICollection<StoreProfessional> Staff { get; set; } = new List<StoreProfessional>();
         public ICollection<Service> Services { get; set; } = new List<Service>();
 

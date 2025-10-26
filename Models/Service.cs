@@ -1,6 +1,6 @@
 namespace Nails.Models
 {
-    public class Service
+    public class Service : BaseEntity
     {
         public int Id { get; set; }
         public int StoreId { get; set; }

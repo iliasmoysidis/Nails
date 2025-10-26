@@ -2,7 +2,7 @@ using Nails.Enums;
 
 namespace Nails.Models
 {
-    public class Appointment
+    public class Appointment : BaseEntity
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
@@ -12,11 +12,10 @@ namespace Nails.Models
         public DateTime EndAt { get; set; }
         public decimal BookedPrice { get; set; }
         public string? Notes { get; set; }
-
         public AppointmentStatus Status { get; set; } = AppointmentStatus.PendingConfirmation;
 
-        public Customer Customer { get; set; } = null!;
-        public Professional Professional { get; set; } = null!;
+        public User Customer { get; set; } = null!;
+        public User Professional { get; set; } = null!;
         public Service Service { get; set; } = null!;
     }
 }

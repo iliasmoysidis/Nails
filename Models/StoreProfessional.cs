@@ -8,6 +8,6 @@ namespace Nails.Models
         public DateTime? EndDate { get; set; } = null;
 
         public Store Store { get; set; } = null!;
-        public Professional Professional { get; set; } = null!;
+        public User Professional { get; set; } = null!;
     }
 }

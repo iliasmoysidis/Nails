@@ -4,9 +4,9 @@ using Nails.Models;
 
 namespace Nails.Data.Configurations
 {
-    public class StoreOwnerConfiguration : IEntityTypeConfiguration<StoreOwner>
+    public class StoreManagerConfiguration : IEntityTypeConfiguration<StoreManager>
     {
-        public void Configure(EntityTypeBuilder<StoreOwner> builder)
+        public void Configure(EntityTypeBuilder<StoreManager> builder)
         {
             builder.HasKey(so => new { so.UserId, so.StoreId });
         }
