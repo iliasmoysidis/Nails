@@ -1,3 +1,5 @@
+using Nails.Enums;
+
 namespace Nails.Models
 {
     public class Appointment
@@ -11,7 +13,7 @@ namespace Nails.Models
         public decimal BookedPrice { get; set; }
         public string? Notes { get; set; }
 
-        public string Status { get; set; } = null!;
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.PendingConfirmation;
 
         public Customer Customer { get; set; } = null!;
         public Professional Professional { get; set; } = null!;
