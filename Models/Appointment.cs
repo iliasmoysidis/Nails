@@ -11,6 +11,8 @@ namespace Nails.Models
         public decimal BookedPrice { get; set; }
         public string? Notes { get; set; }
 
+        public string Status { get; set; } = null!;
+
         public Customer Customer { get; set; } = null!;
         public Professional Professional { get; set; } = null!;
         public Service Service { get; set; } = null!;

@@ -9,6 +9,5 @@ namespace Nails.Models
         public ICollection<StoreProfessional> Employers { get; set; } = new List<StoreProfessional>();
         public ICollection<ProfessionalService> Services { get; set; } = new List<ProfessionalService>();
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-
     }
 }

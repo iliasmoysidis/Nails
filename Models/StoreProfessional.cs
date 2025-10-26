@@ -4,6 +4,8 @@ namespace Nails.Models
     {
         public int StoreId { get; set; }
         public int ProfessionalId { get; set; }
+        public DateTime StartDate { get; set; } = DateTime.UtcNow;
+        public DateTime? EndDate { get; set; } = null;
 
         public Store Store { get; set; } = null!;
         public Professional Professional { get; set; } = null!;

@@ -11,5 +11,8 @@ namespace Nails.Models
         public Store Store { get; set; } = null!;
         public ICollection<ProfessionalService> Providers { get; set; } = new List<ProfessionalService>();
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+
+        public bool IsActive { get; set; } = true;
+        public DateTime? DeletedAt { get; set; }
     }
 }

@@ -12,5 +12,8 @@ namespace Nails.Models
         public ICollection<StoreOwner> Owners { get; set; } = new List<StoreOwner>();
         public ICollection<StoreProfessional> Staff { get; set; } = new List<StoreProfessional>();
         public ICollection<Service> Services { get; set; } = new List<Service>();
+
+        public bool IsActive { get; set; } = true;
+        public DateTime? DeletedAt { get; set; }
     }
 }
