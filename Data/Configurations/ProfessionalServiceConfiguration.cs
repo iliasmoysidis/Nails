@@ -8,7 +8,17 @@ namespace Nails.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ProfessionalService> builder)
         {
-            builder.HasKey(ps => new { ps.ProfessionalId, ps.ServiceId });
+            builder.HasKey(e => new { e.ProfessionalId, e.ServiceId });
+
+            builder.HasOne(e => e.Professional)
+                .WithMany(u => u.ProvidedServices)
+                .HasForeignKey(e => e.ProfessionalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(e => e.Service)
+                .WithMany(s => s.Providers)
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow;
 using Microsoft.EntityFrameworkCore;
 using Nails.Models;
 
@@ -7,8 +6,6 @@ namespace Nails.Data
     public class AppDbContext : DbContext
     {
         public DbSet<User> Users => Set<User>();
-        public DbSet<Customer> Customers => Set<Customer>();
-        public DbSet<Professional> Professionals => Set<Professional>();
         public DbSet<Store> Stores => Set<Store>();
         public DbSet<StoreManager> StoreManagers => Set<StoreManager>();
         public DbSet<StoreProfessional> StoreProfessionals => Set<StoreProfessional>();
@@ -16,11 +13,17 @@ namespace Nails.Data
         public DbSet<ProfessionalService> ProfessionalServices => Set<ProfessionalService>();
         public DbSet<Appointment> Appointments => Set<Appointment>();
 
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Store>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Service>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Appointment>().HasQueryFilter(e => e.IsActive);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 

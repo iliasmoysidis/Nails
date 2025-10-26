@@ -17,5 +17,8 @@ namespace Nails.Models
         public User Customer { get; set; } = null!;
         public User Professional { get; set; } = null!;
         public Service Service { get; set; } = null!;
+
+        public bool IsActive { get; set; } = true;
+        public DateTime? DeletedAt { get; set; }
     }
 }
