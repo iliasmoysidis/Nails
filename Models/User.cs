@@ -7,9 +7,9 @@ namespace Nails.Models
         public string Surname { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Phone { get; set; } = null!;
+        public string? TaxIdNumber { get; set; }
         public bool IsCustomer { get; set; } = true;
         public bool IsProfessional { get; set; } = false;
-        public string? TaxIdNumber { get; set; }
 
         public ICollection<Appointment> BookedAppointments { get; set; } = new List<Appointment>();
         public ICollection<StoreProfessional> Workplaces { get; set; } = new List<StoreProfessional>();
