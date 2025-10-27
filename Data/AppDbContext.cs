@@ -12,6 +12,10 @@ namespace Nails.Data
         public DbSet<Service> Services => Set<Service>();
         public DbSet<ProfessionalService> ProfessionalServices => Set<ProfessionalService>();
         public DbSet<Appointment> Appointments => Set<Appointment>();
+        public DbSet<StoreOperatingHours> StoreOperatingHours => Set<StoreOperatingHours>();
+        public DbSet<StoreException> StoreExceptions => Set<StoreException>();
+        public DbSet<ProfessionalSchedule> ProfessionalSchedules => Set<ProfessionalSchedule>();
+        public DbSet<ProfessionalTimeOff> ProfessionalTimeOffs => Set<ProfessionalTimeOff>();
 
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -26,8 +30,6 @@ namespace Nails.Data
             modelBuilder.Entity<Appointment>().HasQueryFilter(e => e.IsActive);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
-
         }
     }
 }

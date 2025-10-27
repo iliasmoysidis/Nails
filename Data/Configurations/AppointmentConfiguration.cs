@@ -8,7 +8,6 @@ namespace Nails.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Appointment> builder)
         {
-            builder.HasQueryFilter(e => e.IsActive);
             builder.HasKey(e => e.Id);
             builder.Property(e => e.BookedPrice).HasPrecision(10, 2);
             builder.Property(e => e.Notes).HasMaxLength(1000);
@@ -26,6 +25,11 @@ namespace Nails.Data.Configurations
             builder.HasOne(e => e.Service)
                 .WithMany(s => s.Appointments)
                 .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(e => e.Store)
+                .WithMany(s => s.Appointments)
+                .HasForeignKey(e => e.StoreId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(e => new { e.ProfessionalId, e.StartAt });
