@@ -14,7 +14,7 @@ namespace Nails.Data.Configurations
             builder.Property(e => e.Name).HasMaxLength(100);
             builder.Property(e => e.Surname).HasMaxLength(100);
             builder.Property(e => e.Phone).HasMaxLength(20);
-            builder.Property(e => e.TaxIdentificationNumber).HasMaxLength(50);
+            builder.Property(e => e.TaxIdNumber).HasMaxLength(50);
             builder.HasIndex(e => e.IsProfessional);
             builder.HasIndex(e => e.IsActive);
         }

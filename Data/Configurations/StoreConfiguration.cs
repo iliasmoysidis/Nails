@@ -12,7 +12,7 @@ namespace Nails.Data.Configurations
             builder.HasIndex(e => e.Email).IsUnique();
             builder.Property(e => e.Name).HasMaxLength(200);
             builder.Property(e => e.Address).HasMaxLength(500);
-            builder.Property(e => e.TaxIdentificationNumber).HasMaxLength(50);
+            builder.Property(e => e.TaxIdNumber).HasMaxLength(50);
             builder.Property(e => e.Email).HasMaxLength(255);
             builder.Property(e => e.Phone).HasMaxLength(20);
             builder.HasIndex(e => e.IsActive);
