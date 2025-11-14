@@ -10,7 +10,7 @@ public class HistoricEntity : BaseEntity
         IsActive = true;
     }
 
-    public void Delete()
+    public void SoftDelete()
     {
         IsActive = false;
         DeletedAt = DateTime.UtcNow;
