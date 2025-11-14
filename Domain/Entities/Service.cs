@@ -4,16 +4,20 @@ namespace Domain.Entities;
 
 public class Service : BaseEntity
 {
-    public int Id { get; set; }
-    public int StoreId { get; set; }
-    public string Name { get; set; } = null!;
-    public decimal Price { get; set; }
-    public TimeSpan Duration { get; set; }
+    public int Id { get; private set; }
+    public int StoreId { get; private set; }
+    public string Name { get; private set; } = null!;
+    public decimal Price { get; private set; }
+    public TimeSpan Duration { get; private set; }
+    public bool IsActive { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
-    public Store Store { get; set; } = null!;
-    public ICollection<ProfessionalService> Providers { get; set; } = new List<ProfessionalService>();
-    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+    public Store Store { get; private set; } = null!;
+    private readonly List<ProfessionalService> _providers = new();
+    public IReadOnlyCollection<ProfessionalService> Providers => _providers.AsReadOnly();
 
-    public bool IsActive { get; set; } = true;
-    public DateTime? DeletedAt { get; set; }
+    private Service()
+    {
+        IsActive = true;
+    }
 }

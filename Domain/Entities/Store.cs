@@ -4,20 +4,32 @@ namespace Domain.Entities;
 
 public class Store : BaseEntity
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = null!;
-    public string Address { get; set; } = null!;
-    public string TaxIdNumber { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public string Phone { get; set; } = null!;
+    public int Id { get; private set; }
+    public string Name { get; private set; } = null!;
+    public string Address { get; private set; } = null!;
+    public string TaxIdNumber { get; private set; } = null!;
+    public string Email { get; private set; } = null!;
+    public string Phone { get; private set; } = null!;
+    public bool IsActive { get; private set; } = true;
+    public DateTime? DeletedAt { get; private set; }
 
-    public ICollection<StoreManager> Managers { get; set; } = new List<StoreManager>();
-    public ICollection<StoreProfessional> Staff { get; set; } = new List<StoreProfessional>();
-    public ICollection<Service> Services { get; set; } = new List<Service>();
-    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-    public ICollection<StoreOperatingHours> OperatingHours { get; set; } = new List<StoreOperatingHours>();
-    public ICollection<StoreException> Exceptions { get; set; } = new List<StoreException>();
+    private readonly List<StoreManager> _managers = new();
+    public IReadOnlyCollection<StoreManager> Managers => _managers.AsReadOnly();
 
-    public bool IsActive { get; set; } = true;
-    public DateTime? DeletedAt { get; set; }
+    private readonly List<StoreProfessional> _staff = new();
+    public IReadOnlyCollection<StoreProfessional> Staff => _staff.AsReadOnly();
+
+    private readonly List<StoreOperatingHours> _operatingHours = new();
+    public IReadOnlyCollection<StoreOperatingHours> OperatingHours => _operatingHours.AsReadOnly();
+
+    private readonly List<StoreException> _exceptions = new();
+    public IReadOnlyCollection<StoreException> Exceptions => _exceptions.AsReadOnly();
+
+    private readonly List<Service> _services = new();
+    internal ICollection<Service> Services => _services;
+
+    private Store()
+    {
+        IsActive = true;
+    }
 }

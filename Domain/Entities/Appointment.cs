@@ -5,22 +5,27 @@ namespace Domain.Entities;
 
 public class Appointment : BaseEntity
 {
-    public int Id { get; set; }
-    public int CustomerId { get; set; }
-    public int ServiceId { get; set; }
-    public int ProfessionalId { get; set; }
-    public int StoreId { get; set; }
-    public DateTime StartAt { get; set; }
-    public DateTime EndAt { get; set; }
-    public decimal BookedPrice { get; set; }
-    public string? Notes { get; set; }
-    public AppointmentStatus Status { get; set; } = AppointmentStatus.PendingConfirmation;
+    public int Id { get; private set; }
+    public int CustomerId { get; private set; }
+    public int ServiceId { get; private set; }
+    public int ProfessionalId { get; private set; }
+    public int StoreId { get; private set; }
+    public DateTime StartAt { get; private set; }
+    public DateTime EndAt { get; private set; }
+    public decimal BookedPrice { get; private set; }
+    public string? Notes { get; private set; }
+    public AppointmentStatus Status { get; private set; }
+    public bool IsActive { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
-    public User Customer { get; set; } = null!;
-    public User Professional { get; set; } = null!;
-    public Service Service { get; set; } = null!;
-    public Store Store { get; set; } = null!;
+    public User Customer { get; private set; } = null!;
+    public User Professional { get; private set; } = null!;
+    public Service Service { get; private set; } = null!;
+    public Store Store { get; private set; } = null!;
 
-    public bool IsActive { get; set; } = true;
-    public DateTime? DeletedAt { get; set; }
+    private Appointment()
+    {
+        Status = AppointmentStatus.PendingConfirmation;
+        IsActive = true;
+    }
 }

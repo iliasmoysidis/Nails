@@ -4,24 +4,36 @@ namespace Domain.Entities;
 
 public class User : BaseEntity
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = null!;
-    public string Surname { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public string Phone { get; set; } = null!;
-    public string? TaxIdNumber { get; set; }
-    public bool IsCustomer { get; set; } = true;
-    public bool IsProfessional { get; set; } = false;
+    public int Id { get; private set; }
+    public string Name { get; private set; } = null!;
+    public string Surname { get; private set; } = null!;
+    public string Email { get; private set; } = null!;
+    public string Phone { get; private set; } = null!;
+    public string? TaxIdNumber { get; private set; }
+    public bool IsCustomer { get; private set; } = true;
+    public bool IsProfessional { get; private set; } = false;
+    public bool IsActive { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
-    public ICollection<Appointment> BookedAppointments { get; set; } = new List<Appointment>();
-    public ICollection<StoreProfessional> Workplaces { get; set; } = new List<StoreProfessional>();
-    public ICollection<ProfessionalService> ProvidedServices { get; set; } = new List<ProfessionalService>();
-    public ICollection<Appointment> ProvidedAppointments { get; set; } = new List<Appointment>();
-    public ICollection<ProfessionalSchedule> WorkSchedules { get; set; } = new List<ProfessionalSchedule>();
-    public ICollection<ProfessionalTimeOff> TimeOffs { get; set; } = new List<ProfessionalTimeOff>();
-    public ICollection<StoreManager> ManagedStores { get; set; } = new List<StoreManager>();
+    private readonly List<StoreProfessional> _workplaces = new();
+    public IReadOnlyCollection<StoreProfessional> Workplaces => _workplaces.AsReadOnly();
 
+    private readonly List<ProfessionalService> _providedServices = new();
+    public IReadOnlyCollection<ProfessionalService> ProvidedServices => _providedServices.AsReadOnly();
 
-    public bool IsActive { get; set; } = true;
-    public DateTime? DeletedAt { get; set; }
+    private readonly List<ProfessionalSchedule> _workSchedules = new();
+    public IReadOnlyCollection<ProfessionalSchedule> WorkSchedules => _workSchedules.AsReadOnly();
+
+    private readonly List<ProfessionalTimeOff> _timeOffs = new();
+    public IReadOnlyCollection<ProfessionalTimeOff> TimeOffs => _timeOffs.AsReadOnly();
+
+    private readonly List<StoreManager> _managedStores = new();
+    public IReadOnlyCollection<StoreManager> ManagedStores => _managedStores.AsReadOnly();
+
+    private User()
+    {
+        IsCustomer = true;
+        IsProfessional = false;
+        IsActive = true;
+    }
 }

@@ -4,13 +4,18 @@ namespace Domain.Entities;
 
 public class StoreException
 {
-    public int Id { get; set; }
-    public int StoreId { get; set; }
-    public DateTime Date { get; set; }
-    public TimeSpan? OpenTime { get; set; }
-    public TimeSpan CloseTime { get; set; }
-    public string? Reason { get; set; }
-    public bool IsClosed { get; set; } = true;
+    public int Id { get; private set; }
+    public int StoreId { get; private set; }
+    public DateTime Date { get; private set; }
+    public TimeSpan? OpenTime { get; private set; }
+    public TimeSpan CloseTime { get; private set; }
+    public string? Reason { get; private set; }
+    public bool IsClosed { get; private set; }
 
-    public Store Store { get; set; } = null!;
+    public Store Store { get; private set; } = null!;
+
+    private StoreException()
+    {
+        IsClosed = true;
+    }
 }

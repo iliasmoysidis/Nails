@@ -2,14 +2,19 @@ namespace Domain.Entities;
 
 public class ProfessionalSchedule
 {
-    public int Id { get; set; }
-    public int ProfessionalId { get; set; }
-    public int StoreId { get; set; }
-    public DayOfWeek DayOfWeek { get; set; }
-    public TimeSpan StartTime { get; set; }
-    public TimeSpan EndTime { get; set; }
-    public bool IsActive { get; set; } = true;
+    public int Id { get; private set; }
+    public int ProfessionalId { get; private set; }
+    public int StoreId { get; private set; }
+    public DayOfWeek DayOfWeek { get; private set; }
+    public TimeSpan StartTime { get; private set; }
+    public TimeSpan EndTime { get; private set; }
+    public bool IsActive { get; private set; }
 
     public User Professional { get; set; } = null!;
     public Store Store { get; set; } = null!;
+
+    private ProfessionalSchedule()
+    {
+        IsActive = true;
+    }
 }

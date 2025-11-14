@@ -2,11 +2,16 @@ namespace Domain.Entities;
 
 public class StoreProfessional
 {
-    public int StoreId { get; set; }
-    public int ProfessionalId { get; set; }
-    public DateTime StartDate { get; set; } = DateTime.UtcNow;
-    public DateTime? EndDate { get; set; } = null;
+    public int StoreId { get; private set; }
+    public int ProfessionalId { get; private set; }
+    public DateTime StartDate { get; private set; }
+    public DateTime? EndDate { get; private set; }
 
-    public Store Store { get; set; } = null!;
-    public User Professional { get; set; } = null!;
+    public Store Store { get; private set; } = null!;
+    public User Professional { get; private set; } = null!;
+
+    private StoreProfessional()
+    {
+        StartDate = DateTime.UtcNow;
+    }
 }
