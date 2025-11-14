@@ -1,8 +1,9 @@
+using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Entities;
 
-public class ProfessionalTimeOff
+public class ProfessionalTimeOff : BaseEntity
 {
     public int Id { get; private set; }
     public int ProfessionalId { get; private set; }

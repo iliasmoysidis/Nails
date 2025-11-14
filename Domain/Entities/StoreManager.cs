@@ -1,8 +1,9 @@
+using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Entities;
 
-public class StoreManager
+public class StoreManager : BaseEntity
 {
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }

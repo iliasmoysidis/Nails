@@ -2,7 +2,7 @@ using Domain.Common;
 
 namespace Domain.Entities;
 
-public class StoreException
+public class StoreException : BaseEntity
 {
     public int Id { get; private set; }
     public int StoreId { get; private set; }

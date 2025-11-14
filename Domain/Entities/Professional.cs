@@ -1,6 +1,8 @@
+using Domain.Common;
+
 namespace Domain.Entities;
 
-public class Professional
+public class Professional : HistoricEntity
 {
     public int Id { get; private set; }
     public string Name { get; private set; } = null!;
@@ -8,8 +10,6 @@ public class Professional
     public string Email { get; private set; } = null!;
     public string Phone { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
-    public bool IsActive { get; private set; }
-    public DateTime? DeletedAt { get; private set; }
 
     private readonly List<StoreProfessional> _workplaces = new();
     public IReadOnlyCollection<StoreProfessional> Workplaces => _workplaces.AsReadOnly();

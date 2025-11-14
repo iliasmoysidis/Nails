@@ -1,6 +1,8 @@
+using Domain.Common;
+
 namespace Domain.Entities;
 
-public class ProfessionalService
+public class ProfessionalService : BaseEntity
 {
     public int ProfessionalId { get; private set; }
     public int ServiceId { get; private set; }

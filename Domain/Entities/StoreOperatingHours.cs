@@ -1,6 +1,8 @@
+using Domain.Common;
+
 namespace Domain.Entities;
 
-public class StoreOperatingHours
+public class StoreOperatingHours : BaseEntity
 {
     public int Id { get; private set; }
     public int StoreId { get; private set; }

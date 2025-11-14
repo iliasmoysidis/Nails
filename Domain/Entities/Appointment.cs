@@ -3,7 +3,7 @@ using Domain.Enums;
 
 namespace Domain.Entities;
 
-public class Appointment : BaseEntity
+public class Appointment : HistoricEntity
 {
     public int Id { get; private set; }
     public int UserId { get; private set; }
@@ -15,8 +15,6 @@ public class Appointment : BaseEntity
     public decimal BookedPrice { get; private set; }
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
-    public bool IsActive { get; private set; }
-    public DateTime? DeletedAt { get; private set; }
 
     public User User { get; private set; } = null!;
     public Professional Professional { get; private set; } = null!;
@@ -26,6 +24,5 @@ public class Appointment : BaseEntity
     private Appointment()
     {
         Status = AppointmentStatus.PendingConfirmation;
-        IsActive = true;
     }
 }
