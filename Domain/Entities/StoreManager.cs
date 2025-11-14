@@ -5,9 +5,12 @@ namespace Domain.Entities;
 
 public class StoreManager
 {
-    public int StoreId { get; private set; }
-    public int UserId { get; private set; }
-    public StoreRole Role { get; private set; }
-    public DateTime StartDate { get; private set; } = DateTime.UtcNow;
-    public DateTime? EndDate { get; private set; }
+    public int StoreId { get; set; }
+    public int UserId { get; set; }
+    public StoreRole Role { get; set; }
+    public DateTime StartDate { get; set; } = DateTime.UtcNow;
+    public DateTime? EndDate { get; set; } = null;
+
+    public Store Store { get; set; } = null!;
+    public User User { get; set; } = null!;
 }

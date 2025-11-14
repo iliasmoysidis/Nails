@@ -1,14 +1,16 @@
-using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Entities;
 
-public class ProfessionalTimeOff : BaseEntity
+public class ProfessionalTimeOff
 {
-    public int ProfessionalId { get; private set; }
-    public int? StoreId { get; private set; }
-    public DateTime StartAt { get; private set; }
-    public DateTime EndAt { get; private set; }
-    public string? Reason { get; private set; }
-    public TimeOffType Type { get; private set; }
+    public int Id { get; set; }
+    public int ProfessionalId { get; set; }
+    public int? StoreId { get; set; }
+    public DateTime StartAt { get; set; }
+    public DateTime EndAt { get; set; }
+    public string? Reason { get; set; }
+    public TimeOffType Type { get; set; }
+    public User Professional { get; set; } = null!;
+    public Store? Store { get; set; }
 }

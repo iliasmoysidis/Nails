@@ -1,12 +1,13 @@
-using Domain.Common;
-
 namespace Domain.Entities;
 
-public class StoreOperatingHours : BaseEntity
+public class StoreOperatingHours
 {
-    public int StoreId { get; private set; }
-    public DayOfWeek DayOfWeek { get; private set; }
-    public TimeSpan OpenTime { get; private set; }
-    public TimeSpan CloseTime { get; private set; }
-    public bool IsClosed { get; private set; } = false;
+    public int Id { get; set; }
+    public int StoreId { get; set; }
+    public DayOfWeek DayOfWeek { get; set; }
+    public TimeSpan OpenTime { get; set; }
+    public TimeSpan CloseTime { get; set; }
+    public bool IsClosed { get; set; } = false;
+
+    public Store Store { get; set; } = null!;
 }

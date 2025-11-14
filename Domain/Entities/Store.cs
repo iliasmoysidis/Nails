@@ -4,9 +4,20 @@ namespace Domain.Entities;
 
 public class Store : BaseEntity
 {
-    public string Name { get; private set; } = null!;
-    public string Address { get; private set; } = null!;
-    public string TaxIdNumber { get; private set; } = null!;
-    public string Email { get; private set; } = null!;
-    public string Phone { get; private set; } = null!;
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Address { get; set; } = null!;
+    public string TaxIdNumber { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Phone { get; set; } = null!;
+
+    public ICollection<StoreManager> Managers { get; set; } = new List<StoreManager>();
+    public ICollection<StoreProfessional> Staff { get; set; } = new List<StoreProfessional>();
+    public ICollection<Service> Services { get; set; } = new List<Service>();
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+    public ICollection<StoreOperatingHours> OperatingHours { get; set; } = new List<StoreOperatingHours>();
+    public ICollection<StoreException> Exceptions { get; set; } = new List<StoreException>();
+
+    public bool IsActive { get; set; } = true;
+    public DateTime? DeletedAt { get; set; }
 }
