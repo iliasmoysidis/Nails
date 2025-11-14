@@ -10,9 +10,16 @@ public class ProfessionalSchedule : BaseEntity
     public DayOfWeek DayOfWeek { get; private set; }
     public TimeSpan StartTime { get; private set; }
     public TimeSpan EndTime { get; private set; }
+    public bool IsActive { get; private set; }
 
-    public Professional Professional { get; set; } = null!;
-    public Store Store { get; set; } = null!;
+    public Professional Professional { get; private set; } = null!;
+    public Store Store { get; private set; } = null!;
 
-    private ProfessionalSchedule() { }
+    private ProfessionalSchedule()
+    {
+        IsActive = true;
+    }
+
+    public void Activate() => IsActive = true;
+    public void Deactivate() => IsActive = false;
 }
