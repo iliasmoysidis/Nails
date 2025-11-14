@@ -12,7 +12,7 @@ public class ProfessionalTimeOff
     public string? Reason { get; private set; }
     public TimeOffType Type { get; private set; }
 
-    public User Professional { get; private set; } = null!;
+    public Professional Professional { get; private set; } = null!;
     public Store? Store { get; private set; }
 
     private ProfessionalTimeOff() { }

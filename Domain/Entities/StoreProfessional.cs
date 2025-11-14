@@ -8,7 +8,7 @@ public class StoreProfessional
     public DateTime? EndDate { get; private set; }
 
     public Store Store { get; private set; } = null!;
-    public User Professional { get; private set; } = null!;
+    public Professional Professional { get; private set; } = null!;
 
     private StoreProfessional()
     {

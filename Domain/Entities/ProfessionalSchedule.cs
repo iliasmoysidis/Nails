@@ -10,7 +10,7 @@ public class ProfessionalSchedule
     public TimeSpan EndTime { get; private set; }
     public bool IsActive { get; private set; }
 
-    public User Professional { get; set; } = null!;
+    public Professional Professional { get; set; } = null!;
     public Store Store { get; set; } = null!;
 
     private ProfessionalSchedule()

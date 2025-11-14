@@ -6,7 +6,7 @@ namespace Domain.Entities;
 public class Appointment : BaseEntity
 {
     public int Id { get; private set; }
-    public int CustomerId { get; private set; }
+    public int UserId { get; private set; }
     public int ServiceId { get; private set; }
     public int ProfessionalId { get; private set; }
     public int StoreId { get; private set; }
@@ -18,8 +18,8 @@ public class Appointment : BaseEntity
     public bool IsActive { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
-    public User Customer { get; private set; } = null!;
-    public User Professional { get; private set; } = null!;
+    public User User { get; private set; } = null!;
+    public Professional Professional { get; private set; } = null!;
     public Service Service { get; private set; } = null!;
     public Store Store { get; private set; } = null!;
 

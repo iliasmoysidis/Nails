@@ -10,7 +10,7 @@ public class Store : BaseEntity
     public string TaxIdNumber { get; private set; } = null!;
     public string Email { get; private set; } = null!;
     public string Phone { get; private set; } = null!;
-    public bool IsActive { get; private set; } = true;
+    public bool IsActive { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
     private readonly List<StoreManager> _managers = new();
