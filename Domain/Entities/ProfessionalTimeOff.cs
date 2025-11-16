@@ -11,10 +11,23 @@ public class ProfessionalTimeOff : BaseEntity
     public DateTime StartAt { get; private set; }
     public DateTime EndAt { get; private set; }
     public string? Reason { get; private set; }
-    public TimeOffType Type { get; private set; }
+    public TimeOffType? Type { get; private set; }
 
     public Professional Professional { get; private set; } = null!;
     public Store? Store { get; private set; }
 
     private ProfessionalTimeOff() { }
+
+    public static ProfessionalTimeOff Create(int profesionalId, DateTime startAt, DateTime endAt, TimeOffType? type = null, string? reason = null, int? storeId = null)
+    {
+        return new ProfessionalTimeOff
+        {
+            ProfessionalId = profesionalId,
+            StoreId = storeId,
+            StartAt = startAt,
+            EndAt = endAt,
+            Reason = reason,
+            Type = type
+        };
+    }
 }

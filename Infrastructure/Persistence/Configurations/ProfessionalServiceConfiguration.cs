@@ -11,13 +11,16 @@ public class ProfessionalServiceConfiguration : IEntityTypeConfiguration<Profess
         builder.HasKey(e => new { e.ProfessionalId, e.ServiceId });
 
         builder.HasOne(e => e.Professional)
-            .WithMany(u => u.ProvidedServices)
+            .WithMany(p => p.ProvidedServices)
             .HasForeignKey(e => e.ProfessionalId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(e => e.Service)
-            .WithMany(s => s.Providers)
+            .WithMany(p => p.Providers)
             .HasForeignKey(e => e.ServiceId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(e => e.ServiceId)
+            .HasDatabaseName("IX_ProfessionalServices_ServiceId");
     }
 }

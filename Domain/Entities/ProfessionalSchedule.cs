@@ -20,6 +20,14 @@ public class ProfessionalSchedule : BaseEntity
         IsActive = true;
     }
 
-    public void Activate() => IsActive = true;
+    public void Activate()
+    {
+        if (StartTime >= EndTime)
+        {
+            throw new InvalidOperationException("Start time cannot be greater than or equal to end time.");
+        }
+
+        IsActive = true;
+    }
     public void Deactivate() => IsActive = false;
 }

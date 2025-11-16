@@ -11,4 +11,13 @@ public class ProfessionalService : BaseEntity
     public Service Service { get; private set; } = null!;
 
     private ProfessionalService() { }
+
+    public static ProfessionalService Create(int profesionalId, int serviceId)
+    {
+        return new ProfessionalService
+        {
+            ProfessionalId = profesionalId,
+            ServiceId = serviceId
+        };
+    }
 }

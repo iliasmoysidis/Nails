@@ -10,8 +10,21 @@ public class ProfessionalScheduleConfiguration : IEntityTypeConfiguration<Profes
     {
         builder.HasKey(e => e.Id);
 
+        builder.Property(e => e.DayOfWeek)
+            .IsRequired()
+            .HasConversion<int>();
+
+        builder.Property(e => e.StartTime)
+            .IsRequired();
+
+        builder.Property(e => e.EndTime)
+            .IsRequired();
+
+        builder.Property(e => e.IsActive)
+            .IsRequired();
+
         builder.HasOne(e => e.Professional)
-            .WithMany(u => u.WorkSchedules)
+            .WithMany(p => p.WorkSchedules)
             .HasForeignKey(e => e.ProfessionalId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -20,6 +33,15 @@ public class ProfessionalScheduleConfiguration : IEntityTypeConfiguration<Profes
             .HasForeignKey(e => e.StoreId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(e => new { e.ProfessionalId, e.StoreId, e.DayOfWeek, e.IsActive });
+        builder.HasIndex(e => new { e.ProfessionalId, e.StoreId, e.DayOfWeek, e.IsActive }).HasDatabaseName("IX_ProfessionalSchedules_Composite");
+
+        builder.HasIndex(e => new { e.ProfessionalId, e.StoreId, e.DayOfWeek, e.StartTime })
+        .IsUnique()
+        .HasFilter("[IsActive] = 1")
+        .HasDatabaseName("IX_ProfessionalSchedules_Unique_Active");
+
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_ProfessionalSchedule_StartBeforeEnd",
+            "[StartTime]<[EndTime]"));
     }
 }
