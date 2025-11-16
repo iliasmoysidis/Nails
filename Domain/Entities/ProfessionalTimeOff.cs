@@ -1,5 +1,6 @@
 using Domain.Common;
 using Domain.Enums;
+using Domain.Exceptions;
 
 namespace Domain.Entities;
 
@@ -20,6 +21,11 @@ public class ProfessionalTimeOff : BaseEntity
 
     public static ProfessionalTimeOff Create(int profesionalId, DateTime startAt, DateTime endAt, TimeOffType? type = null, string? reason = null, int? storeId = null)
     {
+        if (startAt >= endAt)
+        {
+            throw new DomainException("Start date must be before end date.");
+        }
+
         return new ProfessionalTimeOff
         {
             ProfessionalId = profesionalId,

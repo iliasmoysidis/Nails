@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Exceptions;
 
 namespace Domain.Entities;
 
@@ -20,6 +21,24 @@ public class ProfessionalSchedule : BaseEntity
         IsActive = true;
     }
 
+    public static ProfessionalSchedule Create(int professionalId, int storeId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime)
+    {
+        if (startTime >= endTime)
+        {
+            throw new DomainException("Start time must be before end time.");
+        }
+
+        return new ProfessionalSchedule
+        {
+            ProfessionalId = professionalId,
+            StoreId = storeId,
+            DayOfWeek = dayOfWeek,
+            StartTime = startTime,
+            EndTime = endTime,
+            IsActive = true
+        };
+    }
+
     public void Activate()
     {
         if (StartTime >= EndTime)
@@ -28,6 +47,33 @@ public class ProfessionalSchedule : BaseEntity
         }
 
         IsActive = true;
+        MarkAsUpdated();
     }
-    public void Deactivate() => IsActive = false;
+    public void Deactivate()
+    {
+        if (!IsActive)
+        {
+            throw new DomainException("Schedule is already inactive.");
+        }
+
+        IsActive = false;
+        MarkAsUpdated();
+    }
+
+    public void UpdateTimes(TimeSpan startTime, TimeSpan endTime)
+    {
+        if (!IsActive)
+        {
+            throw new DomainException("Cannot update inactive schedule.");
+        }
+
+        if (startTime >= endTime)
+        {
+            throw new DomainException("Start time must be before end time.");
+        }
+
+        StartTime = startTime;
+        EndTime = endTime;
+        MarkAsUpdated();
+    }
 }
