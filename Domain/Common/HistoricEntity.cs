@@ -1,18 +1,33 @@
+using Domain.Exceptions;
+
 namespace Domain.Common;
 
-public class HistoricEntity : BaseEntity
+public abstract class HistoricEntity : BaseEntity
 {
-    public bool IsActive { get; private set; }
     public DateTime? DeletedAt { get; private set; }
+    public bool IsDeleted => DeletedAt.HasValue;
 
-    protected HistoricEntity()
-    {
-        IsActive = true;
-    }
+    protected HistoricEntity() { }
 
     public void SoftDelete()
     {
-        IsActive = false;
+        if (IsDeleted)
+        {
+            throw new DomainException($"{GetType().Name} is already deleted.");
+        }
+
         DeletedAt = DateTime.UtcNow;
+        MarkAsUpdated();
+    }
+
+    public void Restore()
+    {
+        if (!IsDeleted)
+        {
+            throw new DomainException($"{GetType().Name} is not deleted.");
+        }
+
+        DeletedAt = null;
+        MarkAsUpdated();
     }
 }

@@ -48,7 +48,7 @@ public class Professional : HistoricEntity
 
     public void UpdatePersonalInfo(string? name = null, string? surname = null, string? phone = null)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot update inactive professional.");
         }
@@ -107,12 +107,12 @@ public class Professional : HistoricEntity
 
     public void AddWorkplace(Store store, DateTime? startDate = null)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot add workplace to inactive professional.");
         }
 
-        if (!store.IsActive)
+        if (store.IsDeleted)
         {
             throw new DomainException("Cannot add professional to inactive store.");
         }
@@ -145,17 +145,17 @@ public class Professional : HistoricEntity
 
     public bool WorksAtStore(int storeId)
     {
-        return IsActive && _workplaces.Any(w => w.StoreId == storeId && w.EndDate == null);
+        return !IsDeleted && _workplaces.Any(w => w.StoreId == storeId && w.EndDate == null);
     }
 
     public void AddService(Service service)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot add service to inactive professional.");
         }
 
-        if (!service.IsActive)
+        if (service.IsDeleted)
         {
             throw new DomainException("Cannot add inactive service.");
         }
@@ -193,12 +193,12 @@ public class Professional : HistoricEntity
 
     public bool ProvidesService(int serviceId)
     {
-        return IsActive && _providedServices.Any(ps => ps.ServiceId == serviceId);
+        return !IsDeleted && _providedServices.Any(ps => ps.ServiceId == serviceId);
     }
 
     public void AddSchedule(ProfessionalSchedule newSchedule)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot add schedule to inactive professional.");
         }
@@ -262,7 +262,7 @@ public class Professional : HistoricEntity
 
     public void RequestTimeOff(DateTime startAt, DateTime endAt, TimeOffType? type = null, string? reason = null, int? storeId = null)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot request time off for inactive professional.");
         }
@@ -317,7 +317,7 @@ public class Professional : HistoricEntity
 
     public bool IsAvailableAt(DateTime dateTime, int storeId)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             return false;
         }
@@ -396,7 +396,7 @@ public class Professional : HistoricEntity
 
     public void Deactivate(string? reason = null)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Professional is already deactivated.");
         }

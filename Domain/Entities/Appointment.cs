@@ -235,22 +235,22 @@ public class Appointment : HistoricEntity
 
     public static void ValidateSchedulingRules(User user, Professional professional, Service service, Store store, DateTime startAt)
     {
-        if (!user.IsActive)
+        if (user.IsDeleted)
         {
             throw new DomainException("User account is not active.");
         }
 
-        if (!professional.IsActive)
+        if (professional.IsDeleted)
         {
             throw new DomainException("Professional is not available.");
         }
 
-        if (!service.IsActive)
+        if (service.IsDeleted)
         {
             throw new DomainException("Service is no longer available.");
         }
 
-        if (!store.IsActive)
+        if (store.IsDeleted)
         {
             throw new DomainException("Store is not active.");
         }

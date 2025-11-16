@@ -22,7 +22,7 @@ public class Service : HistoricEntity
     {
         ValidateServiceInfo(name, price, duration);
 
-        if (!store.IsActive)
+        if (store.IsDeleted)
         {
             throw new DomainException("Cannot create service for inactive store.");
         }
@@ -39,7 +39,7 @@ public class Service : HistoricEntity
 
     public void UpdateDetails(string? name = null, decimal? price = null, TimeSpan? duration = null)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot update inactive service.");
         }
@@ -107,7 +107,7 @@ public class Service : HistoricEntity
 
     public void UpdatePrice(decimal newPrice)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot update price for inactive service.");
         }
@@ -128,7 +128,7 @@ public class Service : HistoricEntity
 
     public void UpdateDuration(TimeSpan newDuration)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot update duration for inactive service.");
         }
@@ -154,12 +154,12 @@ public class Service : HistoricEntity
 
     public void AddProvider(Professional professional)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Cannot add provider to inactive service.");
         }
 
-        if (!professional.IsActive)
+        if (professional.IsDeleted)
         {
             throw new DomainException("Cannot add inactive professional as provider.");
         }
@@ -221,12 +221,12 @@ public class Service : HistoricEntity
 
     public bool IsAvailableWith(int professionalId)
     {
-        return IsActive && HasProvider(professionalId);
+        return !IsDeleted && HasProvider(professionalId);
     }
 
     public void Deactivate(string? reason = null)
     {
-        if (!IsActive)
+        if (IsDeleted)
         {
             throw new DomainException("Service is already deactivated.");
         }
