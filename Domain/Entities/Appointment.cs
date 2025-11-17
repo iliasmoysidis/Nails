@@ -22,6 +22,24 @@ public class Appointment : HistoricEntity
     public Service Service { get; private set; } = null!;
     public Store Store { get; private set; } = null!;
 
+    public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
+    public bool IsConfirmed => Status == AppointmentStatus.Confirmed;
+    public bool IsCompleted => Status == AppointmentStatus.Completed;
+    public bool IsCanceled => Status == AppointmentStatus.Canceled;
+    public bool IsNoShow => Status == AppointmentStatus.NoShow;
+    public bool IsUpComing => Status == AppointmentStatus.Confirmed && StartAt > DateTime.UtcNow;
+    public bool IsPast => EndAt < DateTime.UtcNow;
+    public bool IsInProgress => Status == AppointmentStatus.Confirmed && StartAt <= DateTime.UtcNow && EndAt > DateTime.UtcNow;
+    public TimeSpan Duration => EndAt - StartAt;
+
+    public bool CanBeCanceled =>
+        (Status == AppointmentStatus.PendingConfirmation || Status == AppointmentStatus.Confirmed)
+        && (StartAt - DateTime.Now).TotalHours >= 24;
+
+    public bool CanBeRescheduled =>
+        (Status == AppointmentStatus.PendingConfirmation || Status == AppointmentStatus.Confirmed)
+        && (StartAt - DateTime.Now).TotalHours >= 24;
+
     private Appointment()
     {
         Status = AppointmentStatus.PendingConfirmation;
@@ -282,24 +300,6 @@ public class Appointment : HistoricEntity
             throw new DomainException("Appointments must start on 15 minute intervals.");
         }
     }
-
-    public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
-    public bool IsConfirmed => Status == AppointmentStatus.Confirmed;
-    public bool IsCompleted => Status == AppointmentStatus.Completed;
-    public bool IsCanceled => Status == AppointmentStatus.Canceled;
-    public bool IsNoShow => Status == AppointmentStatus.NoShow;
-    public bool IsUpComing => Status == AppointmentStatus.Confirmed && StartAt > DateTime.UtcNow;
-    public bool IsPast => EndAt < DateTime.UtcNow;
-    public bool IsInProgress => Status == AppointmentStatus.Confirmed && StartAt <= DateTime.UtcNow && EndAt > DateTime.UtcNow;
-    public TimeSpan Duration => EndAt - StartAt;
-
-    public bool CanBeCanceled =>
-        (Status == AppointmentStatus.PendingConfirmation || Status == AppointmentStatus.Confirmed)
-        && (StartAt - DateTime.Now).TotalHours >= 24;
-
-    public bool CanBeRescheduled =>
-        (Status == AppointmentStatus.PendingConfirmation || Status == AppointmentStatus.Confirmed)
-        && (StartAt - DateTime.Now).TotalHours >= 24;
 
     public void ValidateNoTimeConflict(IEnumerable<Appointment> professionalAppointments)
     {
