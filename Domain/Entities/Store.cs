@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Domain.Common;
 using Domain.Exceptions;
 
@@ -270,6 +269,130 @@ public class Store : HistoricEntity
         }
 
         _professionalServices.Remove(professionalService);
+        MarkAsUpdated();
+    }
+
+    public StoreOperatingHours AddOperatingHours(int ownerId, DayOfWeek day, TimeSpan openTime, TimeSpan closeTime)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot add operating hours in an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can add operating hours.");
+        }
+
+        if (openTime >= closeTime)
+        {
+            throw new DomainException("Opening time must be earlier than closing time.");
+        }
+
+        var isOverlapping = _operatingHours.Any(
+            h => h.Day == day &&
+            openTime < h.CloseTime &&
+            h.OpenTime < closeTime
+            );
+
+        if (isOverlapping)
+        {
+            throw new DomainException("Operating hours overlap with existing schedule for this day.");
+        }
+
+        var hours = StoreOperatingHours.Create(Id, day, openTime, closeTime);
+        _operatingHours.Add(hours);
+        MarkAsUpdated();
+
+        return hours;
+    }
+
+    public void RemoveOperatingHours(int ownerId, int operatingHoursId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot remove operating hours from an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can remove operating hours.");
+        }
+
+        var hours = _operatingHours.FirstOrDefault(h => h.Id == operatingHoursId && h.StoreId == Id);
+
+        if (hours == null)
+        {
+            throw new DomainException("Operating hours not found.");
+        }
+
+        _operatingHours.Remove(hours);
+        MarkAsUpdated();
+    }
+
+    public StoreException AddException(int ownerId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot add exceptions to an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can add exceptions.");
+        }
+
+        bool isClosed = !openTime.HasValue || !closeTime.HasValue;
+
+        if (!isClosed)
+        {
+            var isOverlapping = _exceptions.Any(
+                e => e.StoreId == Id &&
+                e.Date.Date == date.Date &&
+                !e.IsClosed &&
+                e.CloseTime > openTime &&
+                e.OpenTime < closeTime);
+
+            if (isOverlapping)
+            {
+                throw new DomainException("Exception overlaps with an existing exception on this day.");
+            }
+
+            var conflictWithClosed = _exceptions.Any(e => e.Date.Date == date.Date && e.IsClosed);
+
+            if (conflictWithClosed)
+            {
+                throw new DomainException("Cannot create partial opening on a fully closed day.");
+            }
+        }
+
+        var exception = StoreException.Create(Id, date, openTime, closeTime, reason, isClosed);
+        _exceptions.Add(exception);
+        MarkAsUpdated();
+
+        return exception;
+    }
+
+    public void RemoveException(int ownerId, int exceptionId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot remove exceptions from an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can remove exceptions.");
+        }
+
+        var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId && e.StoreId == Id);
+
+        if (exception == null)
+        {
+            throw new DomainException("Exception not found.");
+        }
+
+        _exceptions.Remove(exception);
         MarkAsUpdated();
     }
 
