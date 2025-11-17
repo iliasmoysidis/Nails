@@ -393,7 +393,6 @@ public class Professional : HistoricEntity
         }
 
         SoftDelete();
-        MarkAsUpdated();
     }
 
     private static void ValidatePersonalInfo(string name, string surname, string email, string phone, string taxIdNumber)

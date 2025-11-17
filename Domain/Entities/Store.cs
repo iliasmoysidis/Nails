@@ -43,9 +43,9 @@ public class Store : HistoricEntity
         return _staff.Any(s => s.ProfessionalId == professionalId);
     }
 
-    public bool IsProvided(int profesionalId, int serviceId)
+    public bool IsProvided(int professionalId, int serviceId)
     {
-        return _professionalServices.Any(ps => ps.ProfessionalId == profesionalId && ps.ServiceId == serviceId);
+        return _professionalServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
     }
 
     public static Store Create(string name, string address, string taxIdNumber, string email, string phone)

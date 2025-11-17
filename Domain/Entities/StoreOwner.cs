@@ -11,12 +11,12 @@ public class StoreOwner : BaseEntity
 
     private StoreOwner() { }
 
-    public static StoreOwner Create(int storeId, int profesionalId)
+    public static StoreOwner Create(int storeId, int professionalId)
     {
         return new StoreOwner
         {
             StoreId = storeId,
-            ProfessionalId = profesionalId
+            ProfessionalId = professionalId
         };
     }
 }

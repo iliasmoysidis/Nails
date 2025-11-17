@@ -144,7 +144,7 @@ public class Service : HistoricEntity
 
         if (newDuration.TotalMinutes % 15 != 0)
         {
-            throw new DomainException("Duration must be in 15-minute icrements.");
+            throw new DomainException("Duration must be in 15-minute increments.");
         }
 
         Duration = newDuration;
@@ -231,7 +231,6 @@ public class Service : HistoricEntity
         }
 
         SoftDelete();
-        MarkAsUpdated();
     }
 
     public static void ValidateServiceInfo(string name, decimal price, TimeSpan duration)

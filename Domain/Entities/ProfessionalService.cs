@@ -12,11 +12,11 @@ public class ProfessionalService : BaseEntity
 
     private ProfessionalService() { }
 
-    public static ProfessionalService Create(int profesionalId, int serviceId)
+    public static ProfessionalService Create(int professionalId, int serviceId)
     {
         return new ProfessionalService
         {
-            ProfessionalId = profesionalId,
+            ProfessionalId = professionalId,
             ServiceId = serviceId
         };
     }

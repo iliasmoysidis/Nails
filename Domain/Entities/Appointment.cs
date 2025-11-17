@@ -70,7 +70,7 @@ public class Appointment : HistoricEntity
         return appointment;
     }
 
-    public void Confirmm()
+    public void Confirm()
     {
         if (Status != AppointmentStatus.PendingConfirmation)
         {

@@ -19,7 +19,7 @@ public class ProfessionalTimeOff : BaseEntity
 
     private ProfessionalTimeOff() { }
 
-    public static ProfessionalTimeOff Create(int profesionalId, DateTime startAt, DateTime endAt, TimeOffType? type = null, string? reason = null, int? storeId = null)
+    public static ProfessionalTimeOff Create(int professionalId, DateTime startAt, DateTime endAt, TimeOffType? type = null, string? reason = null, int? storeId = null)
     {
         if (startAt >= endAt)
         {
@@ -28,7 +28,7 @@ public class ProfessionalTimeOff : BaseEntity
 
         return new ProfessionalTimeOff
         {
-            ProfessionalId = profesionalId,
+            ProfessionalId = professionalId,
             StoreId = storeId,
             StartAt = startAt,
             EndAt = endAt,
