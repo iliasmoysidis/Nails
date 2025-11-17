@@ -13,6 +13,9 @@ public class Professional : HistoricEntity
     public string Phone { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
 
+    private readonly List<StoreOwner> _ownedStores = new();
+    public IReadOnlyCollection<StoreOwner> OwnedStores => _ownedStores.AsReadOnly();
+
     private readonly List<StoreProfessional> _workplaces = new();
     public IReadOnlyCollection<StoreProfessional> Workplaces => _workplaces.AsReadOnly();
 
@@ -24,9 +27,6 @@ public class Professional : HistoricEntity
 
     private readonly List<ProfessionalTimeOff> _timeOffs = new();
     public IReadOnlyCollection<ProfessionalTimeOff> TimeOffs => _timeOffs.AsReadOnly();
-
-    private readonly List<StoreManager> _managedStores = new();
-    public IReadOnlyCollection<StoreManager> ManagedStores => _managedStores.AsReadOnly();
 
     private Professional() { }
 
@@ -105,7 +105,7 @@ public class Professional : HistoricEntity
         if (hasChanges) MarkAsUpdated();
     }
 
-    public void AddWorkplace(Store store, DateTime? startDate = null)
+    public void AddWorkplace(Store store)
     {
         if (IsDeleted)
         {
@@ -117,35 +117,43 @@ public class Professional : HistoricEntity
             throw new DomainException("Cannot add professional to inactive store.");
         }
 
-        var existingActiveWorkplace = _workplaces.FirstOrDefault(w => w.StoreId == store.Id && w.EndDate == null);
+        var existingActiveWorkplace = _workplaces.FirstOrDefault(w => w.StoreId == store.Id);
 
         if (existingActiveWorkplace != null)
         {
             throw new DomainException("Professional already works at this store.");
         }
 
-        var workplace = StoreProfessional.Create(store.Id, Id, startDate);
+        var workplace = StoreProfessional.Create(store.Id, Id);
         _workplaces.Add(workplace);
 
         MarkAsUpdated();
     }
 
-    public void RemoveWorkplace(int storeId, DateTime? endDate = null)
+    public void RemoveWorkplace(int storeId)
     {
-        var workplace = _workplaces.FirstOrDefault(w => w.StoreId == storeId && w.EndDate == null);
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot remove workplace from inactive professional.");
+        }
+
+        var workplace = _workplaces.FirstOrDefault(w => w.StoreId == storeId);
 
         if (workplace == null)
         {
             throw new DomainException("Professional does not work at this store.");
         }
 
-        workplace.RemoveProfessional(endDate);
+        _workSchedules.RemoveAll(s => s.StoreId == storeId);
+        _timeOffs.RemoveAll(t => t.StoreId == storeId);
+        _workplaces.Remove(workplace);
+
         MarkAsUpdated();
     }
 
     public bool WorksAtStore(int storeId)
     {
-        return !IsDeleted && _workplaces.Any(w => w.StoreId == storeId && w.EndDate == null);
+        return !IsDeleted && _workplaces.Any(w => w.StoreId == storeId);
     }
 
     public void AddService(Service service)
@@ -360,23 +368,7 @@ public class Professional : HistoricEntity
 
     public bool IsOwnerOf(int storeId)
     {
-        return _managedStores.Any(m =>
-            m.StoreId == storeId &&
-            m.Role == StoreRole.Owner &&
-            m.EndDate == null);
-    }
-
-    public bool IsManagerOf(int storeId)
-    {
-        return _managedStores.Any(m =>
-            m.StoreId == storeId &&
-            (m.Role == StoreRole.Owner || m.Role == StoreRole.Manager) &&
-            m.EndDate == null);
-    }
-
-    public bool CanManageStore(int storeId)
-    {
-        return IsManagerOf(storeId);
+        return _ownedStores.Any(m => m.StoreId == storeId && m.ProfessionalId == Id);
     }
 
     public string FullName => $"{Name} {Surname}";
@@ -384,7 +376,6 @@ public class Professional : HistoricEntity
     public IEnumerable<int> GetActiveStoreIds()
     {
         return _workplaces
-            .Where(w => w.EndDate == null)
             .Select(w => w.StoreId)
             .Distinct();
     }

@@ -290,8 +290,7 @@ public class Appointment : HistoricEntity
     public bool IsNoShow => Status == AppointmentStatus.NoShow;
     public bool IsUpComing => Status == AppointmentStatus.Confirmed && StartAt > DateTime.UtcNow;
     public bool IsPast => EndAt < DateTime.UtcNow;
-    public bool IsInProfess => Status == AppointmentStatus.Confirmed && StartAt <= DateTime.UtcNow && EndAt > DateTime.UtcNow;
-
+    public bool IsInProgress => Status == AppointmentStatus.Confirmed && StartAt <= DateTime.UtcNow && EndAt > DateTime.UtcNow;
     public TimeSpan Duration => EndAt - StartAt;
 
     public bool CanBeCanceled =>

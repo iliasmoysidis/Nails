@@ -1,21 +1,22 @@
 using Domain.Common;
-using Domain.Enums;
 
 namespace Domain.Entities;
 
-public class StoreManager : BaseEntity
+public class StoreOwner : BaseEntity
 {
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
-    public StoreRole Role { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime? EndDate { get; private set; }
-
     public Store Store { get; private set; } = null!;
     public Professional Professional { get; private set; } = null!;
 
-    private StoreManager()
+    private StoreOwner() { }
+
+    public static StoreOwner Create(int storeId, int profesionalId)
     {
-        StartDate = DateTime.UtcNow;
+        return new StoreOwner
+        {
+            StoreId = storeId,
+            ProfessionalId = profesionalId
+        };
     }
 }

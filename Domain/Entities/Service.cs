@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Domain.Common;
 using Domain.Exceptions;
 
