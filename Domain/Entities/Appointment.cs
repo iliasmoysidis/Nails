@@ -45,6 +45,8 @@ public class Appointment : HistoricEntity
 
     public static Appointment Create(int userId, int professionalId, Service service, int storeId, DateTime startAt, string? notes = null)
     {
+        ValidateAppointmentInfo(userId, professionalId, service, storeId, startAt);
+
         return new Appointment
         {
             UserId = userId,
@@ -235,6 +237,8 @@ public class Appointment : HistoricEntity
 
         MarkAsUpdated();
     }
+
+    public static void ValidateAppointmentInfo(int userId, int professionalId, Service service, int storeId, DateTime startAt) { }
 
     public static void ValidateSchedulingRules(User user, Professional professional, Service service, Store store, DateTime startAt)
     {
