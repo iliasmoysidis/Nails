@@ -19,10 +19,10 @@ public class Store : HistoricEntity
     public IReadOnlyCollection<StoreProfessional> Staff => _staff.AsReadOnly();
 
     private readonly List<Service> _services = new();
-    private IReadOnlyCollection<Service> Services => _services;
+    public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
 
     private readonly List<ProfessionalService> _professionalServices = new();
-    private IReadOnlyCollection<ProfessionalService> ProfessionalServices => _professionalServices;
+    public IReadOnlyCollection<ProfessionalService> ProfessionalServices => _professionalServices.AsReadOnly();
 
     private readonly List<StoreOperatingHours> _operatingHours = new();
     public IReadOnlyCollection<StoreOperatingHours> OperatingHours => _operatingHours.AsReadOnly();
@@ -261,7 +261,9 @@ public class Store : HistoricEntity
             throw new DomainException("Service is not offered by the store.");
         }
 
-        var professionalService = _professionalServices.FirstOrDefault(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
+        var professionalService = _professionalServices.FirstOrDefault(
+            ps => ps.ProfessionalId == professionalId &&
+            ps.ServiceId == serviceId);
 
         if (professionalService == null)
         {
@@ -272,7 +274,7 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    public StoreOperatingHours AddOperatingHours(int ownerId, DayOfWeek day, TimeSpan openTime, TimeSpan closeTime)
+    public StoreOperatingHours AddOperatingHours(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
         if (IsDeleted)
         {
@@ -284,27 +286,44 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can add operating hours.");
         }
 
-        if (openTime >= closeTime)
+        var operatingHours = StoreOperatingHours.Create(Id, day, openTime, closeTime);
+
+        if (operatingHours.IsFullDayClosed)
         {
-            throw new DomainException("Opening time must be earlier than closing time.");
+            bool isPartialOpen = _operatingHours.Any(e => e.Day == day && !e.IsFullDayClosed);
+
+            if (isPartialOpen)
+            {
+                throw new DomainException("Cannot create a full-day closure when partial schedule exists for the day.");
+            }
+        }
+        else
+        {
+            bool isFullClosedDay = _operatingHours.Any(e => e.Day == day && e.IsFullDayClosed);
+
+            if (isFullClosedDay)
+            {
+                throw new DomainException("Cannot create a partial block on a fully closed day.");
+            }
+
+            bool isOverlapping = _operatingHours.Any(
+                e => e.Day == day &&
+                e.OpenTime.HasValue &&
+                e.CloseTime.HasValue &&
+                e.OpenTime.Value < closeTime &&
+                e.CloseTime.Value > openTime
+                );
+
+            if (isOverlapping)
+            {
+                throw new DomainException("Operating hours overlap with an existing schedule for this day.");
+            }
         }
 
-        var isOverlapping = _operatingHours.Any(
-            h => h.Day == day &&
-            openTime < h.CloseTime &&
-            h.OpenTime < closeTime
-            );
-
-        if (isOverlapping)
-        {
-            throw new DomainException("Operating hours overlap with existing schedule for this day.");
-        }
-
-        var hours = StoreOperatingHours.Create(Id, day, openTime, closeTime);
-        _operatingHours.Add(hours);
+        _operatingHours.Add(operatingHours);
         MarkAsUpdated();
 
-        return hours;
+        return operatingHours;
     }
 
     public void RemoveOperatingHours(int ownerId, int operatingHoursId)
@@ -342,31 +361,40 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can add exceptions.");
         }
 
-        bool isClosed = !openTime.HasValue || !closeTime.HasValue;
+        var exception = StoreException.Create(Id, date, openTime, closeTime, reason);
 
-        if (!isClosed)
+        if (exception.IsFullDayClosed)
         {
-            var isOverlapping = _exceptions.Any(
-                e => e.StoreId == Id &&
-                e.Date.Date == date.Date &&
-                !e.IsClosed &&
-                e.CloseTime > openTime &&
-                e.OpenTime < closeTime);
+            bool isPartialOpen = _exceptions.Any(e => e.Date.Date == date.Date && !e.IsFullDayClosed);
+
+            if (isPartialOpen)
+            {
+                throw new DomainException("Cannot create a full-day closure when partial exceptions exist for the day");
+            }
+        }
+        else
+        {
+            bool isFullClosedDay = _exceptions.Any(e => e.Date.Date == date.Date && e.IsFullDayClosed);
+
+            if (isFullClosedDay)
+            {
+                throw new DomainException("Cannot create a partial block on a fully closed day.");
+            }
+
+            bool isOverlapping = _exceptions.Any(
+                e => e.Date.Date == date.Date &&
+                e.OpenTime.HasValue &&
+                e.CloseTime.HasValue &&
+                e.OpenTime.Value < closeTime &&
+                e.CloseTime.Value > openTime
+                );
 
             if (isOverlapping)
             {
-                throw new DomainException("Exception overlaps with an existing exception on this day.");
-            }
-
-            var conflictWithClosed = _exceptions.Any(e => e.Date.Date == date.Date && e.IsClosed);
-
-            if (conflictWithClosed)
-            {
-                throw new DomainException("Cannot create partial opening on a fully closed day.");
+                throw new DomainException("Exception overlaps with an existing partial block for this day.");
             }
         }
 
-        var exception = StoreException.Create(Id, date, openTime, closeTime, reason, isClosed);
         _exceptions.Add(exception);
         MarkAsUpdated();
 
@@ -396,6 +424,31 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
+    public bool IsOpenAt(DateTime date)
+    {
+        var dateExceptions = _exceptions.Where(e => e.Date.Date == date.Date).ToList();
+
+        if (dateExceptions.Any())
+        {
+            return dateExceptions.Any(
+                e => !e.IsFullDayClosed &&
+                e.OpenTime.HasValue &&
+                e.CloseTime.HasValue &&
+                date.TimeOfDay >= e.OpenTime.Value &&
+                date.TimeOfDay < e.CloseTime.Value
+            );
+        }
+
+        var dayHours = _operatingHours.Where(h => h.Day == date.DayOfWeek).ToList();
+
+        return dayHours.Any(
+            h => !h.IsFullDayClosed &&
+            h.OpenTime.HasValue &&
+            h.CloseTime.HasValue &&
+            date.TimeOfDay >= h.OpenTime.Value &&
+            date.TimeOfDay < h.CloseTime.Value);
+    }
+
     private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string email, string phone)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -406,6 +459,16 @@ public class Store : HistoricEntity
         if (name.Length > 100)
         {
             throw new DomainException("Name cannot exceed 100 characters.");
+        }
+
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            throw new DomainException("Address is required.");
+        }
+
+        if (address.Length > 200)
+        {
+            throw new DomainException("Address cannot exceed 200 characters.");
         }
 
         if (string.IsNullOrWhiteSpace(email))
