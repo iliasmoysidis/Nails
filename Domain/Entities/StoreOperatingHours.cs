@@ -17,7 +17,7 @@ public class StoreOperatingHours : BaseEntity
 
     public static StoreOperatingHours Create(int storeId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
-        ValidateSchedule(openTime, closeTime);
+        ValidateScheduleInfo(openTime, closeTime);
 
         return new StoreOperatingHours
         {
@@ -28,7 +28,7 @@ public class StoreOperatingHours : BaseEntity
         };
     }
 
-    public static void ValidateSchedule(TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    public static void ValidateScheduleInfo(TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
         if ((openTime.HasValue && !closeTime.HasValue) || (!openTime.HasValue && closeTime.HasValue))
         {

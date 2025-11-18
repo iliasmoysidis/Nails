@@ -12,8 +12,6 @@ public class Service : HistoricEntity
     public TimeSpan Duration { get; private set; }
 
     public Store Store { get; private set; } = null!;
-    private readonly List<ProfessionalService> _providers = new();
-    public IReadOnlyCollection<ProfessionalService> Providers => _providers.AsReadOnly();
 
     private Service() { }
 
@@ -91,7 +89,7 @@ public class Service : HistoricEntity
 
             if (duration.Value.TotalMinutes % 15 != 0)
             {
-                throw new DomainException("Duration must be in 15-minute icrements.");
+                throw new DomainException("Duration must be in 15-minute increments.");
             }
 
             Duration = duration.Value;
@@ -104,126 +102,7 @@ public class Service : HistoricEntity
         }
     }
 
-    public void UpdatePrice(decimal newPrice)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot update price for inactive service.");
-        }
-
-        if (newPrice <= 0)
-        {
-            throw new DomainException("Price must be greater than zero.");
-        }
-
-        if (newPrice > 10000)
-        {
-            throw new DomainException("Price cannot exceed 10,000.");
-        }
-
-        Price = newPrice;
-        MarkAsUpdated();
-    }
-
-    public void UpdateDuration(TimeSpan newDuration)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot update duration for inactive service.");
-        }
-
-        if (newDuration <= TimeSpan.Zero)
-        {
-            throw new DomainException("Duration must be greater than zero.");
-        }
-
-        if (newDuration > TimeSpan.FromHours(8))
-        {
-            throw new DomainException("Duration cannot exceed 8 hours.");
-        }
-
-        if (newDuration.TotalMinutes % 15 != 0)
-        {
-            throw new DomainException("Duration must be in 15-minute increments.");
-        }
-
-        Duration = newDuration;
-        MarkAsUpdated();
-    }
-
-    public void AddProvider(Professional professional)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot add provider to inactive service.");
-        }
-
-        if (professional.IsDeleted)
-        {
-            throw new DomainException("Cannot add inactive professional as provider.");
-        }
-
-        if (!professional.WorksAtStore(StoreId))
-        {
-            throw new DomainException("Professional must work at this store to provide this service.");
-        }
-
-        var alreadyProvider = _providers.Any(p => p.ProfessionalId == professional.Id);
-        if (alreadyProvider)
-        {
-            throw new DomainException("Professional is already a provider of this service.");
-        }
-
-        var professionalService = ProfessionalService.Create(professional.Id, Id);
-        _providers.Add(professionalService);
-
-        MarkAsUpdated();
-    }
-
-    public void RemoveProvider(int professionalId)
-    {
-        var provider = _providers.FirstOrDefault(p => p.ProfessionalId == professionalId);
-
-        if (provider == null)
-        {
-            throw new DomainException("Professional is not a provider of this service.");
-        }
-
-        if (_providers.Count == 1)
-        {
-            throw new DomainException("Cannot remove the last provider. Service must have at least one provider.");
-        }
-
-        _providers.Remove(provider);
-        MarkAsUpdated();
-    }
-
-    public bool HasProvider(int professionalId)
-    {
-        return _providers.Any(p => p.ProfessionalId == professionalId);
-    }
-
-    public bool HasProviders()
-    {
-        return _providers.Any();
-    }
-
-    public int GetProviderCount()
-    {
-        return _providers.Count();
-    }
-
-    public IEnumerable<int> GetProviderIds()
-    {
-        return _providers.Select(p => p.ProfessionalId);
-    }
-
-    public bool IsAvailableWith(int professionalId)
-    {
-        return !IsDeleted && HasProvider(professionalId);
-    }
-
-    public void Deactivate(string? reason = null)
+    public void Deactivate()
     {
         if (IsDeleted)
         {
@@ -267,7 +146,7 @@ public class Service : HistoricEntity
 
         if (duration.TotalMinutes % 15 != 0)
         {
-            throw new DomainException("Duration must be in 15-minute icrements.");
+            throw new DomainException("Duration must be in 15-minute increments.");
         }
     }
 }

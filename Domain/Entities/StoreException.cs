@@ -18,7 +18,7 @@ public class StoreException : BaseEntity
 
     public static StoreException Create(int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
     {
-        ValidateSchedule(openTime, closeTime);
+        ValidateScheduleInfo(openTime, closeTime);
 
         return new StoreException
         {
@@ -30,7 +30,7 @@ public class StoreException : BaseEntity
         };
     }
 
-    public static void ValidateSchedule(TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    public static void ValidateScheduleInfo(TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
         if ((openTime.HasValue && !closeTime.HasValue) || (!openTime.HasValue && closeTime.HasValue))
         {

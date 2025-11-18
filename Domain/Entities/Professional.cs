@@ -385,7 +385,7 @@ public class Professional : HistoricEntity
         return _providedServices.Select(ps => ps.ServiceId);
     }
 
-    public void Deactivate(string? reason = null)
+    public void Deactivate()
     {
         if (IsDeleted)
         {
