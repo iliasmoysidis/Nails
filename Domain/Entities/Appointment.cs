@@ -12,7 +12,6 @@ public class Appointment : HistoricEntity
     public int ProfessionalId { get; private set; }
     public int StoreId { get; private set; }
     public DateTime StartAt { get; private set; }
-    public DateTime EndAt { get; private set; }
     public decimal BookedPrice { get; private set; }
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
@@ -22,6 +21,7 @@ public class Appointment : HistoricEntity
     public Service Service { get; private set; } = null!;
     public Store Store { get; private set; } = null!;
 
+    public DateTime EndAt => StartAt.Add(Service.Duration);
     public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
     public bool IsConfirmed => Status == AppointmentStatus.Confirmed;
     public bool IsCompleted => Status == AppointmentStatus.Completed;
@@ -33,41 +33,29 @@ public class Appointment : HistoricEntity
     public TimeSpan Duration => EndAt - StartAt;
 
     public bool CanBeCanceled =>
-        (Status == AppointmentStatus.PendingConfirmation || Status == AppointmentStatus.Confirmed)
-        && (StartAt - DateTime.Now).TotalHours >= 24;
+        (IsPending || IsConfirmed)
+        && (StartAt - DateTime.UtcNow).TotalHours >= 24;
 
-    public bool CanBeRescheduled =>
-        (Status == AppointmentStatus.PendingConfirmation || Status == AppointmentStatus.Confirmed)
-        && (StartAt - DateTime.Now).TotalHours >= 24;
+    public bool CanBeRescheduled => CanBeCanceled;
 
     private Appointment()
     {
         Status = AppointmentStatus.PendingConfirmation;
     }
 
-    public static Appointment Schedule(User user, Professional professional, Service service, Store store, DateTime startAt, string? notes = null)
+    public static Appointment Create(int userId, int professionalId, Service service, int storeId, DateTime startAt, string? notes = null)
     {
-        var endAt = startAt.Add(service.Duration);
-
-        var appointment = new Appointment
+        return new Appointment
         {
-            UserId = user.Id,
-            ProfessionalId = professional.Id,
+            UserId = userId,
             ServiceId = service.Id,
-            StoreId = store.Id,
+            ProfessionalId = professionalId,
+            StoreId = storeId,
             StartAt = startAt,
-            EndAt = endAt,
             BookedPrice = service.Price,
             Notes = notes?.Trim(),
-            Status = AppointmentStatus.PendingConfirmation
+            Status = AppointmentStatus.PendingConfirmation,
         };
-
-        appointment.User = user;
-        appointment.Professional = professional;
-        appointment.Service = service;
-        appointment.Store = store;
-
-        return appointment;
     }
 
     public void Confirm()
@@ -186,13 +174,10 @@ public class Appointment : HistoricEntity
             Service = newService;
             BookedPrice = newService.Price;
             StartAt = newStartAt;
-            EndAt = newStartAt.Add(newService.Duration);
         }
         else
         {
-            var duration = EndAt - StartAt;
             StartAt = newStartAt;
-            EndAt = newStartAt.Add(duration);
         }
 
         MarkAsUpdated();

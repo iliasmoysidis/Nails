@@ -60,7 +60,7 @@ public class Store : HistoricEntity
         };
     }
 
-    public StoreOwner AddOwner(int ownerId, int professionalId)
+    public StoreOwner AddOwner(int ownerId, int prospectiveOwnerId)
     {
         if (IsDeleted)
         {
@@ -72,12 +72,12 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can add an owner.");
         }
 
-        if (IsOwner(professionalId))
+        if (IsOwner(prospectiveOwnerId))
         {
             throw new DomainException("This professional is already an owner of this store.");
         }
 
-        var owner = StoreOwner.Create(Id, professionalId);
+        var owner = StoreOwner.Create(Id, prospectiveOwnerId);
         _owners.Add(owner);
         MarkAsUpdated();
 
