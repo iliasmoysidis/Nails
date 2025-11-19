@@ -12,16 +12,12 @@ public class Appointment : HistoricEntity
     public int ProfessionalId { get; private set; }
     public int StoreId { get; private set; }
     public DateTime StartAt { get; private set; }
+    public DateTime EndAt { get; private set; }
     public decimal BookedPrice { get; private set; }
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
 
-    public User User { get; private set; } = null!;
-    public Professional Professional { get; private set; } = null!;
-    public Service Service { get; private set; } = null!;
-    public Store Store { get; private set; } = null!;
 
-    public DateTime EndAt => StartAt.Add(Service.Duration);
     public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
     public bool IsConfirmed => Status == AppointmentStatus.Confirmed;
     public bool IsCompleted => Status == AppointmentStatus.Completed;
@@ -43,18 +39,19 @@ public class Appointment : HistoricEntity
         Status = AppointmentStatus.PendingConfirmation;
     }
 
-    public static Appointment Create(int userId, int professionalId, Service service, int storeId, DateTime startAt, string? notes = null)
+    public static Appointment Create(int userId, int professionalId, int serviceId, int storeId, decimal price, DateTime startAt, DateTime endAt, string? notes = null)
     {
-        ValidateAppointmentInfo(userId, professionalId, service, storeId, startAt);
+        ValidateAppointmentInfo(price, startAt, endAt, notes);
 
         return new Appointment
         {
             UserId = userId,
-            ServiceId = service.Id,
+            ServiceId = serviceId,
             ProfessionalId = professionalId,
             StoreId = storeId,
+            BookedPrice = price,
             StartAt = startAt,
-            BookedPrice = service.Price,
+            EndAt = endAt,
             Notes = notes?.Trim(),
             Status = AppointmentStatus.PendingConfirmation,
         };
@@ -142,7 +139,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated();
     }
 
-    public void Reschedule(DateTime newStartAt, Service? newService = null)
+    public void Reschedule(DateTime newStartAt)
     {
         if (Status == AppointmentStatus.Completed)
         {
@@ -170,18 +167,7 @@ public class Appointment : HistoricEntity
             throw new DomainException("Cannot reschedule appointments less than 24 hours before start time. Please contact the store directly.");
         }
 
-        if (newService != null && newService.Id != ServiceId)
-        {
-            ServiceId = newService.Id;
-            Service = newService;
-            BookedPrice = newService.Price;
-            StartAt = newStartAt;
-        }
-        else
-        {
-            StartAt = newStartAt;
-        }
-
+        StartAt = newStartAt;
         MarkAsUpdated();
     }
 
@@ -238,70 +224,26 @@ public class Appointment : HistoricEntity
         MarkAsUpdated();
     }
 
-    public static void ValidateAppointmentInfo(int userId, int professionalId, Service service, int storeId, DateTime startAt) { }
-
-    public static void ValidateSchedulingRules(User user, Professional professional, Service service, Store store, DateTime startAt)
+    public static void ValidateAppointmentInfo(Decimal price, DateTime startAt, DateTime endAt, string? notes = null)
     {
-        if (user.IsDeleted)
-        {
-            throw new DomainException("User account is not active.");
-        }
-
-        if (professional.IsDeleted)
-        {
-            throw new DomainException("Professional is not available.");
-        }
-
-        if (service.IsDeleted)
-        {
-            throw new DomainException("Service is no longer available.");
-        }
-
-        if (store.IsDeleted)
-        {
-            throw new DomainException("Store is not active.");
-        }
-
-        if (service.StoreId != store.Id)
-        {
-            throw new DomainException("Service does not belong to this store.");
-        }
-
         if (startAt <= DateTime.UtcNow)
         {
             throw new DomainException("Cannot book appointments in the past.");
         }
 
-        var hoursInAdvance = (startAt - DateTime.UtcNow).TotalHours;
-        if (hoursInAdvance < 2)
+        if (startAt >= endAt)
         {
-            throw new DomainException("Appointments must be booked at least 2 hours in advance.");
+            throw new DomainException("Start time must be before end time.");
         }
 
-        var daysInAdvance = (startAt - DateTime.UtcNow).TotalDays;
-        if (daysInAdvance > 45)
+        if (price <= 0)
         {
-            throw new DomainException("Cannot book appointments more than 45 days in advance.");
+            throw new DomainException("Price cannot be less than or equal to zero");
         }
 
-        if (startAt.Minute % 15 != 0 || startAt.Second != 0)
+        if (notes != null && notes.Length > 500)
         {
-            throw new DomainException("Appointments must start on 15 minute intervals.");
-        }
-    }
-
-    public void ValidateNoTimeConflict(IEnumerable<Appointment> professionalAppointments)
-    {
-        foreach (var existing in professionalAppointments)
-        {
-            if (existing.Id == Id) continue;
-
-            if (existing.Status == AppointmentStatus.Canceled || existing.Status == AppointmentStatus.NoShow) continue;
-
-            if (StartAt < existing.EndAt && EndAt > existing.StartAt)
-            {
-                throw new DomainException($"Professional is not available at this time. Conflicts with appointment from {existing.StartAt:g} to {existing.EndAt:g}.");
-            }
+            throw new DomainException("Notes cannot be more than 500 characters.");
         }
     }
 }
