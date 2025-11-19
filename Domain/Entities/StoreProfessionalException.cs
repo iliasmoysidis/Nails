@@ -1,8 +1,9 @@
+using Domain.Common;
 using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreProfessionalException
+public class StoreProfessionalException : BaseEntity
 {
     public int Id { get; private set; }
     public int StoreId { get; private set; }
