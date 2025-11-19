@@ -18,7 +18,7 @@ public class StoreException : BaseEntity
 
     public static StoreException Create(int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
     {
-        ValidateScheduleInfo(openTime, closeTime);
+        ValidateScheduleInfo(date, openTime, closeTime, reason);
 
         return new StoreException
         {
@@ -30,7 +30,7 @@ public class StoreException : BaseEntity
         };
     }
 
-    public static void ValidateScheduleInfo(TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    private static void ValidateScheduleInfo(DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
     {
         if ((openTime.HasValue && !closeTime.HasValue) || (!openTime.HasValue && closeTime.HasValue))
         {
@@ -40,6 +40,16 @@ public class StoreException : BaseEntity
         if (openTime.HasValue && closeTime.HasValue && openTime >= closeTime)
         {
             throw new DomainException("Opening time must be earlier than closing time.");
+        }
+
+        if (date.Date < DateTime.UtcNow.Date)
+        {
+            throw new DomainException("Cannot create an exception for a past date");
+        }
+
+        if (reason?.Length > 500)
+        {
+            throw new DomainException("Reason cannot be longer than 500 characters.");
         }
     }
 
