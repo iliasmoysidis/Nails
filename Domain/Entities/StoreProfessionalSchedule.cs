@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using Domain.Common;
 using Domain.Exceptions;
 
@@ -8,29 +9,36 @@ public class StoreProfessionalSchedule : BaseEntity
     public int Id { get; private set; }
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
-    public DayOfWeek DayOfWeek { get; private set; }
-    public TimeSpan StartTime { get; private set; }
-    public TimeSpan EndTime { get; private set; }
+    public DayOfWeek Day { get; private set; }
+    public TimeSpan? StartTime { get; private set; }
+    public TimeSpan? EndTime { get; private set; }
 
-    public StoreProfessionalSchedule Create(int storeId, int professionalId, DayOfWeek dayOfWeek, TimeSpan start, TimeSpan end)
+    public static StoreProfessionalSchedule Create(int storeId, int professionalId, DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
     {
-        ValidateStoreProfessionalScheduleInfo(start, end);
+        ValidateStoreProfessionalScheduleInfo(startTime, endTime);
 
         return new StoreProfessionalSchedule
         {
             StoreId = storeId,
             ProfessionalId = professionalId,
-            DayOfWeek = dayOfWeek,
-            StartTime = start,
-            EndTime = end
+            Day = day,
+            StartTime = startTime,
+            EndTime = endTime
         };
     }
 
-    private static void ValidateStoreProfessionalScheduleInfo(TimeSpan start, TimeSpan end)
+    private static void ValidateStoreProfessionalScheduleInfo(TimeSpan? startTime = null, TimeSpan? endTime = null)
     {
-        if (start >= end)
+        if ((startTime.HasValue && !endTime.HasValue) || (!startTime.HasValue && endTime.HasValue))
+        {
+            throw new DomainException("Both start and end times must be provided.");
+        }
+
+        if (startTime >= endTime)
         {
             throw new DomainException("Start time must be before end time.");
         }
     }
+
+    public bool IsDayOff => !StartTime.HasValue && !EndTime.HasValue;
 }

@@ -18,6 +18,9 @@ public class Store : HistoricEntity
     private readonly List<StoreProfessional> _staff = new();
     public IReadOnlyCollection<StoreProfessional> Staff => _staff.AsReadOnly();
 
+    private readonly List<StoreProfessionalSchedule> _staffSchedules = new();
+    public IReadOnlyCollection<StoreProfessionalSchedule> StaffSchedules => _staffSchedules.AsReadOnly();
+
     private readonly List<Service> _services = new();
     public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
 
@@ -424,6 +427,86 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
+    public StoreProfessionalSchedule AddStaffSchedule(int ownerId, int professionalId, DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot add schedules to an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can add staff schedules.");
+        }
+
+        if (!IsStaff(professionalId))
+        {
+            throw new DomainException("Cannot set schedule for a professional who does not work at this store.");
+        }
+
+        var schedule = StoreProfessionalSchedule.Create(Id, professionalId, day, startTime, endTime);
+
+        if (schedule.IsDayOff)
+        {
+            bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && !s.IsDayOff);
+
+            if (isWorking)
+            {
+                throw new DomainException("Cannot create full-day off when partial schedule exists.");
+            }
+        }
+        else
+        {
+            var storeDayHours = _operatingHours.Where(h => h.Day == day).ToList();
+
+            if (!IsOpenOnDay(day))
+            {
+                throw new DomainException("Cannot schedule staff on a day the store is closed.");
+            }
+
+            bool isOverlapping = _staffSchedules.Any(
+                s => s.ProfessionalId == professionalId &&
+                s.Day == day &&
+                s.StartTime.HasValue &&
+                s.EndTime.HasValue &&
+                s.StartTime.Value < endTime &&
+                s.EndTime.Value > startTime);
+
+            if (isOverlapping)
+            {
+                throw new DomainException("Schedule overlaps with existing schedule.");
+            }
+        }
+
+        _staffSchedules.Add(schedule);
+        MarkAsUpdated();
+
+        return schedule;
+    }
+
+    public void RemoveStaffSchedule(int ownerId, int scheduleId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot remove schedules from an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can remove staff schedules.");
+        }
+
+        var schedule = _staffSchedules.FirstOrDefault(s => s.Id == scheduleId);
+
+        if (schedule == null)
+        {
+            throw new DomainException("Schedule does not exist.");
+        }
+
+        _staffSchedules.Remove(schedule);
+        MarkAsUpdated();
+    }
+
     public bool IsOpenAt(DateTime date)
     {
         var dateExceptions = _exceptions.Where(e => e.Date.Date == date.Date).ToList();
@@ -447,6 +530,11 @@ public class Store : HistoricEntity
             h.CloseTime.HasValue &&
             date.TimeOfDay >= h.OpenTime.Value &&
             date.TimeOfDay < h.CloseTime.Value);
+    }
+
+    public bool IsOpenOnDay(DayOfWeek day)
+    {
+        return !_operatingHours.Any(h => h.Day == day && h.IsFullDayClosed);
     }
 
     private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string email, string phone)
