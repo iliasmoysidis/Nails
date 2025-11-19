@@ -12,8 +12,6 @@ public class StoreException : BaseEntity
     public TimeSpan? CloseTime { get; private set; }
     public string? Reason { get; private set; }
 
-    public Store Store { get; private set; } = null!;
-
     private StoreException() { }
 
     public static StoreException Create(int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)

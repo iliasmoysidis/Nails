@@ -6,8 +6,6 @@ public class StoreOwner : BaseEntity
 {
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
-    public Store Store { get; private set; } = null!;
-    public Professional Professional { get; private set; } = null!;
 
     private StoreOwner() { }
 

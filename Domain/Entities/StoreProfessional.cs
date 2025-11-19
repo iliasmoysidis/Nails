@@ -7,9 +7,6 @@ public class StoreProfessional : BaseEntity
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
 
-    public Store Store { get; private set; } = null!;
-    public Professional Professional { get; private set; } = null!;
-
     private StoreProfessional() { }
 
     public static StoreProfessional Create(int storeId, int professionalId)

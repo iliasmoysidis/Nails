@@ -11,8 +11,6 @@ public class StoreSchedule : BaseEntity
     public TimeSpan? OpenTime { get; private set; }
     public TimeSpan? CloseTime { get; private set; }
 
-    public Store Store { get; private set; } = null!;
-
     private StoreSchedule() { }
 
     public static StoreSchedule Create(int storeId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)

@@ -13,9 +13,6 @@ public class ProfessionalSchedule : BaseEntity
     public TimeSpan EndTime { get; private set; }
     public bool IsActive { get; private set; }
 
-    public Professional Professional { get; private set; } = null!;
-    public Store Store { get; private set; } = null!;
-
     private ProfessionalSchedule()
     {
         IsActive = true;

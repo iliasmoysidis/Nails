@@ -21,14 +21,14 @@ public class Store : HistoricEntity
     private readonly List<StoreProfessionalSchedule> _staffSchedules = new();
     public IReadOnlyCollection<StoreProfessionalSchedule> StaffSchedules => _staffSchedules.AsReadOnly();
 
-    private readonly List<StoreProfessionalException> _professionalExceptions = new();
-    public IReadOnlyCollection<StoreProfessionalException> ProfessionalExceptions => _professionalExceptions.AsReadOnly();
+    private readonly List<StoreProfessionalException> _staffExceptions = new();
+    public IReadOnlyCollection<StoreProfessionalException> StaffExceptions => _staffExceptions.AsReadOnly();
 
     private readonly List<Service> _services = new();
     public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
 
-    private readonly List<ProfessionalService> _professionalServices = new();
-    public IReadOnlyCollection<ProfessionalService> ProfessionalServices => _professionalServices.AsReadOnly();
+    private readonly List<ProfessionalService> _staffServices = new();
+    public IReadOnlyCollection<ProfessionalService> StaffServices => _staffServices.AsReadOnly();
 
     private readonly List<StoreSchedule> _storeSchedules = new();
     public IReadOnlyCollection<StoreSchedule> StoreSchedules => _storeSchedules.AsReadOnly();
@@ -50,7 +50,7 @@ public class Store : HistoricEntity
 
     public bool IsProvided(int professionalId, int serviceId)
     {
-        return _professionalServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
+        return _staffServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
     }
 
     public static Store Create(string name, string address, string taxIdNumber, string email, string phone)
@@ -237,7 +237,7 @@ public class Store : HistoricEntity
         }
 
         var professionalService = ProfessionalService.Create(professionalId, serviceId);
-        _professionalServices.Add(professionalService);
+        _staffServices.Add(professionalService);
         MarkAsUpdated();
 
         return professionalService;
@@ -267,7 +267,7 @@ public class Store : HistoricEntity
             throw new DomainException("Service is not offered by the store.");
         }
 
-        var professionalService = _professionalServices.FirstOrDefault(
+        var professionalService = _staffServices.FirstOrDefault(
             ps => ps.ProfessionalId == professionalId &&
             ps.ServiceId == serviceId);
 
@@ -276,7 +276,7 @@ public class Store : HistoricEntity
             throw new DomainException("Service is not offered by the professional.");
         }
 
-        _professionalServices.Remove(professionalService);
+        _staffServices.Remove(professionalService);
         MarkAsUpdated();
     }
 
@@ -531,7 +531,7 @@ public class Store : HistoricEntity
 
         if (exception.IsFullDayAbsent)
         {
-            bool isPartiallyWorking = _professionalExceptions.Any(
+            bool isPartiallyWorking = _staffExceptions.Any(
                 e => e.ProfessionalId == professionalId &&
                 e.Date == date &&
                 !e.IsFullDayAbsent
@@ -544,7 +544,7 @@ public class Store : HistoricEntity
         }
         else
         {
-            bool isOverlapping = _professionalExceptions.Any(
+            bool isOverlapping = _staffExceptions.Any(
                 e => e.ProfessionalId == professionalId &&
                 e.Date == date &&
                 e.StartTime.HasValue &&
@@ -559,7 +559,7 @@ public class Store : HistoricEntity
             }
         }
 
-        _professionalExceptions.Add(exception);
+        _staffExceptions.Add(exception);
         MarkAsUpdated();
 
         return exception;
@@ -577,14 +577,14 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can remove professional exceptions.");
         }
 
-        var exception = _professionalExceptions.FirstOrDefault(e => e.Id == exceptionId);
+        var exception = _staffExceptions.FirstOrDefault(e => e.Id == exceptionId);
 
         if (exception == null)
         {
             throw new DomainException("Professional exception not found.");
         }
 
-        _professionalExceptions.Remove(exception);
+        _staffExceptions.Remove(exception);
         MarkAsUpdated();
     }
 
