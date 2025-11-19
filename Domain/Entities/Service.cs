@@ -10,27 +10,21 @@ public class Service : HistoricEntity
     public string Name { get; private set; } = null!;
     public decimal Price { get; private set; }
     public TimeSpan Duration { get; private set; }
-
-    public Store Store { get; private set; } = null!;
+    public string? Description { get; private set; }
 
     private Service() { }
 
-    public static Service Create(Store store, string name, decimal price, TimeSpan duration)
+    public static Service Create(int storeId, string name, decimal price, TimeSpan duration, string? description = null)
     {
-        ValidateServiceInfo(name, price, duration);
-
-        if (store.IsDeleted)
-        {
-            throw new DomainException("Cannot create service for inactive store.");
-        }
+        ValidateServiceInfo(name, price, duration, description);
 
         return new Service
         {
-            StoreId = store.Id,
+            StoreId = storeId,
             Name = name.Trim(),
             Price = price,
             Duration = duration,
-            Store = store,
+            Description = description?.Trim()
         };
     }
 
@@ -112,7 +106,7 @@ public class Service : HistoricEntity
         SoftDelete();
     }
 
-    public static void ValidateServiceInfo(string name, decimal price, TimeSpan duration)
+    public static void ValidateServiceInfo(string name, decimal price, TimeSpan duration, string? description = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -147,6 +141,11 @@ public class Service : HistoricEntity
         if (duration.TotalMinutes % 15 != 0)
         {
             throw new DomainException("Duration must be in 15-minute increments.");
+        }
+
+        if (description != null && description.Length > 500)
+        {
+            throw new DomainException("Description cannot exceed 500 characters.");
         }
     }
 }

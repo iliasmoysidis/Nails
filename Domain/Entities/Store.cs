@@ -165,7 +165,7 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    public Service AddService(int ownerId, string name, decimal price, TimeSpan duration)
+    public Service AddService(int ownerId, string name, decimal price, TimeSpan duration, string? description = null)
     {
         if (IsDeleted)
         {
@@ -177,7 +177,7 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can add a service.");
         }
 
-        var service = Service.Create(this, name, price, duration);
+        var service = Service.Create(Id, name, price, duration, description);
         _services.Add(service);
         MarkAsUpdated();
 
