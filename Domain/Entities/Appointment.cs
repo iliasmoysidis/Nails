@@ -16,6 +16,7 @@ public class Appointment : HistoricEntity
     public decimal BookedPrice { get; private set; }
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
+    public DateTime? CanceledAt { get; private set; }
 
 
     public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
@@ -104,6 +105,7 @@ public class Appointment : HistoricEntity
         }
 
         Status = AppointmentStatus.Canceled;
+        CanceledAt = DateTime.UtcNow;
         MarkAsUpdated();
     }
 
@@ -168,6 +170,7 @@ public class Appointment : HistoricEntity
         }
 
         StartAt = newStartAt;
+        EndAt = newStartAt.Add(Duration);
         MarkAsUpdated();
     }
 
@@ -236,14 +239,30 @@ public class Appointment : HistoricEntity
             throw new DomainException("Start time must be before end time.");
         }
 
-        if (price <= 0)
+        if (price < 0)
         {
-            throw new DomainException("Price cannot be less than or equal to zero");
+            throw new DomainException("Price cannot be negative.");
         }
 
         if (notes != null && notes.Length > 500)
         {
             throw new DomainException("Notes cannot be more than 500 characters.");
+        }
+
+        var duration = endAt - startAt;
+        if (duration > TimeSpan.FromHours(8))
+        {
+            throw new DomainException("Appointment duration cannot exceed 8 hours.");
+        }
+
+        if (duration.TotalMinutes % 15 != 0)
+        {
+            throw new DomainException("Appointment duration must be in 15-minute increments.");
+        }
+
+        if (startAt.Minute % 15 != 0 || startAt.Second != 0)
+        {
+            throw new DomainException("Appointments must start on 15-minute intervals.");
         }
     }
 }
