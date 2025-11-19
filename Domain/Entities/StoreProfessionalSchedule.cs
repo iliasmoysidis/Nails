@@ -34,7 +34,7 @@ public class StoreProfessionalSchedule : BaseEntity
             throw new DomainException("Both start and end times must be provided.");
         }
 
-        if (startTime >= endTime)
+        if (startTime.HasValue && endTime.HasValue && startTime >= endTime)
         {
             throw new DomainException("Start time must be before end time.");
         }

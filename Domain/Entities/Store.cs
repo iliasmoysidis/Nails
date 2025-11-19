@@ -20,6 +20,8 @@ public class Store : HistoricEntity
 
     private readonly List<StoreProfessionalSchedule> _staffSchedules = new();
     public IReadOnlyCollection<StoreProfessionalSchedule> StaffSchedules => _staffSchedules.AsReadOnly();
+    private readonly List<StoreProfessionalException> _professionalExceptions = new();
+    public IReadOnlyCollection<StoreProfessionalException> ProfessionalExceptions => _professionalExceptions.AsReadOnly();
 
     private readonly List<Service> _services = new();
     public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
@@ -277,7 +279,7 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    public StoreOperatingHours AddOperatingHours(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    public StoreOperatingHours AddStoreSchedule(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
         if (IsDeleted)
         {
@@ -329,7 +331,7 @@ public class Store : HistoricEntity
         return operatingHours;
     }
 
-    public void RemoveOperatingHours(int ownerId, int operatingHoursId)
+    public void RemoveStoreSchedule(int ownerId, int operatingHoursId)
     {
         if (IsDeleted)
         {
@@ -352,7 +354,7 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    public StoreException AddException(int ownerId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
+    public StoreException AddStoreException(int ownerId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
     {
         if (IsDeleted)
         {
@@ -404,7 +406,7 @@ public class Store : HistoricEntity
         return exception;
     }
 
-    public void RemoveException(int ownerId, int exceptionId)
+    public void RemoveStoreException(int ownerId, int exceptionId)
     {
         if (IsDeleted)
         {
@@ -504,6 +506,84 @@ public class Store : HistoricEntity
         }
 
         _staffSchedules.Remove(schedule);
+        MarkAsUpdated();
+    }
+
+    public StoreProfessionalException AddStaffException(int ownerId, int professionalId, DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot add staff exceptions to an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can add staff exceptions.");
+        }
+
+        if (!IsStaff(professionalId))
+        {
+            throw new DomainException("Cannot add exception for a professional who does not work at this store.");
+        }
+
+        var exception = StoreProfessionalException.Create(Id, professionalId, date, startTime, endTime, reason);
+
+        if (exception.IsFullDayAbsent)
+        {
+            bool isPartiallyWorking = _professionalExceptions.Any(
+                e => e.ProfessionalId == professionalId &&
+                e.Date == date &&
+                !e.IsFullDayAbsent
+            );
+
+            if (isPartiallyWorking)
+            {
+                throw new DomainException("Cannot schedule staff to partially work on a day off.");
+            }
+        }
+        else
+        {
+            bool isOverlapping = _professionalExceptions.Any(
+                e => e.ProfessionalId == professionalId &&
+                e.Date == date &&
+                e.StartTime.HasValue &&
+                e.EndTime.HasValue &&
+                e.StartTime.Value < endTime &&
+                e.EndTime.Value > startTime
+                );
+
+            if (isOverlapping)
+            {
+                throw new DomainException("Exception overlaps with an existing exception for this professional.");
+            }
+        }
+
+        _professionalExceptions.Add(exception);
+        MarkAsUpdated();
+
+        return exception;
+    }
+
+    public void RemoveStaffException(int ownerId, int exceptionId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot remove exceptions from an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can remove professional exceptions.");
+        }
+
+        var exception = _professionalExceptions.FirstOrDefault(e => e.Id == exceptionId);
+
+        if (exception == null)
+        {
+            throw new DomainException("Professional exception not found.");
+        }
+
+        _professionalExceptions.Remove(exception);
         MarkAsUpdated();
     }
 
