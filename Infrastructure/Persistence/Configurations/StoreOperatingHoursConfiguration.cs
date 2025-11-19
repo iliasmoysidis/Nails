@@ -4,14 +4,14 @@ using Domain.Entities;
 
 namespace Infrastructure.Persistence.Configurations;
 
-public class StoreOperatingHoursConfiguration : IEntityTypeConfiguration<StoreOperatingHours>
+public class StoreScheduleConfiguration : IEntityTypeConfiguration<StoreSchedule>
 {
-    public void Configure(EntityTypeBuilder<StoreOperatingHours> builder)
+    public void Configure(EntityTypeBuilder<StoreSchedule> builder)
     {
         builder.HasKey(e => e.Id);
 
         builder.HasOne(e => e.Store)
-            .WithMany(s => s.OperatingHours)
+            .WithMany(s => s.storeSchedule)
             .HasForeignKey(e => e.StoreId)
             .OnDelete(DeleteBehavior.Cascade);
 

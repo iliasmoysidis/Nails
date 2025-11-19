@@ -20,6 +20,7 @@ public class Store : HistoricEntity
 
     private readonly List<StoreProfessionalSchedule> _staffSchedules = new();
     public IReadOnlyCollection<StoreProfessionalSchedule> StaffSchedules => _staffSchedules.AsReadOnly();
+
     private readonly List<StoreProfessionalException> _professionalExceptions = new();
     public IReadOnlyCollection<StoreProfessionalException> ProfessionalExceptions => _professionalExceptions.AsReadOnly();
 
@@ -29,8 +30,8 @@ public class Store : HistoricEntity
     private readonly List<ProfessionalService> _professionalServices = new();
     public IReadOnlyCollection<ProfessionalService> ProfessionalServices => _professionalServices.AsReadOnly();
 
-    private readonly List<StoreOperatingHours> _operatingHours = new();
-    public IReadOnlyCollection<StoreOperatingHours> OperatingHours => _operatingHours.AsReadOnly();
+    private readonly List<StoreSchedule> _storeSchedules = new();
+    public IReadOnlyCollection<StoreSchedule> StoreSchedules => _storeSchedules.AsReadOnly();
 
     private readonly List<StoreException> _exceptions = new();
     public IReadOnlyCollection<StoreException> Exceptions => _exceptions.AsReadOnly();
@@ -279,7 +280,7 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    public StoreOperatingHours AddStoreSchedule(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    public StoreSchedule AddStoreSchedule(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
         if (IsDeleted)
         {
@@ -291,11 +292,11 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can add operating hours.");
         }
 
-        var operatingHours = StoreOperatingHours.Create(Id, day, openTime, closeTime);
+        var storeSchedule = StoreSchedule.Create(Id, day, openTime, closeTime);
 
-        if (operatingHours.IsFullDayClosed)
+        if (storeSchedule.IsFullDayClosed)
         {
-            bool isPartialOpen = _operatingHours.Any(e => e.Day == day && !e.IsFullDayClosed);
+            bool isPartialOpen = _storeSchedules.Any(e => e.Day == day && !e.IsFullDayClosed);
 
             if (isPartialOpen)
             {
@@ -304,14 +305,14 @@ public class Store : HistoricEntity
         }
         else
         {
-            bool isFullClosedDay = _operatingHours.Any(e => e.Day == day && e.IsFullDayClosed);
+            bool isFullClosedDay = _storeSchedules.Any(e => e.Day == day && e.IsFullDayClosed);
 
             if (isFullClosedDay)
             {
                 throw new DomainException("Cannot create a partial block on a fully closed day.");
             }
 
-            bool isOverlapping = _operatingHours.Any(
+            bool isOverlapping = _storeSchedules.Any(
                 e => e.Day == day &&
                 e.OpenTime.HasValue &&
                 e.CloseTime.HasValue &&
@@ -325,13 +326,13 @@ public class Store : HistoricEntity
             }
         }
 
-        _operatingHours.Add(operatingHours);
+        _storeSchedules.Add(storeSchedule);
         MarkAsUpdated();
 
-        return operatingHours;
+        return storeSchedule;
     }
 
-    public void RemoveStoreSchedule(int ownerId, int operatingHoursId)
+    public void RemoveStoreSchedule(int ownerId, int storeScheduleId)
     {
         if (IsDeleted)
         {
@@ -343,14 +344,14 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can remove operating hours.");
         }
 
-        var hours = _operatingHours.FirstOrDefault(h => h.Id == operatingHoursId && h.StoreId == Id);
+        var hours = _storeSchedules.FirstOrDefault(h => h.Id == storeScheduleId && h.StoreId == Id);
 
         if (hours == null)
         {
             throw new DomainException("Operating hours not found.");
         }
 
-        _operatingHours.Remove(hours);
+        _storeSchedules.Remove(hours);
         MarkAsUpdated();
     }
 
@@ -459,7 +460,7 @@ public class Store : HistoricEntity
         }
         else
         {
-            var storeDayHours = _operatingHours.Where(h => h.Day == day).ToList();
+            var storeDayHours = _storeSchedules.Where(h => h.Day == day).ToList();
 
             if (!IsOpenOnDay(day))
             {
@@ -602,7 +603,7 @@ public class Store : HistoricEntity
             );
         }
 
-        var dayHours = _operatingHours.Where(h => h.Day == date.DayOfWeek).ToList();
+        var dayHours = _storeSchedules.Where(h => h.Day == date.DayOfWeek).ToList();
 
         return dayHours.Any(
             h => !h.IsFullDayClosed &&
@@ -614,7 +615,7 @@ public class Store : HistoricEntity
 
     public bool IsOpenOnDay(DayOfWeek day)
     {
-        return !_operatingHours.Any(h => h.Day == day && h.IsFullDayClosed);
+        return !_storeSchedules.Any(h => h.Day == day && h.IsFullDayClosed);
     }
 
     private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string email, string phone)

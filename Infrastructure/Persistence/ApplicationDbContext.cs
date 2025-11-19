@@ -12,7 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Service> Services => Set<Service>();
     public DbSet<ProfessionalService> ProfessionalServices => Set<ProfessionalService>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
-    public DbSet<StoreOperatingHours> StoreOperatingHours => Set<StoreOperatingHours>();
+    public DbSet<StoreSchedule> StoreSchedule => Set<StoreSchedule>();
     public DbSet<StoreException> StoreExceptions => Set<StoreException>();
     public DbSet<ProfessionalSchedule> ProfessionalSchedules => Set<ProfessionalSchedule>();
     public DbSet<ProfessionalTimeOff> ProfessionalTimeOffs => Set<ProfessionalTimeOff>();
