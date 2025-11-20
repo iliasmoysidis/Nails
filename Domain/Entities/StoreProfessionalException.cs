@@ -53,7 +53,9 @@ public class StoreProfessionalException : BaseEntity
         }
     }
 
-    public bool IsFullDayAbsent => !StartTime.HasValue && !EndTime.HasValue;
+    public bool IsWorkingDay => StartTime.HasValue || EndTime.HasValue;
+
+    public bool IsFullDayAbsent => !IsWorkingDay;
 
     public bool IsBlocking(DateTime startAt, DateTime endAt)
     {
@@ -62,7 +64,7 @@ public class StoreProfessionalException : BaseEntity
             return false;
         }
 
-        if (IsFullDayAbsent)
+        if (!IsWorkingDay)
         {
             return true;
         }

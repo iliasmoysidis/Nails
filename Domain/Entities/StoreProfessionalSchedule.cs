@@ -40,5 +40,5 @@ public class StoreProfessionalSchedule : BaseEntity
         }
     }
 
-    public bool IsDayOff => !StartTime.HasValue && !EndTime.HasValue;
+    public bool IsWorkingDay => StartTime.HasValue && EndTime.HasValue;
 }

@@ -24,9 +24,6 @@ public class Store : HistoricEntity
     private readonly List<StoreProfessionalException> _staffExceptions = new();
     public IReadOnlyCollection<StoreProfessionalException> StaffExceptions => _staffExceptions.AsReadOnly();
 
-    private readonly List<Service> _services = new();
-    public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
-
     private readonly List<ProfessionalService> _staffServices = new();
     public IReadOnlyCollection<ProfessionalService> StaffServices => _staffServices.AsReadOnly();
 
@@ -35,6 +32,12 @@ public class Store : HistoricEntity
 
     private readonly List<StoreException> _exceptions = new();
     public IReadOnlyCollection<StoreException> Exceptions => _exceptions.AsReadOnly();
+
+    private readonly List<Service> _services = new();
+    public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
+
+    private readonly List<Appointment> _appointments = new();
+    public IReadOnlyCollection<Appointment> Appointments => _appointments.AsReadOnly();
 
     private Store() { }
 
@@ -48,9 +51,14 @@ public class Store : HistoricEntity
         return _staff.Any(s => s.ProfessionalId == professionalId);
     }
 
-    public bool IsProvided(int professionalId, int serviceId)
+    public bool ServiceIsProvidedByProfessional(int professionalId, int serviceId)
     {
         return _staffServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
+    }
+
+    public bool ServiceIsProvidedByTheStore(int serviceId)
+    {
+        return _services.Any(s => s.Id == serviceId && s.StoreId == Id && !s.IsDeleted);
     }
 
     public static Store Create(string name, string address, string taxIdNumber, string email, string phone)
@@ -224,7 +232,7 @@ public class Store : HistoricEntity
             throw new DomainException("Cannot assign services to a professional who does not work at the store.");
         }
 
-        if (IsProvided(professionalId, serviceId))
+        if (ServiceIsProvidedByProfessional(professionalId, serviceId))
         {
             throw new DomainException("Service is already offered by this professional");
         }
@@ -449,9 +457,9 @@ public class Store : HistoricEntity
 
         var schedule = StoreProfessionalSchedule.Create(Id, professionalId, day, startTime, endTime);
 
-        if (schedule.IsDayOff)
+        if (!schedule.IsWorkingDay)
         {
-            bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && !s.IsDayOff);
+            bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorkingDay);
 
             if (isWorking)
             {
@@ -478,6 +486,13 @@ public class Store : HistoricEntity
             if (isOverlapping)
             {
                 throw new DomainException("Schedule overlaps with existing schedule.");
+            }
+
+            bool withinStoreHours = storeDayHours.Any(h => h.OpenTime <= startTime && h.CloseTime >= endTime);
+
+            if (!withinStoreHours)
+            {
+                throw new DomainException("Staff schedule must be within store operating hours.");
             }
         }
 
@@ -586,6 +601,181 @@ public class Store : HistoricEntity
 
         _staffExceptions.Remove(exception);
         MarkAsUpdated();
+    }
+
+    public Appointment BookAppointment(int userId, int professionalId, int serviceId, DateTime startAt, string? notes = null)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot book appointments at an inactive store.");
+        }
+
+        if (!IsStaff(professionalId))
+        {
+            throw new DomainException("Professional does not work at this store.");
+        }
+
+        if (!ServiceIsProvidedByTheStore(serviceId))
+        {
+            throw new DomainException("The service is not offered by this store.");
+        }
+
+        if (!ServiceIsProvidedByProfessional(professionalId, serviceId))
+        {
+            throw new DomainException("The professional is not offering this service.");
+        }
+
+        var service = _services.FirstOrDefault(s => s.Id == serviceId);
+        var endAt = startAt.Add(service!.Duration);
+
+        if (!IsOpenAt(endAt.AddMinutes(-1)))
+        {
+            throw new DomainException("Appointment extends beyond store closing time.");
+        }
+
+        if (!IsProfessionalAvailable(professionalId, startAt, endAt))
+        {
+            throw new DomainException("Professional is not available at the requested time.");
+        }
+
+        if (HasAppointmentConflict(professionalId, startAt, endAt))
+        {
+            throw new DomainException("Professional already has an appointment at this time.");
+        }
+
+        var appointment = Appointment.Create(userId, professionalId, serviceId, Id, service.Price, startAt, endAt, notes);
+        _appointments.Add(appointment);
+        MarkAsUpdated();
+
+        return appointment;
+    }
+
+    public void CanceAppointment(int appointmentId, string? reason = null)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot cancel appointments at an inactive store.");
+        }
+
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+
+        if (appointment == null)
+        {
+            throw new DomainException("Appointment not found.");
+        }
+
+        appointment.Cancel(reason);
+        MarkAsUpdated();
+    }
+
+    public void ConfirmAppointment(int ownerId, int appointmentId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot confirm appointments at an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can confirm appointments.");
+        }
+
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+
+        if (appointment == null)
+        {
+            throw new DomainException("Appointment not found.");
+        }
+
+        appointment.Confirm();
+        MarkAsUpdated();
+    }
+
+    public void CompleteAppointment(int ownerId, int appointmentId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot complete appointments at an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can complete appointments.");
+        }
+
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+
+        if (appointment == null)
+        {
+            throw new DomainException("Appointment not found.");
+        }
+
+        appointment.Complete();
+        MarkAsUpdated();
+    }
+
+    public void MarkAppointmentAsNoShow(int ownerId, int appointmentId)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot mark appointments as no show at an inactive store.");
+        }
+
+        if (!IsOwner(ownerId))
+        {
+            throw new DomainException("Only an owner can mark an appointment as no show.");
+        }
+
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+
+        if (appointment == null)
+        {
+            throw new DomainException("Appointment not found.");
+        }
+
+        appointment.MarkAsNoShow();
+        MarkAsUpdated();
+    }
+
+    private bool IsProfessionalAvailable(int professionalId, DateTime startAt, DateTime endAt)
+    {
+        var day = startAt.DayOfWeek;
+
+        var daySchedules = _staffSchedules.Where(s => s.Id == professionalId && s.Day == day && s.IsWorkingDay).ToList();
+
+        if (!daySchedules.Any())
+        {
+            return false;
+        }
+
+        bool isWithinSchedule = daySchedules.Any(s => startAt.TimeOfDay >= s.StartTime!.Value && endAt.TimeOfDay <= s.EndTime!.Value);
+        if (!isWithinSchedule)
+        {
+            return false;
+        }
+
+        var dateExceptions = _staffExceptions.Where(e => e.ProfessionalId == professionalId && e.Date.Date == startAt.Date).ToList();
+
+        foreach (var exception in dateExceptions)
+        {
+            if (exception.IsBlocking(startAt, endAt))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool HasAppointmentConflict(int professionalId, DateTime startAt, DateTime endAt)
+    {
+        return _appointments.Any(
+            a => a.ProfessionalId == professionalId &&
+            !a.IsCanceled &&
+            !a.IsNoShow &&
+            a.StartAt < endAt &&
+            a.EndAt > startAt
+            );
     }
 
     public bool IsOpenAt(DateTime date)

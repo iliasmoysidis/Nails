@@ -21,7 +21,7 @@ public class StoreException : BaseEntity
         return new StoreException
         {
             StoreId = storeId,
-            Date = date,
+            Date = date.Date,
             OpenTime = openTime,
             CloseTime = closeTime,
             Reason = reason
