@@ -60,6 +60,11 @@ public class Appointment : HistoricEntity
 
     public void Confirm()
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot confirm deleted appointment.");
+        }
+
         if (Status != AppointmentStatus.PendingConfirmation)
         {
             throw new DomainException($"Cannot confirm appointment. Current status is {Status}. Only pending appointments can be confirmed.");
@@ -76,6 +81,11 @@ public class Appointment : HistoricEntity
 
     public void Cancel(string? reason = null)
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot cancel deleted appointment.");
+        }
+
         if (Status == AppointmentStatus.Completed)
         {
             throw new DomainException("Cannot cancel a completed appointment.");
@@ -111,6 +121,11 @@ public class Appointment : HistoricEntity
 
     public void Complete()
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot complete deleted appointment.");
+        }
+
         if (Status != AppointmentStatus.Confirmed)
         {
             throw new DomainException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
@@ -143,6 +158,11 @@ public class Appointment : HistoricEntity
 
     public void Reschedule(DateTime newStartAt)
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot reschedule deleted appointment.");
+        }
+
         if (Status == AppointmentStatus.Completed)
         {
             throw new DomainException("Cannot reschedule a completed appointment.");
@@ -176,6 +196,11 @@ public class Appointment : HistoricEntity
 
     public void UpdateNotes(string? notes)
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot update the notes of deleted appointment.");
+        }
+
         if (Status == AppointmentStatus.Completed)
         {
             throw new DomainException("Cannot update notes for completed appointments.");
@@ -197,6 +222,11 @@ public class Appointment : HistoricEntity
 
     public void AdjustPrice(decimal newPrice, string reason)
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot adjust the price of a deleted appointment.");
+        }
+
         if (Status == AppointmentStatus.Completed)
         {
             throw new DomainException("Cannot adjust price for completed appointments.");

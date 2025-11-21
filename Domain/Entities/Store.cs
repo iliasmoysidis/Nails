@@ -58,7 +58,7 @@ public class Store : HistoricEntity
 
     public bool ServiceIsProvidedByTheStore(int serviceId)
     {
-        return _services.Any(s => s.Id == serviceId && s.StoreId == Id && !s.IsDeleted);
+        return _services.Any(s => s.Id == serviceId && !s.IsDeleted);
     }
 
     public static Store Create(string name, string address, string taxIdNumber, string email, string phone)
@@ -91,14 +91,14 @@ public class Store : HistoricEntity
             throw new DomainException("This professional is already an owner of this store.");
         }
 
-        var owner = StoreOwner.Create(Id, prospectiveOwnerId);
-        _owners.Add(owner);
+        var newOwner = StoreOwner.Create(Id, prospectiveOwnerId);
+        _owners.Add(newOwner);
         MarkAsUpdated();
 
-        return owner;
+        return newOwner;
     }
 
-    public void RemoveOwner(int ownerId, int oldOwnerId)
+    public void RemoveOwner(int ownerId, int toBeRemovedOwnerId)
     {
         if (IsDeleted)
         {
@@ -110,9 +110,9 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can remove an owner.");
         }
 
-        var oldOwner = _owners.FirstOrDefault(s => s.ProfessionalId == oldOwnerId);
+        var toBeRemovedOwner = _owners.FirstOrDefault(s => s.ProfessionalId == toBeRemovedOwnerId);
 
-        if (oldOwner == null)
+        if (toBeRemovedOwner == null)
         {
             throw new DomainException("Professional is not an owner of this store.");
         }
@@ -122,7 +122,7 @@ public class Store : HistoricEntity
             throw new DomainException("Cannot remove last owner.");
         }
 
-        _owners.Remove(oldOwner);
+        _owners.Remove(toBeRemovedOwner);
         MarkAsUpdated();
     }
 
@@ -204,11 +204,11 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can remove a service.");
         }
 
-        var service = _services.FirstOrDefault(s => s.Id == serviceId && s.StoreId == Id);
+        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 
         if (service == null)
         {
-            throw new DomainException("Cannot remove a service that is not offered by the store.");
+            throw new DomainException("Could not find service.");
         }
 
         service.Deactivate();
@@ -237,11 +237,11 @@ public class Store : HistoricEntity
             throw new DomainException("Service is already offered by this professional");
         }
 
-        var service = _services.FirstOrDefault(s => s.Id == serviceId && s.StoreId == Id);
+        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 
         if (service == null)
         {
-            throw new DomainException("Service is not offered by the store.");
+            throw new DomainException("Could not find service.");
         }
 
         var professionalService = ProfessionalService.Create(professionalId, serviceId);
@@ -268,11 +268,11 @@ public class Store : HistoricEntity
             throw new DomainException("Cannot unassign services from professionals who do not work at the store.");
         }
 
-        var service = _services.FirstOrDefault(s => s.Id == serviceId && s.StoreId == Id);
+        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 
         if (service == null)
         {
-            throw new DomainException("Service is not offered by the store.");
+            throw new DomainException("Could not find service.");
         }
 
         var professionalService = _staffServices.FirstOrDefault(
@@ -300,9 +300,9 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can add operating hours.");
         }
 
-        var storeSchedule = StoreSchedule.Create(Id, day, openTime, closeTime);
+        var schedule = StoreSchedule.Create(Id, day, openTime, closeTime);
 
-        if (storeSchedule.IsFullDayClosed)
+        if (schedule.IsFullDayClosed)
         {
             bool isPartialOpen = _storeSchedules.Any(e => e.Day == day && !e.IsFullDayClosed);
 
@@ -334,10 +334,10 @@ public class Store : HistoricEntity
             }
         }
 
-        _storeSchedules.Add(storeSchedule);
+        _storeSchedules.Add(schedule);
         MarkAsUpdated();
 
-        return storeSchedule;
+        return schedule;
     }
 
     public void RemoveStoreSchedule(int ownerId, int storeScheduleId)
@@ -352,14 +352,14 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can remove operating hours.");
         }
 
-        var hours = _storeSchedules.FirstOrDefault(h => h.Id == storeScheduleId && h.StoreId == Id);
+        var schedule = _storeSchedules.FirstOrDefault(s => s.Id == storeScheduleId);
 
-        if (hours == null)
+        if (schedule == null)
         {
-            throw new DomainException("Operating hours not found.");
+            throw new DomainException("Schedule not found.");
         }
 
-        _storeSchedules.Remove(hours);
+        _storeSchedules.Remove(schedule);
         MarkAsUpdated();
     }
 
@@ -427,7 +427,7 @@ public class Store : HistoricEntity
             throw new DomainException("Only an owner can remove exceptions.");
         }
 
-        var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId && e.StoreId == Id);
+        var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId);
 
         if (exception == null)
         {
@@ -457,9 +457,9 @@ public class Store : HistoricEntity
 
         var schedule = StoreProfessionalSchedule.Create(Id, professionalId, day, startTime, endTime);
 
-        if (!schedule.IsWorkingDay)
+        if (schedule.IsPTO)
         {
-            bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorkingDay);
+            bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking);
 
             if (isWorking)
             {
@@ -470,7 +470,7 @@ public class Store : HistoricEntity
         {
             var storeDayHours = _storeSchedules.Where(h => h.Day == day).ToList();
 
-            if (!IsOpenOnDay(day))
+            if (!IsOpenOn(day))
             {
                 throw new DomainException("Cannot schedule staff on a day the store is closed.");
             }
@@ -488,9 +488,7 @@ public class Store : HistoricEntity
                 throw new DomainException("Schedule overlaps with existing schedule.");
             }
 
-            bool withinStoreHours = storeDayHours.Any(h => h.OpenTime <= startTime && h.CloseTime >= endTime);
-
-            if (!withinStoreHours)
+            if (!IsWithinStoreHours(day, startTime, endTime))
             {
                 throw new DomainException("Staff schedule must be within store operating hours.");
             }
@@ -518,7 +516,7 @@ public class Store : HistoricEntity
 
         if (schedule == null)
         {
-            throw new DomainException("Schedule does not exist.");
+            throw new DomainException("Could not find schedule.");
         }
 
         _staffSchedules.Remove(schedule);
@@ -544,12 +542,12 @@ public class Store : HistoricEntity
 
         var exception = StoreProfessionalException.Create(Id, professionalId, date, startTime, endTime, reason);
 
-        if (exception.IsFullDayAbsent)
+        if (exception.IsDayOff)
         {
             bool isPartiallyWorking = _staffExceptions.Any(
                 e => e.ProfessionalId == professionalId &&
                 e.Date == date &&
-                !e.IsFullDayAbsent
+                !e.IsDayOff
             );
 
             if (isPartiallyWorking)
@@ -596,7 +594,7 @@ public class Store : HistoricEntity
 
         if (exception == null)
         {
-            throw new DomainException("Professional exception not found.");
+            throw new DomainException("Exception not found.");
         }
 
         _staffExceptions.Remove(exception);
@@ -625,8 +623,19 @@ public class Store : HistoricEntity
             throw new DomainException("The professional is not offering this service.");
         }
 
-        var service = _services.FirstOrDefault(s => s.Id == serviceId);
-        var endAt = startAt.Add(service!.Duration);
+        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
+
+        if (service == null)
+        {
+            throw new DomainException("Could not find service.");
+        }
+
+        if (!IsOpenAt(startAt))
+        {
+            throw new DomainException("Store is closed at the requested time.");
+        }
+
+        var endAt = startAt.Add(service.Duration);
 
         if (!IsOpenAt(endAt.AddMinutes(-1)))
         {
@@ -650,7 +659,54 @@ public class Store : HistoricEntity
         return appointment;
     }
 
-    public void CanceAppointment(int appointmentId, string? reason = null)
+    public void RescheduleAppointment(int appointmentId, DateTime newStartAt)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot reschedule appointments at an inactive store.");
+        }
+
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+
+        if (appointment == null)
+        {
+            throw new DomainException("Appointment not found.");
+        }
+
+        var service = _services.FirstOrDefault(s => s.Id == appointment.ServiceId && !s.IsDeleted);
+
+        if (service == null)
+        {
+            throw new DomainException("Service not found.");
+        }
+
+        var newEndAt = newStartAt.Add(service.Duration);
+
+        if (!IsOpenAt(newStartAt))
+        {
+            throw new DomainException("Store is closed at the requested time.");
+        }
+
+        if (!IsOpenAt(newEndAt.AddMinutes(-1)))
+        {
+            throw new DomainException("Appointment extends beyong store closing time.");
+        }
+
+        if (!IsProfessionalAvailable(appointment.ProfessionalId, newStartAt, newEndAt))
+        {
+            throw new DomainException("Professional is not available at the requested time.");
+        }
+
+        if (HasAppointmentConflict(appointment.ProfessionalId, newStartAt, newEndAt))
+        {
+            throw new DomainException("Professional already has an appointment at this time.");
+        }
+
+        appointment.Reschedule(newStartAt);
+        MarkAsUpdated();
+    }
+
+    public void CancelAppointment(int appointmentId, string? reason = null)
     {
         if (IsDeleted)
         {
@@ -741,7 +797,7 @@ public class Store : HistoricEntity
     {
         var day = startAt.DayOfWeek;
 
-        var daySchedules = _staffSchedules.Where(s => s.Id == professionalId && s.Day == day && s.IsWorkingDay).ToList();
+        var daySchedules = _staffSchedules.Where(s => s.Id == professionalId && s.Day == day && s.IsWorking).ToList();
 
         if (!daySchedules.Any())
         {
@@ -778,7 +834,7 @@ public class Store : HistoricEntity
             );
     }
 
-    public bool IsOpenAt(DateTime date)
+    private bool IsOpenAt(DateTime date)
     {
         var dateExceptions = _exceptions.Where(e => e.Date.Date == date.Date).ToList();
 
@@ -803,9 +859,14 @@ public class Store : HistoricEntity
             date.TimeOfDay < h.CloseTime.Value);
     }
 
-    public bool IsOpenOnDay(DayOfWeek day)
+    private bool IsOpenOn(DayOfWeek day)
     {
         return !_storeSchedules.Any(h => h.Day == day && h.IsFullDayClosed);
+    }
+
+    private bool IsWithinStoreHours(DayOfWeek day, TimeSpan? startTime, TimeSpan? endTime)
+    {
+        return _storeSchedules.Any(h => h.Day == day && h.OpenTime <= startTime && h.CloseTime >= endTime);
     }
 
     private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string email, string phone)

@@ -55,7 +55,7 @@ public class StoreProfessionalException : BaseEntity
 
     public bool IsWorkingDay => StartTime.HasValue || EndTime.HasValue;
 
-    public bool IsFullDayAbsent => !IsWorkingDay;
+    public bool IsDayOff => !IsWorkingDay;
 
     public bool IsBlocking(DateTime startAt, DateTime endAt)
     {
