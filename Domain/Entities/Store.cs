@@ -288,318 +288,318 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    public StoreSchedule AddStoreSchedule(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot add operating hours in an inactive store.");
-        }
+    // public StoreSchedule AddStoreSchedule(int ownerId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot add operating hours in an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can add operating hours.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can add operating hours.");
+    //     }
 
-        var schedule = StoreSchedule.Create(Id, day, openTime, closeTime);
+    //     var schedule = StoreSchedule.Create(Id, day, openTime, closeTime);
 
-        if (schedule.IsFullDayClosed)
-        {
-            bool isPartialOpen = _storeSchedules.Any(e => e.Day == day && !e.IsFullDayClosed);
+    //     if (schedule.IsFullDayClosed)
+    //     {
+    //         bool isPartialOpen = _storeSchedules.Any(e => e.Day == day && !e.IsFullDayClosed);
 
-            if (isPartialOpen)
-            {
-                throw new DomainException("Cannot create a full-day closure when partial schedule exists for the day.");
-            }
-        }
-        else
-        {
-            bool isFullClosedDay = _storeSchedules.Any(e => e.Day == day && e.IsFullDayClosed);
+    //         if (isPartialOpen)
+    //         {
+    //             throw new DomainException("Cannot create a full-day closure when partial schedule exists for the day.");
+    //         }
+    //     }
+    //     else
+    //     {
+    //         bool isFullClosedDay = _storeSchedules.Any(e => e.Day == day && e.IsFullDayClosed);
 
-            if (isFullClosedDay)
-            {
-                throw new DomainException("Cannot create a partial block on a fully closed day.");
-            }
+    //         if (isFullClosedDay)
+    //         {
+    //             throw new DomainException("Cannot create a partial block on a fully closed day.");
+    //         }
 
-            bool isOverlapping = _storeSchedules.Any(
-                e => e.Day == day &&
-                e.OpenTime.HasValue &&
-                e.CloseTime.HasValue &&
-                e.OpenTime.Value < closeTime &&
-                e.CloseTime.Value > openTime
-                );
+    //         bool isOverlapping = _storeSchedules.Any(
+    //             e => e.Day == day &&
+    //             e.OpenTime.HasValue &&
+    //             e.CloseTime.HasValue &&
+    //             e.OpenTime.Value < closeTime &&
+    //             e.CloseTime.Value > openTime
+    //             );
 
-            if (isOverlapping)
-            {
-                throw new DomainException("Operating hours overlap with an existing schedule for this day.");
-            }
-        }
+    //         if (isOverlapping)
+    //         {
+    //             throw new DomainException("Operating hours overlap with an existing schedule for this day.");
+    //         }
+    //     }
 
-        _storeSchedules.Add(schedule);
-        MarkAsUpdated();
+    //     _storeSchedules.Add(schedule);
+    //     MarkAsUpdated();
 
-        return schedule;
-    }
+    //     return schedule;
+    // }
 
-    public void RemoveStoreSchedule(int ownerId, int storeScheduleId)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot remove operating hours from an inactive store.");
-        }
+    // public void RemoveStoreSchedule(int ownerId, int storeScheduleId)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot remove operating hours from an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can remove operating hours.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can remove operating hours.");
+    //     }
 
-        var schedule = _storeSchedules.FirstOrDefault(s => s.Id == storeScheduleId);
+    //     var schedule = _storeSchedules.FirstOrDefault(s => s.Id == storeScheduleId);
 
-        if (schedule == null)
-        {
-            throw new DomainException("Schedule not found.");
-        }
+    //     if (schedule == null)
+    //     {
+    //         throw new DomainException("Schedule not found.");
+    //     }
 
-        _storeSchedules.Remove(schedule);
-        MarkAsUpdated();
-    }
+    //     _storeSchedules.Remove(schedule);
+    //     MarkAsUpdated();
+    // }
 
-    public StoreException AddStoreException(int ownerId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot add exceptions to an inactive store.");
-        }
+    // public StoreException AddStoreException(int ownerId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot add exceptions to an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can add exceptions.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can add exceptions.");
+    //     }
 
-        var exception = StoreException.Create(Id, date, openTime, closeTime, reason);
+    //     var exception = StoreException.Create(Id, date, openTime, closeTime, reason);
 
-        if (exception.IsFullDayClosed)
-        {
-            bool isPartialOpen = _exceptions.Any(e => e.Date.Date == date.Date && !e.IsFullDayClosed);
+    //     if (exception.IsFullDayClosed)
+    //     {
+    //         bool isPartialOpen = _exceptions.Any(e => e.Date.Date == date.Date && !e.IsFullDayClosed);
 
-            if (isPartialOpen)
-            {
-                throw new DomainException("Cannot create a full-day closure when partial exceptions exist for the day");
-            }
-        }
-        else
-        {
-            bool isFullClosedDay = _exceptions.Any(e => e.Date.Date == date.Date && e.IsFullDayClosed);
+    //         if (isPartialOpen)
+    //         {
+    //             throw new DomainException("Cannot create a full-day closure when partial exceptions exist for the day");
+    //         }
+    //     }
+    //     else
+    //     {
+    //         bool isFullClosedDay = _exceptions.Any(e => e.Date.Date == date.Date && e.IsFullDayClosed);
 
-            if (isFullClosedDay)
-            {
-                throw new DomainException("Cannot create a partial block on a fully closed day.");
-            }
+    //         if (isFullClosedDay)
+    //         {
+    //             throw new DomainException("Cannot create a partial block on a fully closed day.");
+    //         }
 
-            bool isOverlapping = _exceptions.Any(
-                e => e.Date.Date == date.Date &&
-                e.OpenTime.HasValue &&
-                e.CloseTime.HasValue &&
-                e.OpenTime.Value < closeTime &&
-                e.CloseTime.Value > openTime
-                );
+    //         bool isOverlapping = _exceptions.Any(
+    //             e => e.Date.Date == date.Date &&
+    //             e.OpenTime.HasValue &&
+    //             e.CloseTime.HasValue &&
+    //             e.OpenTime.Value < closeTime &&
+    //             e.CloseTime.Value > openTime
+    //             );
 
-            if (isOverlapping)
-            {
-                throw new DomainException("Exception overlaps with an existing partial block for this day.");
-            }
-        }
+    //         if (isOverlapping)
+    //         {
+    //             throw new DomainException("Exception overlaps with an existing partial block for this day.");
+    //         }
+    //     }
 
-        _exceptions.Add(exception);
-        MarkAsUpdated();
+    //     _exceptions.Add(exception);
+    //     MarkAsUpdated();
 
-        return exception;
-    }
+    //     return exception;
+    // }
 
-    public void RemoveStoreException(int ownerId, int exceptionId)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot remove exceptions from an inactive store.");
-        }
+    // public void RemoveStoreException(int ownerId, int exceptionId)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot remove exceptions from an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can remove exceptions.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can remove exceptions.");
+    //     }
 
-        var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId);
+    //     var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId);
 
-        if (exception == null)
-        {
-            throw new DomainException("Exception not found.");
-        }
+    //     if (exception == null)
+    //     {
+    //         throw new DomainException("Exception not found.");
+    //     }
 
-        _exceptions.Remove(exception);
-        MarkAsUpdated();
-    }
+    //     _exceptions.Remove(exception);
+    //     MarkAsUpdated();
+    // }
 
-    public StoreProfessionalSchedule AddStaffSchedule(int ownerId, int professionalId, DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot add schedules to an inactive store.");
-        }
+    // public StoreProfessionalSchedule AddStaffSchedule(int ownerId, int professionalId, DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot add schedules to an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can add staff schedules.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can add staff schedules.");
+    //     }
 
-        if (!IsStaff(professionalId))
-        {
-            throw new DomainException("Cannot set schedule for a professional who does not work at this store.");
-        }
+    //     if (!IsStaff(professionalId))
+    //     {
+    //         throw new DomainException("Cannot set schedule for a professional who does not work at this store.");
+    //     }
 
-        var schedule = StoreProfessionalSchedule.Create(Id, professionalId, day, startTime, endTime);
+    //     var schedule = StoreProfessionalSchedule.Create(Id, professionalId, day, startTime, endTime);
 
-        if (schedule.IsPTO)
-        {
-            bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking);
+    //     if (schedule.IsPTO)
+    //     {
+    //         bool isWorking = _staffSchedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking);
 
-            if (isWorking)
-            {
-                throw new DomainException("Cannot create full-day off when partial schedule exists.");
-            }
-        }
-        else
-        {
-            var storeDayHours = _storeSchedules.Where(h => h.Day == day).ToList();
+    //         if (isWorking)
+    //         {
+    //             throw new DomainException("Cannot create full-day off when partial schedule exists.");
+    //         }
+    //     }
+    //     else
+    //     {
+    //         var storeDayHours = _storeSchedules.Where(h => h.Day == day).ToList();
 
-            if (!IsOpenOn(day))
-            {
-                throw new DomainException("Cannot schedule staff on a day the store is closed.");
-            }
+    //         if (!IsOpenOn(day))
+    //         {
+    //             throw new DomainException("Cannot schedule staff on a day the store is closed.");
+    //         }
 
-            bool isOverlapping = _staffSchedules.Any(
-                s => s.ProfessionalId == professionalId &&
-                s.Day == day &&
-                s.StartTime.HasValue &&
-                s.EndTime.HasValue &&
-                s.StartTime.Value < endTime &&
-                s.EndTime.Value > startTime);
+    //         bool isOverlapping = _staffSchedules.Any(
+    //             s => s.ProfessionalId == professionalId &&
+    //             s.Day == day &&
+    //             s.StartTime.HasValue &&
+    //             s.EndTime.HasValue &&
+    //             s.StartTime.Value < endTime &&
+    //             s.EndTime.Value > startTime);
 
-            if (isOverlapping)
-            {
-                throw new DomainException("Schedule overlaps with existing schedule.");
-            }
+    //         if (isOverlapping)
+    //         {
+    //             throw new DomainException("Schedule overlaps with existing schedule.");
+    //         }
 
-            if (!IsWithinStoreHours(day, startTime, endTime))
-            {
-                throw new DomainException("Staff schedule must be within store operating hours.");
-            }
-        }
+    //         if (!IsWithinStoreHours(day, startTime, endTime))
+    //         {
+    //             throw new DomainException("Staff schedule must be within store operating hours.");
+    //         }
+    //     }
 
-        _staffSchedules.Add(schedule);
-        MarkAsUpdated();
+    //     _staffSchedules.Add(schedule);
+    //     MarkAsUpdated();
 
-        return schedule;
-    }
+    //     return schedule;
+    // }
 
-    public void RemoveStaffSchedule(int ownerId, int scheduleId)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot remove schedules from an inactive store.");
-        }
+    // public void RemoveStaffSchedule(int ownerId, int scheduleId)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot remove schedules from an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can remove staff schedules.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can remove staff schedules.");
+    //     }
 
-        var schedule = _staffSchedules.FirstOrDefault(s => s.Id == scheduleId);
+    //     var schedule = _staffSchedules.FirstOrDefault(s => s.Id == scheduleId);
 
-        if (schedule == null)
-        {
-            throw new DomainException("Could not find schedule.");
-        }
+    //     if (schedule == null)
+    //     {
+    //         throw new DomainException("Could not find schedule.");
+    //     }
 
-        _staffSchedules.Remove(schedule);
-        MarkAsUpdated();
-    }
+    //     _staffSchedules.Remove(schedule);
+    //     MarkAsUpdated();
+    // }
 
-    public StoreProfessionalException AddStaffException(int ownerId, int professionalId, DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot add staff exceptions to an inactive store.");
-        }
+    // public StoreProfessionalException AddStaffException(int ownerId, int professionalId, DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot add staff exceptions to an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can add staff exceptions.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can add staff exceptions.");
+    //     }
 
-        if (!IsStaff(professionalId))
-        {
-            throw new DomainException("Cannot add exception for a professional who does not work at this store.");
-        }
+    //     if (!IsStaff(professionalId))
+    //     {
+    //         throw new DomainException("Cannot add exception for a professional who does not work at this store.");
+    //     }
 
-        var exception = StoreProfessionalException.Create(Id, professionalId, date, startTime, endTime, reason);
+    //     var exception = StoreProfessionalException.Create(Id, professionalId, date, startTime, endTime, reason);
 
-        if (exception.IsDayOff)
-        {
-            bool isPartiallyWorking = _staffExceptions.Any(
-                e => e.ProfessionalId == professionalId &&
-                e.Date == date &&
-                !e.IsDayOff
-            );
+    //     if (exception.IsDayOff)
+    //     {
+    //         bool isPartiallyWorking = _staffExceptions.Any(
+    //             e => e.ProfessionalId == professionalId &&
+    //             e.Date == date &&
+    //             !e.IsDayOff
+    //         );
 
-            if (isPartiallyWorking)
-            {
-                throw new DomainException("Cannot schedule staff to partially work on a day off.");
-            }
-        }
-        else
-        {
-            bool isOverlapping = _staffExceptions.Any(
-                e => e.ProfessionalId == professionalId &&
-                e.Date == date &&
-                e.StartTime.HasValue &&
-                e.EndTime.HasValue &&
-                e.StartTime.Value < endTime &&
-                e.EndTime.Value > startTime
-                );
+    //         if (isPartiallyWorking)
+    //         {
+    //             throw new DomainException("Cannot schedule staff to partially work on a day off.");
+    //         }
+    //     }
+    //     else
+    //     {
+    //         bool isOverlapping = _staffExceptions.Any(
+    //             e => e.ProfessionalId == professionalId &&
+    //             e.Date == date &&
+    //             e.StartTime.HasValue &&
+    //             e.EndTime.HasValue &&
+    //             e.StartTime.Value < endTime &&
+    //             e.EndTime.Value > startTime
+    //             );
 
-            if (isOverlapping)
-            {
-                throw new DomainException("Exception overlaps with an existing exception for this professional.");
-            }
-        }
+    //         if (isOverlapping)
+    //         {
+    //             throw new DomainException("Exception overlaps with an existing exception for this professional.");
+    //         }
+    //     }
 
-        _staffExceptions.Add(exception);
-        MarkAsUpdated();
+    //     _staffExceptions.Add(exception);
+    //     MarkAsUpdated();
 
-        return exception;
-    }
+    //     return exception;
+    // }
 
-    public void RemoveStaffException(int ownerId, int exceptionId)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot remove exceptions from an inactive store.");
-        }
+    // public void RemoveStaffException(int ownerId, int exceptionId)
+    // {
+    //     if (IsDeleted)
+    //     {
+    //         throw new DomainException("Cannot remove exceptions from an inactive store.");
+    //     }
 
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can remove professional exceptions.");
-        }
+    //     if (!IsOwner(ownerId))
+    //     {
+    //         throw new DomainException("Only an owner can remove professional exceptions.");
+    //     }
 
-        var exception = _staffExceptions.FirstOrDefault(e => e.Id == exceptionId);
+    //     var exception = _staffExceptions.FirstOrDefault(e => e.Id == exceptionId);
 
-        if (exception == null)
-        {
-            throw new DomainException("Exception not found.");
-        }
+    //     if (exception == null)
+    //     {
+    //         throw new DomainException("Exception not found.");
+    //     }
 
-        _staffExceptions.Remove(exception);
-        MarkAsUpdated();
-    }
+    //     _staffExceptions.Remove(exception);
+    //     MarkAsUpdated();
+    // }
 
     public Appointment BookAppointment(int userId, int professionalId, int serviceId, DateTime startAt, string? notes = null)
     {
