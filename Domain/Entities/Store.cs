@@ -797,7 +797,7 @@ public class Store : HistoricEntity
     {
         var day = startAt.DayOfWeek;
 
-        var daySchedules = _staffSchedules.Where(s => s.Id == professionalId && s.Day == day && s.IsWorking).ToList();
+        var daySchedules = _staffSchedules.Where(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking).ToList();
 
         if (!daySchedules.Any())
         {

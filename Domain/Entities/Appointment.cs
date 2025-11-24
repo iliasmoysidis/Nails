@@ -257,7 +257,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated();
     }
 
-    public static void ValidateAppointmentInfo(Decimal price, DateTime startAt, DateTime endAt, string? notes = null)
+    private static void ValidateAppointmentInfo(Decimal price, DateTime startAt, DateTime endAt, string? notes = null)
     {
         if (startAt <= DateTime.UtcNow)
         {
