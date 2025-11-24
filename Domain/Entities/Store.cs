@@ -793,46 +793,46 @@ public class Store : HistoricEntity
         MarkAsUpdated();
     }
 
-    private bool IsProfessionalAvailable(int professionalId, DateTime startAt, DateTime endAt)
-    {
-        var day = startAt.DayOfWeek;
+    // private bool IsProfessionalAvailable(int professionalId, DateTime startAt, DateTime endAt)
+    // {
+    //     var day = startAt.DayOfWeek;
 
-        var daySchedules = _staffSchedules.Where(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking).ToList();
+    //     var daySchedules = _staffSchedules.Where(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking).ToList();
 
-        if (!daySchedules.Any())
-        {
-            return false;
-        }
+    //     if (!daySchedules.Any())
+    //     {
+    //         return false;
+    //     }
 
-        bool isWithinSchedule = daySchedules.Any(s => startAt.TimeOfDay >= s.StartTime!.Value && endAt.TimeOfDay <= s.EndTime!.Value);
-        if (!isWithinSchedule)
-        {
-            return false;
-        }
+    //     bool isWithinSchedule = daySchedules.Any(s => startAt.TimeOfDay >= s.StartTime!.Value && endAt.TimeOfDay <= s.EndTime!.Value);
+    //     if (!isWithinSchedule)
+    //     {
+    //         return false;
+    //     }
 
-        var dateExceptions = _staffExceptions.Where(e => e.ProfessionalId == professionalId && e.Date.Date == startAt.Date).ToList();
+    //     var dateExceptions = _staffExceptions.Where(e => e.ProfessionalId == professionalId && e.Date.Date == startAt.Date).ToList();
 
-        foreach (var exception in dateExceptions)
-        {
-            if (exception.IsBlocking(startAt, endAt))
-            {
-                return false;
-            }
-        }
+    //     foreach (var exception in dateExceptions)
+    //     {
+    //         if (exception.IsBlocking(startAt, endAt))
+    //         {
+    //             return false;
+    //         }
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
-    private bool HasAppointmentConflict(int professionalId, DateTime startAt, DateTime endAt)
-    {
-        return _appointments.Any(
-            a => a.ProfessionalId == professionalId &&
-            !a.IsCanceled &&
-            !a.IsNoShow &&
-            a.StartAt < endAt &&
-            a.EndAt > startAt
-            );
-    }
+    // private bool HasAppointmentConflict(int professionalId, DateTime startAt, DateTime endAt)
+    // {
+    //     return _appointments.Any(
+    //         a => a.ProfessionalId == professionalId &&
+    //         !a.IsCanceled &&
+    //         !a.IsNoShow &&
+    //         a.StartAt < endAt &&
+    //         a.EndAt > startAt
+    //         );
+    // }
 
     private bool IsOpenAt(DateTime date)
     {

@@ -131,4 +131,43 @@ public class ProfessionalCalendar : BaseEntity
         MarkAsUpdated();
     }
 
+    public bool IsAvailable(int professionalId, DateTime startAt, DateTime endAt)
+    {
+        var day = startAt.DayOfWeek;
+
+        var daySchedules = _weeklySchedule.Where(s => s.Day == startAt.DayOfWeek && s.IsWorking).ToList();
+
+        if (!daySchedules.Any())
+        {
+            return false;
+        }
+
+        bool isWithinSchedule = daySchedules.Any(s => startAt.TimeOfDay >= s.StartTime!.Value && endAt.TimeOfDay <= s.EndTime!.Value);
+        if (!isWithinSchedule)
+        {
+            return false;
+        }
+
+        var dateExceptions = _professionalExceptions.Where(e => e.Date.Date == startAt.Date).ToList();
+
+        foreach (var exception in dateExceptions)
+        {
+            if (exception.IsBlocking(startAt, endAt))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool HasAppointmentConflict(int professionalId, DateTime startAt, DateTime endAt)
+    {
+        return _appointments.Any(
+            a => !a.IsCanceled &&
+            !a.IsNoShow &&
+            a.StartAt < endAt &&
+            a.EndAt > startAt
+            );
+    }
 }
