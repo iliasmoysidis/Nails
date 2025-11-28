@@ -3,7 +3,7 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreException : BaseEntity
+public class StoreScheduleSpecial : BaseEntity
 {
     public int Id { get; private set; }
     public int StoreId { get; private set; }
@@ -12,13 +12,13 @@ public class StoreException : BaseEntity
     public TimeSpan? CloseTime { get; private set; }
     public string? Reason { get; private set; }
 
-    private StoreException() { }
+    private StoreScheduleSpecial() { }
 
-    public static StoreException Create(int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
+    public static StoreScheduleSpecial Create(int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
     {
         ValidateScheduleInfo(date, openTime, closeTime, reason);
 
-        return new StoreException
+        return new StoreScheduleSpecial
         {
             StoreId = storeId,
             Date = date.Date,

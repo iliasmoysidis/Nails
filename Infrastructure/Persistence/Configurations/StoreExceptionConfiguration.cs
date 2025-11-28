@@ -4,9 +4,9 @@ using Domain.Entities;
 
 namespace Infrastructure.Persistence.Configurations;
 
-public class StoreExceptionConfiguration : IEntityTypeConfiguration<StoreException>
+public class StoreScheduleSpecialConfiguration : IEntityTypeConfiguration<StoreScheduleSpecial>
 {
-    public void Configure(EntityTypeBuilder<StoreException> builder)
+    public void Configure(EntityTypeBuilder<StoreScheduleSpecial> builder)
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Reason).HasMaxLength(500);

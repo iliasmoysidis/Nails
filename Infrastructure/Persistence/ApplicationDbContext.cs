@@ -8,12 +8,12 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Store> Stores => Set<Store>();
     public DbSet<StoreManager> StoreManagers => Set<StoreManager>();
-    public DbSet<StoreProfessional> StoreProfessionals => Set<StoreProfessional>();
+    public DbSet<StoreStaff> StoreStaffs => Set<StoreStaff>();
     public DbSet<Service> Services => Set<Service>();
     public DbSet<ProfessionalService> StaffServices => Set<ProfessionalService>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<StoreSchedule> StoreSchedule => Set<StoreSchedule>();
-    public DbSet<StoreException> StoreExceptions => Set<StoreException>();
+    public DbSet<StoreScheduleSpecial> StoreScheduleSpecials => Set<StoreScheduleSpecial>();
     public DbSet<ProfessionalSchedule> ProfessionalSchedules => Set<ProfessionalSchedule>();
     public DbSet<ProfessionalTimeOff> ProfessionalTimeOffs => Set<ProfessionalTimeOff>();
 

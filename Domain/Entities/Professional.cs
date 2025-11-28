@@ -16,8 +16,8 @@ public class Professional : HistoricEntity
     private readonly List<StoreOwner> _ownedStores = new();
     public IReadOnlyCollection<StoreOwner> OwnedStores => _ownedStores.AsReadOnly();
 
-    private readonly List<StoreProfessional> _workplaces = new();
-    public IReadOnlyCollection<StoreProfessional> Workplaces => _workplaces.AsReadOnly();
+    private readonly List<StoreStaff> _workplaces = new();
+    public IReadOnlyCollection<StoreStaff> Workplaces => _workplaces.AsReadOnly();
 
     private readonly List<ProfessionalService> _providedServices = new();
     public IReadOnlyCollection<ProfessionalService> ProvidedServices => _providedServices.AsReadOnly();
