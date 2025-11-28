@@ -4,7 +4,7 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreOperatingHours : BaseEntity
+public class StoreScheduleManager : BaseEntity
 {
     public int Id { get; private set; }
     public int StoreId { get; private set; }
@@ -15,12 +15,13 @@ public class StoreOperatingHours : BaseEntity
     private readonly List<StoreException> _storeExceptions = new();
     public IReadOnlyCollection<StoreException> StoreExceptions => _storeExceptions.AsReadOnly();
 
+
     [Timestamp]
     public byte[] RowVersion { get; private set; } = null!;
 
-    public static StoreOperatingHours Create(int storeId)
+    public static StoreScheduleManager Create(int storeId)
     {
-        return new StoreOperatingHours
+        return new StoreScheduleManager
         {
             StoreId = storeId
         };
