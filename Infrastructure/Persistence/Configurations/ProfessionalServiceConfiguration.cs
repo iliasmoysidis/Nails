@@ -4,9 +4,9 @@ using Domain.Entities;
 
 namespace Infrastructure.Persistence.Configurations;
 
-public class ProfessionalServiceConfiguration : IEntityTypeConfiguration<ProfessionalService>
+public class ProfessionalServiceConfiguration : IEntityTypeConfiguration<StaffService>
 {
-    public void Configure(EntityTypeBuilder<ProfessionalService> builder)
+    public void Configure(EntityTypeBuilder<StaffService> builder)
     {
         builder.HasKey(e => new { e.ProfessionalId, e.ServiceId });
 

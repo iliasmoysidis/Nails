@@ -42,5 +42,5 @@ public class StoreStaffSchedule : BaseEntity
 
     public bool IsWorking => StartTime.HasValue || EndTime.HasValue;
 
-    public bool IsPTO => !IsWorking;
+    public bool IsTimeOff => !IsWorking;
 }

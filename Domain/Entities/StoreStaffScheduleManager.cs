@@ -5,6 +5,7 @@ namespace Domain.Entities;
 public class StoreStaffScheduleManager
 {
     public int StoreId { get; private set; }
+    public int ProfessionalId { get; private set; }
 
     private readonly List<StoreStaffSchedule> _schedules = new();
     public IReadOnlyCollection<StoreStaffSchedule> Schedules => _schedules.AsReadOnly();
@@ -22,13 +23,13 @@ public class StoreStaffScheduleManager
         };
     }
 
-    public StoreStaffSchedule AddStaffSchedule(int professionalId, DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
+    public StoreStaffSchedule AddStaffSchedule(DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
     {
-        var schedule = StoreStaffSchedule.Create(StoreId, professionalId, day, startTime, endTime);
+        var schedule = StoreStaffSchedule.Create(StoreId, ProfessionalId, day, startTime, endTime);
 
-        if (schedule.IsPTO)
+        if (schedule.IsTimeOff)
         {
-            bool isWorking = _schedules.Any(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking);
+            bool isWorking = _schedules.Any(s => s.Day == day && s.IsWorking);
 
             if (isWorking)
             {
@@ -38,8 +39,7 @@ public class StoreStaffScheduleManager
         else
         {
             bool isOverlapping = _schedules.Any(
-                s => s.ProfessionalId == professionalId &&
-                s.Day == day &&
+                s => s.Day == day &&
                 s.StartTime.HasValue &&
                 s.EndTime.HasValue &&
                 s.StartTime.Value < endTime &&
@@ -67,29 +67,27 @@ public class StoreStaffScheduleManager
         _schedules.Remove(schedule);
     }
 
-    public StoreStaffScheduleSpecial AddStaffException(int professionalId, DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
+    public StoreStaffScheduleSpecial AddStaffException(DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
     {
 
-        var exception = StoreStaffScheduleSpecial.Create(StoreId, professionalId, date, startTime, endTime, reason);
+        var exception = StoreStaffScheduleSpecial.Create(StoreId, ProfessionalId, date, startTime, endTime, reason);
 
         if (exception.IsDayOff)
         {
             bool isPartiallyWorking = _exceptions.Any(
-                e => e.ProfessionalId == professionalId &&
-                e.Date == date &&
+                e => e.Date == date &&
                 !e.IsDayOff
             );
 
             if (isPartiallyWorking)
             {
-                throw new DomainException("Cannot schedule staff to partially work on a day off.");
+                throw new DomainException("Cannot schedule an employe to work on a day off.");
             }
         }
         else
         {
             bool isOverlapping = _exceptions.Any(
-                e => e.ProfessionalId == professionalId &&
-                e.Date == date &&
+                e => e.Date == date &&
                 e.StartTime.HasValue &&
                 e.EndTime.HasValue &&
                 e.StartTime.Value < endTime &&
@@ -118,26 +116,30 @@ public class StoreStaffScheduleManager
         _exceptions.Remove(exception);
     }
 
-    public bool IsProfessionalAvailable(int professionalId, DateTime startAt, DateTime endAt)
+    public bool IsProfessionalAvailable(DateTime startAt, DateTime endAt)
     {
         var day = startAt.DayOfWeek;
 
-        var daySchedules = _schedules.Where(s => s.ProfessionalId == professionalId && s.Day == day && s.IsWorking).ToList();
+        var schedules = _schedules.Where(s => s.Day == day && s.IsWorking).ToList();
 
-        if (!daySchedules.Any())
+        if (schedules.Count == 0)
         {
             return false;
         }
 
-        bool isWithinSchedule = daySchedules.Any(s => startAt.TimeOfDay >= s.StartTime!.Value && endAt.TimeOfDay <= s.EndTime!.Value);
+        bool isWithinSchedule = schedules.Any(
+            s => s.StartTime.HasValue &&
+            s.EndTime.HasValue &&
+            startAt.TimeOfDay >= s.StartTime.Value &&
+            endAt.TimeOfDay <= s.EndTime.Value);
         if (!isWithinSchedule)
         {
             return false;
         }
 
-        var dateExceptions = _exceptions.Where(e => e.ProfessionalId == professionalId && e.Date.Date == startAt.Date).ToList();
+        var exceptions = _exceptions.Where(e => e.Date.Date == startAt.Date).ToList();
 
-        foreach (var exception in dateExceptions)
+        foreach (var exception in exceptions)
         {
             if (exception.IsBlocking(startAt, endAt))
             {

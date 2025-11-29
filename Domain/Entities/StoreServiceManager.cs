@@ -2,21 +2,21 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreCatalogManager
+public class StoreServiceManager
 {
     public int StoreId { get; private set; }
 
     private readonly List<Service> _services = new();
     public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
 
-    private readonly List<ProfessionalService> _staffServices = new();
-    public IReadOnlyCollection<ProfessionalService> StaffServices => _staffServices.AsReadOnly();
+    private readonly List<StaffService> _staffServices = new();
+    public IReadOnlyCollection<StaffService> StaffServices => _staffServices.AsReadOnly();
 
-    private StoreCatalogManager() { }
+    private StoreServiceManager() { }
 
-    public StoreCatalogManager Create(int storeId)
+    public StoreServiceManager Create(int storeId)
     {
-        return new StoreCatalogManager
+        return new StoreServiceManager
         {
             StoreId = storeId
         };
@@ -52,11 +52,11 @@ public class StoreCatalogManager
         service.MarkAsUpdated();
     }
 
-    public ProfessionalService AssignStaffToService(int ownerId, int professionalId, int serviceId)
+    public StaffService AssignStaffToService(int professionalId, int serviceId)
     {
         if (ServiceIsProvidedByProfessional(professionalId, serviceId))
         {
-            throw new DomainException("Service is already offered by this professional");
+            throw new DomainException("Service is already offered by this professional.");
         }
 
         var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
@@ -66,12 +66,12 @@ public class StoreCatalogManager
             throw new DomainException("Could not find service.");
         }
 
-        var professionalService = ProfessionalService.Create(professionalId, serviceId);
+        var professionalService = StaffService.Create(professionalId, serviceId);
         _staffServices.Add(professionalService);
         return professionalService;
     }
 
-    public void UnassignStaffFromService(int ownerId, int professionalId, int serviceId)
+    public void UnassignStaffFromService(int professionalId, int serviceId)
     {
         var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 

@@ -62,9 +62,9 @@ public class StoreScheduleManager
         return schedule;
     }
 
-    public void RemoveStoreSchedule(int storeScheduleId)
+    public void RemoveStoreSchedule(int scheduleId)
     {
-        var schedule = _schedules.FirstOrDefault(s => s.Id == storeScheduleId);
+        var schedule = _schedules.FirstOrDefault(s => s.Id == scheduleId);
 
         if (schedule == null)
         {
@@ -84,7 +84,7 @@ public class StoreScheduleManager
 
             if (isPartialOpen)
             {
-                throw new DomainException("Cannot create a full-day closure when partial exceptions exist for the day");
+                throw new DomainException("Cannot create a full-day closure when partial exceptions exist for the day.");
             }
         }
         else
@@ -114,7 +114,7 @@ public class StoreScheduleManager
         return exception;
     }
 
-    public void RemoveStoreScheduleSpecial(int ownerId, int exceptionId)
+    public void RemoveStoreScheduleSpecial(int exceptionId)
     {
         var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId);
 
@@ -128,24 +128,22 @@ public class StoreScheduleManager
 
     public bool IsOpenAt(DateTime date)
     {
-        var dateExceptions = _exceptions.Where(e => e.Date.Date == date.Date).ToList();
+        var exceptions = _exceptions.Where(e => e.Date.Date == date.Date).ToList();
 
-        if (dateExceptions.Any())
+        if (exceptions.Any())
         {
-            return dateExceptions.Any(
-                e => !e.IsFullDayClosed &&
-                e.OpenTime.HasValue &&
+            return exceptions.Any(
+                e => e.OpenTime.HasValue &&
                 e.CloseTime.HasValue &&
                 date.TimeOfDay >= e.OpenTime.Value &&
                 date.TimeOfDay < e.CloseTime.Value
             );
         }
 
-        var dayHours = _schedules.Where(h => h.Day == date.DayOfWeek).ToList();
+        var schedules = _schedules.Where(h => h.Day == date.DayOfWeek).ToList();
 
-        return dayHours.Any(
-            h => !h.IsFullDayClosed &&
-            h.OpenTime.HasValue &&
+        return schedules.Any(
+            h => h.OpenTime.HasValue &&
             h.CloseTime.HasValue &&
             date.TimeOfDay >= h.OpenTime.Value &&
             date.TimeOfDay < h.CloseTime.Value);

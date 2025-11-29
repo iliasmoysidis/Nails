@@ -2,16 +2,16 @@ using Domain.Common;
 
 namespace Domain.Entities;
 
-public class ProfessionalService : BaseEntity
+public class StaffService : BaseEntity
 {
     public int ProfessionalId { get; private set; }
     public int ServiceId { get; private set; }
 
-    private ProfessionalService() { }
+    private StaffService() { }
 
-    public static ProfessionalService Create(int professionalId, int serviceId)
+    public static StaffService Create(int professionalId, int serviceId)
     {
-        return new ProfessionalService
+        return new StaffService
         {
             ProfessionalId = professionalId,
             ServiceId = serviceId

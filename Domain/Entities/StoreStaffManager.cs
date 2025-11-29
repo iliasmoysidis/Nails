@@ -14,15 +14,12 @@ public class StoreStaffManager
 
     private StoreStaffManager() { }
 
-    public static StoreStaffManager Create(int storeId, int ownerId)
+    public static StoreStaffManager Create(int storeId)
     {
-        var staff = new StoreStaffManager
+        return new StoreStaffManager
         {
             StoreId = storeId
         };
-
-        staff._owners.Add(StoreOwner.Create(storeId, ownerId));
-        return staff;
     }
 
     public bool IsOwner(int professionalId)
