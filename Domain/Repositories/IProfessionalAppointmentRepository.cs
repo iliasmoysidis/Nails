@@ -4,7 +4,7 @@ namespace Domain.Repositories;
 
 public interface IProfessionalAppointmentRepository
 {
-    ProfessionalAppointmentManager GetByProfessionalId(int professionalId);
+    Task<ProfessionalAppointmentManager> GetByProfessionalId(int professionalId);
 
-    void SaveProfessionalAppointments(ProfessionalAppointmentManager manager);
+    Task SaveProfessionalAppointments(ProfessionalAppointmentManager manager);
 }

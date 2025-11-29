@@ -4,6 +4,6 @@ namespace Domain.Repositories;
 
 public interface IStoreScheduleRepository
 {
-    StoreScheduleManager GetByStoreId(int storeId);
-    void Save(StoreScheduleManager manager);
+    Task<StoreScheduleManager> GetByStoreId(int storeId);
+    Task Save(StoreScheduleManager manager);
 }

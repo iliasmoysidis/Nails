@@ -21,10 +21,10 @@ public class BookingService
 
     public async Task<Appointment> CreateAppointment(int userId, int serviceId, int professionalId, int storeId, DateTime startAt, string? notes = null)
     {
-        var storeScheduleManager = _storeScheduleRepository.GetByStoreId(storeId);
-        var storeStaffScheduleManager = _storeStaffScheduleRepository.GetByStoreIdAndProfessionalId(storeId, professionalId);
-        var storeServiceManager = _storeServiceRepository.GetByStoreId(storeId);
-        var professionalAppointmentManager = _professionalAppointmentRepository.GetByProfessionalId(professionalId);
+        var storeScheduleManager = await _storeScheduleRepository.GetByStoreId(storeId);
+        var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreIdAndProfessionalId(storeId, professionalId);
+        var storeServiceManager = await _storeServiceRepository.GetByStoreId(storeId);
+        var professionalAppointmentManager = await _professionalAppointmentRepository.GetByProfessionalId(professionalId);
 
         var service = storeServiceManager.Services.First(s => s.Id == serviceId);
         decimal price = service.Price;
