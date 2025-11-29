@@ -21,12 +21,17 @@ public class BookingService
 
     public async Task<Appointment> CreateAppointment(int userId, int serviceId, int professionalId, int storeId, DateTime startAt, string? notes = null)
     {
-        var storeScheduleManager = await _storeScheduleRepository.GetByStoreId(storeId);
-        var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreIdAndProfessionalId(storeId, professionalId);
-        var storeServiceManager = await _storeServiceRepository.GetByStoreId(storeId);
-        var professionalAppointmentManager = await _professionalAppointmentRepository.GetByProfessionalId(professionalId);
+        var storeScheduleManager = await _storeScheduleRepository.GetByStoreIdAsync(storeId);
+        var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreIdAndProfessionalIdAsync(storeId, professionalId);
+        var storeServiceManager = await _storeServiceRepository.GetByStoreIdAsync(storeId);
+        var professionalAppointmentManager = await _professionalAppointmentRepository.GetByProfessionalIdAsync(professionalId);
 
-        var service = storeServiceManager.Services.First(s => s.Id == serviceId);
+        var service = storeServiceManager.Services.First(s => s.Id == serviceId && !s.IsDeleted);
+        if (service == null)
+        {
+            throw new DomainException("Service not found.");
+        }
+
         decimal price = service.Price;
         DateTime endAt = startAt.Add(service.Duration);
 
@@ -51,6 +56,8 @@ public class BookingService
         }
 
         var appointment = professionalAppointmentManager.ScheduleAppointment(userId, storeId, serviceId, price, startAt, endAt, notes);
+
+        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(professionalAppointmentManager);
 
         return appointment;
     }

@@ -4,6 +4,6 @@ namespace Domain.Repositories;
 
 public interface IStoreStaffScheduleRepository
 {
-    Task<StoreStaffScheduleManager> GetByStoreIdAndProfessionalId(int storeId, int professionalId);
-    Task Save(StoreStaffScheduleManager manager);
+    Task<StoreStaffScheduleManager> GetByStoreIdAndProfessionalIdAsync(int storeId, int professionalId);
+    Task SaveAsync(StoreStaffScheduleManager manager);
 }
