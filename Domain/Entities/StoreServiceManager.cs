@@ -14,22 +14,12 @@ public class StoreServiceManager
 
     private StoreServiceManager() { }
 
-    public StoreServiceManager Create(int storeId)
+    public static StoreServiceManager Create(int storeId)
     {
         return new StoreServiceManager
         {
             StoreId = storeId
         };
-    }
-
-    public bool ServiceIsProvidedByProfessional(int professionalId, int serviceId)
-    {
-        return _staffServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
-    }
-
-    public bool ServiceIsProvidedByTheStore(int serviceId)
-    {
-        return _services.Any(s => s.Id == serviceId && !s.IsDeleted);
     }
 
     public Service AddService(string name, decimal price, TimeSpan duration, string? description = null)
@@ -50,6 +40,7 @@ public class StoreServiceManager
 
         service.Deactivate();
         service.MarkAsUpdated();
+        _staffServices.RemoveAll(s => s.ServiceId == serviceId);
     }
 
     public StaffService AssignStaffToService(int professionalId, int serviceId)
@@ -59,36 +50,42 @@ public class StoreServiceManager
             throw new DomainException("Service is already offered by this professional.");
         }
 
-        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
-
-        if (service == null)
+        if (!ServiceIsProvidedByTheStore(serviceId))
         {
-            throw new DomainException("Could not find service.");
+            throw new DomainException("Cannot assign staff to a non-existing or inactive service.");
         }
 
-        var professionalService = StaffService.Create(professionalId, serviceId);
-        _staffServices.Add(professionalService);
-        return professionalService;
+        var staffService = StaffService.Create(professionalId, serviceId);
+        _staffServices.Add(staffService);
+        return staffService;
     }
 
     public void UnassignStaffFromService(int professionalId, int serviceId)
     {
-        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
-
-        if (service == null)
+        if (!ServiceIsProvidedByTheStore(serviceId))
         {
-            throw new DomainException("Could not find service.");
+            throw new DomainException("Cannot unassign staff from a non-existing or inactive service.");
         }
 
-        var professionalService = _staffServices.FirstOrDefault(
+        var staffService = _staffServices.FirstOrDefault(
             ps => ps.ProfessionalId == professionalId &&
             ps.ServiceId == serviceId);
 
-        if (professionalService == null)
+        if (staffService == null)
         {
             throw new DomainException("Service is not offered by the professional.");
         }
 
-        _staffServices.Remove(professionalService);
+        _staffServices.Remove(staffService);
+    }
+
+    public bool ServiceIsProvidedByProfessional(int professionalId, int serviceId)
+    {
+        return _staffServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
+    }
+
+    public bool ServiceIsProvidedByTheStore(int serviceId)
+    {
+        return _services.Any(s => s.Id == serviceId && !s.IsDeleted);
     }
 }

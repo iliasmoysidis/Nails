@@ -15,11 +15,12 @@ public class StoreStaffScheduleManager
 
     private StoreStaffScheduleManager() { }
 
-    public StoreStaffScheduleManager Create(int storeId)
+    public StoreStaffScheduleManager Create(int storeId, int professionalId)
     {
         return new StoreStaffScheduleManager
         {
             StoreId = storeId,
+            ProfessionalId = professionalId
         };
     }
 
