@@ -2,18 +2,18 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class ProfessionalAppointmentManager
+public class ProfessionalAppointments
 {
     public int ProfessionalId { get; private set; }
 
     private readonly List<Appointment> _appointments = new();
     public IReadOnlyCollection<Appointment> Appointments => _appointments.AsReadOnly();
 
-    private ProfessionalAppointmentManager() { }
+    private ProfessionalAppointments() { }
 
-    public static ProfessionalAppointmentManager Create(int professionalId)
+    public static ProfessionalAppointments Create(int professionalId)
     {
-        return new ProfessionalAppointmentManager
+        return new ProfessionalAppointments
         {
             ProfessionalId = professionalId
         };

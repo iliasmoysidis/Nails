@@ -2,7 +2,7 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreServiceManager
+public class StoreCatalog
 {
     public int StoreId { get; private set; }
 
@@ -12,11 +12,11 @@ public class StoreServiceManager
     private readonly List<StaffService> _staffServices = new();
     public IReadOnlyCollection<StaffService> StaffServices => _staffServices.AsReadOnly();
 
-    private StoreServiceManager() { }
+    private StoreCatalog() { }
 
-    public static StoreServiceManager Create(int storeId)
+    public static StoreCatalog Create(int storeId)
     {
-        return new StoreServiceManager
+        return new StoreCatalog
         {
             StoreId = storeId
         };

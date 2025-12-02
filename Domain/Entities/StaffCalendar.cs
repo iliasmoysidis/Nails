@@ -2,31 +2,31 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreStaffScheduleManager
+public class StaffCalendar
 {
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
 
-    private readonly List<StoreStaffSchedule> _schedules = new();
-    public IReadOnlyCollection<StoreStaffSchedule> Schedules => _schedules.AsReadOnly();
+    private readonly List<StoreEmployeeSchedule> _schedules = new();
+    public IReadOnlyCollection<StoreEmployeeSchedule> Schedules => _schedules.AsReadOnly();
 
-    private readonly List<StoreStaffScheduleSpecial> _exceptions = new();
-    public IReadOnlyCollection<StoreStaffScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
+    private readonly List<StoreEmployeeScheduleSpecial> _exceptions = new();
+    public IReadOnlyCollection<StoreEmployeeScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
 
-    private StoreStaffScheduleManager() { }
+    private StaffCalendar() { }
 
-    public StoreStaffScheduleManager Create(int storeId, int professionalId)
+    public StaffCalendar Create(int storeId, int professionalId)
     {
-        return new StoreStaffScheduleManager
+        return new StaffCalendar
         {
             StoreId = storeId,
             ProfessionalId = professionalId
         };
     }
 
-    public StoreStaffSchedule AddStaffSchedule(DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
+    public StoreEmployeeSchedule AddStaffSchedule(DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
     {
-        var schedule = StoreStaffSchedule.Create(StoreId, ProfessionalId, day, startTime, endTime);
+        var schedule = StoreEmployeeSchedule.Create(StoreId, ProfessionalId, day, startTime, endTime);
 
         if (schedule.IsTimeOff)
         {
@@ -68,10 +68,10 @@ public class StoreStaffScheduleManager
         _schedules.Remove(schedule);
     }
 
-    public StoreStaffScheduleSpecial AddStaffException(DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
+    public StoreEmployeeScheduleSpecial AddStaffException(DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
     {
 
-        var exception = StoreStaffScheduleSpecial.Create(StoreId, ProfessionalId, date, startTime, endTime, reason);
+        var exception = StoreEmployeeScheduleSpecial.Create(StoreId, ProfessionalId, date, startTime, endTime, reason);
 
         if (exception.IsDayOff)
         {

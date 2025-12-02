@@ -4,6 +4,6 @@ namespace Domain.Repositories;
 
 public interface IStoreServiceRepository
 {
-    Task<StoreServiceManager> GetByStoreAsync(int storeId);
-    Task SaveAsync(StoreServiceManager manager);
+    Task<StoreCatalog> GetByStoreAsync(int storeId);
+    Task SaveAsync(StoreCatalog manager);
 }

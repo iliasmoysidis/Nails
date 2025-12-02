@@ -2,7 +2,7 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreScheduleManager
+public class StoreCalendar
 {
     public int StoreId { get; private set; }
 
@@ -12,11 +12,11 @@ public class StoreScheduleManager
     private readonly List<StoreScheduleSpecial> _exceptions = new();
     public IReadOnlyCollection<StoreScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
 
-    private StoreScheduleManager() { }
+    private StoreCalendar() { }
 
-    public static StoreScheduleManager Create(int storeId)
+    public static StoreCalendar Create(int storeId)
     {
-        return new StoreScheduleManager
+        return new StoreCalendar
         {
             StoreId = storeId
         };

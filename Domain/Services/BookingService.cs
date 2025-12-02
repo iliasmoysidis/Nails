@@ -23,12 +23,12 @@ public class BookingService
 
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, DateTime startAt, string? notes = null)
     {
-        var storeScheduleManager = await _storeScheduleRepository.GetByStoreAsync(storeId);
+        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
         var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
-        var storeServiceManager = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var professionalAppointmentManager = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var StoreCatalog = await _storeServiceRepository.GetByStoreAsync(storeId);
+        var ProfessionalAppointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var service = storeServiceManager.Services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
+        var service = StoreCatalog.Services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
         if (service == null)
         {
             throw new DomainException("Service not found.");
@@ -37,7 +37,7 @@ public class BookingService
         decimal price = service.Price;
         DateTime endAt = startAt.Add(service.Duration);
 
-        if (!storeScheduleManager.IsOpenAt(startAt))
+        if (!StoreCalendar.IsOpenAt(startAt))
         {
             throw new DomainException("Store is closed at the requested time.");
         }
@@ -47,19 +47,19 @@ public class BookingService
             throw new DomainException("Professional is unavailable at the requested time.");
         }
 
-        if (!storeServiceManager.ServiceIsProvidedByProfessional(professionalId, serviceId))
+        if (!StoreCatalog.ServiceIsProvidedByProfessional(professionalId, serviceId))
         {
             throw new DomainException("Service is not offered by the professional.");
         }
 
-        if (!storeServiceManager.ServiceIsProvidedByTheStore(serviceId))
+        if (!StoreCatalog.ServiceIsProvidedByTheStore(serviceId))
         {
             throw new DomainException("Service is not offered by the store.");
         }
 
-        var appointment = professionalAppointmentManager.ScheduleAppointment(userId, storeId, serviceId, price, startAt, endAt, notes);
+        var appointment = ProfessionalAppointments.ScheduleAppointment(userId, storeId, serviceId, price, startAt, endAt, notes);
 
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(professionalAppointmentManager);
+        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(ProfessionalAppointments);
 
         return appointment;
     }
@@ -74,14 +74,14 @@ public class BookingService
             throw new DomainException("Appointment not found.");
         }
 
-        var storeServiceManager = await _storeServiceRepository.GetByStoreAsync(appointment.StoreId);
-        var storeScheduleManager = await _storeScheduleRepository.GetByStoreAsync(appointment.StoreId);
+        var StoreCatalog = await _storeServiceRepository.GetByStoreAsync(appointment.StoreId);
+        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(appointment.StoreId);
         var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(appointment.StoreId, appointment.ProfessionalId);
 
-        var service = storeServiceManager.Services.First(s => s.Id == appointment.ServiceId);
+        var service = StoreCatalog.Services.First(s => s.Id == appointment.ServiceId);
         DateTime newEndAt = newStartAt.Add(service.Duration);
 
-        if (!storeScheduleManager.IsOpenAt(newStartAt))
+        if (!StoreCalendar.IsOpenAt(newStartAt))
         {
             throw new DomainException("Store is closed at the requested time.");
         }
