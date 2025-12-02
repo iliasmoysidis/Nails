@@ -8,7 +8,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Store> Stores => Set<Store>();
     public DbSet<StoreManager> StoreManagers => Set<StoreManager>();
-    public DbSet<StoreEmployee> StoreStaffs => Set<StoreEmployee>();
+    public DbSet<Employee> StoreStaffs => Set<Employee>();
     public DbSet<Service> Services => Set<Service>();
     public DbSet<StaffService> StaffServices => Set<StaffService>();
     public DbSet<Appointment> Appointments => Set<Appointment>();

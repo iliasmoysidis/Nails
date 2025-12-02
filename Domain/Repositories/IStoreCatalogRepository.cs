@@ -2,7 +2,7 @@ using Domain.Entities;
 
 namespace Domain.Repositories;
 
-public interface IStoreServiceRepository
+public interface IStoreCatalogRepository
 {
     Task<StoreCatalog> GetByStoreAsync(int storeId);
     Task SaveAsync(StoreCatalog manager);

@@ -6,10 +6,10 @@ namespace Domain.Services;
 
 public class StoreCalendarService
 {
-    private readonly IStoreScheduleRepository _storeScheduleRepository;
-    private readonly IStoreStaffRepository _storeStaffRepository;
+    private readonly IStoreCalendarRepository _storeScheduleRepository;
+    private readonly IStaffRepository _storeStaffRepository;
 
-    public StoreCalendarService(IStoreScheduleRepository storeScheduleRepository, IStoreStaffRepository storeStaffRepository)
+    public StoreCalendarService(IStoreCalendarRepository storeScheduleRepository, IStaffRepository storeStaffRepository)
     {
         _storeScheduleRepository = storeScheduleRepository;
         _storeStaffRepository = storeStaffRepository;
@@ -54,7 +54,7 @@ public class StoreCalendarService
             throw new DomainException("Only an owner can modify the working schedule.");
         }
 
-        var exception = StoreCalendar.AddStoreScheduleSpecial(date, openTime, closeTime);
+        var exception = StoreCalendar.AddStoreScheduleSpecial(date, openTime, closeTime, reason);
         await _storeScheduleRepository.SaveAsync(StoreCalendar);
         return exception;
     }

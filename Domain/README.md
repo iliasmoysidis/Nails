@@ -10,13 +10,13 @@ This document lists all aggregates, their roots, and their internal entities.
 
 ---
 
-## **Aggregate: StoreEmployee**
+## **Aggregate: Employee**
 
-**Root:** `StoreStaff`  
+**Root:** `Staff`  
 **Entities:**
 
 -   `StoreOwner`
--   `StoreEmployee`
+-   `Employee`
 
 ---
 
@@ -35,8 +35,8 @@ This document lists all aggregates, their roots, and their internal entities.
 **Root:** `StaffCalendar`  
 **Entities:**
 
--   `StoreEmployeeSchedule`
--   `StoreEmployeeScheduleSpecial`
+-   `EmployeeSchedule`
+-   `EmployeeScheduleSpecial`
 
 ---
 

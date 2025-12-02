@@ -1,3 +1,4 @@
+using Domain.Enums;
 using Domain.Exceptions;
 
 namespace Domain.Entities;
@@ -49,7 +50,7 @@ public class ProfessionalAppointments
         return appointment;
     }
 
-    public void CancelAppointment(int appointmentId)
+    public void CancelAppointment(int appointmentId, string? reason = null)
     {
         var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
 
@@ -58,13 +59,16 @@ public class ProfessionalAppointments
             throw new DomainException("Appointment not found.");
         }
 
-        appointment.SoftDelete();
-        appointment.MarkAsUpdated();
+        appointment.Cancel(reason);
     }
 
     public bool HasConflict(DateTime startAt, DateTime endAt)
     {
-        return _appointments.Any(a => startAt < a.EndAt && endAt > a.StartAt);
+        return _appointments.Any(
+            a => startAt < a.EndAt &&
+            endAt > a.StartAt &&
+            (a.Status != AppointmentStatus.Completed ||
+            a.Status != AppointmentStatus.Completed));
     }
 
     public bool HasConflictWithException(int appointmentId, DateTime startAt, DateTime endAt)

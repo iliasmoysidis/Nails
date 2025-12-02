@@ -2,21 +2,21 @@ using Domain.Exceptions;
 
 namespace Domain.Entities;
 
-public class StoreStaff
+public class Staff
 {
     public int StoreId { get; private set; }
 
     private readonly List<StoreOwner> _owners = new();
     public IReadOnlyCollection<StoreOwner> Owners => _owners.AsReadOnly();
 
-    private readonly List<StoreEmployee> _staff = new();
-    public IReadOnlyCollection<StoreEmployee> Staff => _staff.AsReadOnly();
+    private readonly List<Employee> _employees = new();
+    public IReadOnlyCollection<Employee> Employees => _employees.AsReadOnly();
 
-    private StoreStaff() { }
+    private Staff() { }
 
-    public static StoreStaff Create(int storeId)
+    public static Staff Create(int storeId)
     {
-        return new StoreStaff
+        return new Staff
         {
             StoreId = storeId
         };
@@ -29,7 +29,7 @@ public class StoreStaff
 
     public bool IsStaff(int professionalId)
     {
-        return _staff.Any(s => s.ProfessionalId == professionalId);
+        return _employees.Any(s => s.ProfessionalId == professionalId);
     }
 
     public StoreOwner AddOwner(int ownerId, int prospectiveOwnerId)
@@ -71,7 +71,7 @@ public class StoreStaff
         _owners.Remove(toBeRemovedOwner);
     }
 
-    public StoreEmployee AddStaff(int ownerId, int professionalId)
+    public Employee AddStaff(int ownerId, int professionalId)
     {
         if (!IsOwner(ownerId))
         {
@@ -83,8 +83,8 @@ public class StoreStaff
             throw new DomainException("Professional already working for the store.");
         }
 
-        var employee = StoreEmployee.Create(StoreId, professionalId);
-        _staff.Add(employee);
+        var employee = Employee.Create(StoreId, professionalId);
+        _employees.Add(employee);
         return employee;
     }
 
@@ -95,13 +95,13 @@ public class StoreStaff
             throw new DomainException("Only an owner can remove staff.");
         }
 
-        var employee = _staff.FirstOrDefault(s => s.ProfessionalId == professionalId);
+        var employee = _employees.FirstOrDefault(s => s.ProfessionalId == professionalId);
 
         if (employee == null)
         {
             throw new DomainException("Professional does not work for the store.");
         }
 
-        _staff.Remove(employee);
+        _employees.Remove(employee);
     }
 }

@@ -6,13 +6,13 @@ namespace Domain.Services;
 
 public class BookingService
 {
-    private readonly IStoreScheduleRepository _storeScheduleRepository;
-    private readonly IStoreStaffScheduleRepository _storeStaffScheduleRepository;
-    private readonly IStoreServiceRepository _storeServiceRepository;
+    private readonly IStoreCalendarRepository _storeScheduleRepository;
+    private readonly IStaffCalendarRepository _storeStaffScheduleRepository;
+    private readonly IStoreCatalogRepository _storeServiceRepository;
     private readonly IProfessionalAppointmentRepository _professionalAppointmentRepository;
     private readonly IAppointmentReadRepository _appointmentReadRepository;
 
-    public BookingService(IStoreScheduleRepository storeScheduleRepository, IStoreStaffScheduleRepository storeStaffScheduleRepository, IStoreServiceRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository)
+    public BookingService(IStoreCalendarRepository storeScheduleRepository, IStaffCalendarRepository storeStaffScheduleRepository, IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository)
     {
         _storeScheduleRepository = storeScheduleRepository;
         _storeStaffScheduleRepository = storeStaffScheduleRepository;
@@ -23,12 +23,12 @@ public class BookingService
 
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, DateTime startAt, string? notes = null)
     {
-        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
+        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
         var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
-        var StoreCatalog = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var ProfessionalAppointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var storeCatalog = await _storeServiceRepository.GetByStoreAsync(storeId);
+        var professionalAppointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var service = StoreCatalog.Services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
+        var service = storeCatalog.Services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
         if (service == null)
         {
             throw new DomainException("Service not found.");
@@ -37,7 +37,7 @@ public class BookingService
         decimal price = service.Price;
         DateTime endAt = startAt.Add(service.Duration);
 
-        if (!StoreCalendar.IsOpenAt(startAt))
+        if (!storeCalendar.IsOpenAt(startAt))
         {
             throw new DomainException("Store is closed at the requested time.");
         }
@@ -47,19 +47,19 @@ public class BookingService
             throw new DomainException("Professional is unavailable at the requested time.");
         }
 
-        if (!StoreCatalog.ServiceIsProvidedByProfessional(professionalId, serviceId))
+        if (!storeCatalog.ServiceIsProvidedByProfessional(professionalId, serviceId))
         {
             throw new DomainException("Service is not offered by the professional.");
         }
 
-        if (!StoreCatalog.ServiceIsProvidedByTheStore(serviceId))
+        if (!storeCatalog.ServiceIsProvidedByTheStore(serviceId))
         {
             throw new DomainException("Service is not offered by the store.");
         }
 
-        var appointment = ProfessionalAppointments.ScheduleAppointment(userId, storeId, serviceId, price, startAt, endAt, notes);
+        var appointment = professionalAppointments.ScheduleAppointment(userId, storeId, serviceId, price, startAt, endAt, notes);
 
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(ProfessionalAppointments);
+        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(professionalAppointments);
 
         return appointment;
     }

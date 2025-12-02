@@ -7,15 +7,15 @@ public class StaffCalendar
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
 
-    private readonly List<StoreEmployeeSchedule> _schedules = new();
-    public IReadOnlyCollection<StoreEmployeeSchedule> Schedules => _schedules.AsReadOnly();
+    private readonly List<EmployeeSchedule> _schedules = new();
+    public IReadOnlyCollection<EmployeeSchedule> Schedules => _schedules.AsReadOnly();
 
-    private readonly List<StoreEmployeeScheduleSpecial> _exceptions = new();
-    public IReadOnlyCollection<StoreEmployeeScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
+    private readonly List<EmployeeScheduleSpecial> _exceptions = new();
+    public IReadOnlyCollection<EmployeeScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
 
     private StaffCalendar() { }
 
-    public StaffCalendar Create(int storeId, int professionalId)
+    public static StaffCalendar Create(int storeId, int professionalId)
     {
         return new StaffCalendar
         {
@@ -24,9 +24,9 @@ public class StaffCalendar
         };
     }
 
-    public StoreEmployeeSchedule AddStaffSchedule(DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
+    public EmployeeSchedule AddStaffSchedule(DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
     {
-        var schedule = StoreEmployeeSchedule.Create(StoreId, ProfessionalId, day, startTime, endTime);
+        var schedule = EmployeeSchedule.Create(StoreId, ProfessionalId, day, startTime, endTime);
 
         if (schedule.IsTimeOff)
         {
@@ -68,10 +68,10 @@ public class StaffCalendar
         _schedules.Remove(schedule);
     }
 
-    public StoreEmployeeScheduleSpecial AddStaffException(DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
+    public EmployeeScheduleSpecial AddStaffException(DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
     {
 
-        var exception = StoreEmployeeScheduleSpecial.Create(StoreId, ProfessionalId, date, startTime, endTime, reason);
+        var exception = EmployeeScheduleSpecial.Create(StoreId, ProfessionalId, date, startTime, endTime, reason);
 
         if (exception.IsDayOff)
         {
@@ -82,7 +82,7 @@ public class StaffCalendar
 
             if (isPartiallyWorking)
             {
-                throw new DomainException("Cannot schedule an employe to work on a day off.");
+                throw new DomainException("Cannot schedule a day off for a working employee.");
             }
         }
         else
