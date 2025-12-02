@@ -17,7 +17,7 @@ public class StoreCalendarService
 
     public async Task<StoreSchedule> AddStoreScheduleAsync(int ownerId, int storeId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
     {
-        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
+        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
         var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
 
         if (!storeStaffManager.IsOwner(ownerId))
@@ -25,14 +25,14 @@ public class StoreCalendarService
             throw new DomainException("Only an owner can modify the working schedule.");
         }
 
-        var schedule = StoreCalendar.AddStoreSchedule(day, openTime, closeTime);
-        await _storeScheduleRepository.SaveAsync(StoreCalendar);
+        var schedule = storeCalendar.AddStoreSchedule(day, openTime, closeTime);
+        await _storeScheduleRepository.SaveAsync(storeCalendar);
         return schedule;
     }
 
     public async Task RemoveStoreSchedule(int ownerId, int storeId, int scheduleId)
     {
-        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
+        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
         var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
 
         if (!storeStaffManager.IsOwner(ownerId))
@@ -40,13 +40,13 @@ public class StoreCalendarService
             throw new DomainException("Only an owner can modify the working schedule.");
         }
 
-        StoreCalendar.RemoveStoreSchedule(scheduleId);
-        await _storeScheduleRepository.SaveAsync(StoreCalendar);
+        storeCalendar.RemoveStoreSchedule(scheduleId);
+        await _storeScheduleRepository.SaveAsync(storeCalendar);
     }
 
     public async Task<StoreScheduleSpecial> AddStoreScheduleSpecial(int ownerId, int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
     {
-        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
+        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
         var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
 
         if (!storeStaffManager.IsOwner(ownerId))
@@ -54,14 +54,14 @@ public class StoreCalendarService
             throw new DomainException("Only an owner can modify the working schedule.");
         }
 
-        var exception = StoreCalendar.AddStoreScheduleSpecial(date, openTime, closeTime, reason);
-        await _storeScheduleRepository.SaveAsync(StoreCalendar);
+        var exception = storeCalendar.AddStoreScheduleSpecial(date, openTime, closeTime, reason);
+        await _storeScheduleRepository.SaveAsync(storeCalendar);
         return exception;
     }
 
     public async Task RemoveStoreScheduleSpecial(int ownerId, int storeId, int exceptionId)
     {
-        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
+        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
         var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
 
         if (!storeStaffManager.IsOwner(ownerId))
@@ -69,7 +69,7 @@ public class StoreCalendarService
             throw new DomainException("Only an owner can modify the working schedule.");
         }
 
-        StoreCalendar.RemoveStoreScheduleSpecial(exceptionId);
-        await _storeScheduleRepository.SaveAsync(StoreCalendar);
+        storeCalendar.RemoveStoreScheduleSpecial(exceptionId);
+        await _storeScheduleRepository.SaveAsync(storeCalendar);
     }
 }

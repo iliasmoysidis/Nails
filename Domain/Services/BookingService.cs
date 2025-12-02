@@ -74,14 +74,14 @@ public class BookingService
             throw new DomainException("Appointment not found.");
         }
 
-        var StoreCatalog = await _storeServiceRepository.GetByStoreAsync(appointment.StoreId);
-        var StoreCalendar = await _storeScheduleRepository.GetByStoreAsync(appointment.StoreId);
+        var storeCatalog = await _storeServiceRepository.GetByStoreAsync(appointment.StoreId);
+        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(appointment.StoreId);
         var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(appointment.StoreId, appointment.ProfessionalId);
 
-        var service = StoreCatalog.Services.First(s => s.Id == appointment.ServiceId);
+        var service = storeCatalog.Services.First(s => s.Id == appointment.ServiceId);
         DateTime newEndAt = newStartAt.Add(service.Duration);
 
-        if (!StoreCalendar.IsOpenAt(newStartAt))
+        if (!storeCalendar.IsOpenAt(newStartAt))
         {
             throw new DomainException("Store is closed at the requested time.");
         }
