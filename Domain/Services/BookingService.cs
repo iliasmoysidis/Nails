@@ -105,8 +105,6 @@ public class BookingService
         await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointmentManager);
     }
 
-
-
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, DateTime? date = null)
     {
         return await _appointmentReadRepository.GetByProfessionalAsync(professionalId, date);

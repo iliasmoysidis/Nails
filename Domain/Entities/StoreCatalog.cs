@@ -39,7 +39,6 @@ public class StoreCatalog
         }
 
         service.Deactivate();
-        service.MarkAsUpdated();
         _staffServices.RemoveAll(s => s.ServiceId == serviceId);
     }
 
