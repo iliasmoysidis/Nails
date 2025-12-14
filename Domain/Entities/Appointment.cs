@@ -154,15 +154,8 @@ public class Appointment : HistoricEntity
 
     public void Reschedule(DateTime startAt, DateTime endAt)
     {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot reschedule deleted appointment.");
-        }
-
-        if (!(IsPending || IsConfirmed))
-        {
-            throw new DomainException("Can reschedule only pending or confirmed appointments.");
-        }
+        if (IsDeleted || IsCompleted || IsCanceled || IsNoShow)
+            throw new DomainException("Appointment cannot be rescheduled.");
 
         if (StartAt <= DateTime.UtcNow)
         {

@@ -67,11 +67,16 @@ public class ProfessionalAppointments
         return _appointments.Any(
             a => startAt < a.EndAt &&
             endAt > a.StartAt &&
-            a.Status == AppointmentStatus.Confirmed);
+            (a.Status == AppointmentStatus.Confirmed ||
+            a.Status == AppointmentStatus.PendingConfirmation));
     }
 
     public bool HasConflictExcludingAppointment(int appointmentId, DateTime startAt, DateTime endAt)
     {
-        return _appointments.Any(a => a.Id != appointmentId && startAt < a.EndAt && endAt > a.StartAt);
+        return _appointments.Any(a => a.Id != appointmentId &&
+        !a.IsDeleted &&
+        a.Status == AppointmentStatus.Confirmed &&
+        startAt < a.EndAt &&
+        endAt > a.StartAt);
     }
 }
