@@ -35,24 +35,24 @@ public class ProfessionalAppointments
 
     public Appointment RescheduleAppointment(int appointmentId, DateTime newStartAt, DateTime newEndAt)
     {
-        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId && !a.IsDeleted);
         if (appointment == null)
         {
             throw new DomainException("Appointment not found.");
         }
 
-        if (HasConflictWithException(appointmentId, newStartAt, newEndAt))
+        if (HasConflictExcludingAppointment(appointmentId, newStartAt, newEndAt))
         {
             throw new DomainException("Reschedule conflict: professional already has an appointment at this time.");
         }
 
-        appointment.Reschedule(newStartAt);
+        appointment.Reschedule(newStartAt, newEndAt);
         return appointment;
     }
 
     public void CancelAppointment(int appointmentId, string? reason = null)
     {
-        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId);
+        var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId && !a.IsDeleted);
 
         if (appointment == null)
         {
@@ -67,11 +67,10 @@ public class ProfessionalAppointments
         return _appointments.Any(
             a => startAt < a.EndAt &&
             endAt > a.StartAt &&
-            (a.Status != AppointmentStatus.Completed ||
-            a.Status != AppointmentStatus.Completed));
+            a.Status == AppointmentStatus.Confirmed);
     }
 
-    public bool HasConflictWithException(int appointmentId, DateTime startAt, DateTime endAt)
+    public bool HasConflictExcludingAppointment(int appointmentId, DateTime startAt, DateTime endAt)
     {
         return _appointments.Any(a => a.Id != appointmentId && startAt < a.EndAt && endAt > a.StartAt);
     }

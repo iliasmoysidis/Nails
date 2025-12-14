@@ -40,7 +40,7 @@ public class EmployeeSchedule : BaseEntity
         }
     }
 
-    public bool IsWorking => StartTime.HasValue || EndTime.HasValue;
+    public bool IsWorking => StartTime.HasValue && EndTime.HasValue;
 
     public bool IsTimeOff => !IsWorking;
 }

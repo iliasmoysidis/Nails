@@ -27,13 +27,6 @@ public class Appointment : HistoricEntity
     public bool IsUpComing => Status == AppointmentStatus.Confirmed && StartAt > DateTime.UtcNow;
     public bool IsPast => EndAt < DateTime.UtcNow;
     public bool IsInProgress => Status == AppointmentStatus.Confirmed && StartAt <= DateTime.UtcNow && EndAt > DateTime.UtcNow;
-    public TimeSpan Duration => EndAt - StartAt;
-
-    public bool CanBeCanceled =>
-        (IsPending || IsConfirmed)
-        && (StartAt - DateTime.UtcNow).TotalHours >= 24;
-
-    public bool CanBeRescheduled => CanBeCanceled;
 
     private Appointment()
     {
@@ -42,7 +35,10 @@ public class Appointment : HistoricEntity
 
     public static Appointment Create(int userId, int professionalId, int serviceId, int storeId, decimal price, DateTime startAt, DateTime endAt, string? notes = null)
     {
-        ValidateAppointmentInfo(price, startAt, endAt, notes);
+        ValidateAppointmentInfo(price, notes);
+        ValidateTimeRange(startAt, endAt);
+        ValidateChronology(startAt, endAt);
+        ValidateStartIsInFuture(startAt);
 
         return new Appointment
         {
@@ -102,9 +98,9 @@ public class Appointment : HistoricEntity
         }
 
         var hoursTillStart = (StartAt - DateTime.UtcNow).TotalHours;
-        if (hoursTillStart < 24 && hoursTillStart > 0)
+        if (hoursTillStart <= 0)
         {
-            throw new DomainException("Cannot cancel appointments less than 24 hours before start time. Please contact the store directly.");
+            throw new DomainException("Cannot cancel an ongoing appointment.");
         }
 
         if (reason != null)
@@ -156,41 +152,29 @@ public class Appointment : HistoricEntity
         MarkAsUpdated();
     }
 
-    public void Reschedule(DateTime newStartAt)
+    public void Reschedule(DateTime startAt, DateTime endAt)
     {
         if (IsDeleted)
         {
             throw new DomainException("Cannot reschedule deleted appointment.");
         }
 
-        if (Status == AppointmentStatus.Completed)
+        if (!(IsPending || IsConfirmed))
         {
-            throw new DomainException("Cannot reschedule a completed appointment.");
+            throw new DomainException("Can reschedule only pending or confirmed appointments.");
         }
 
-        if (Status == AppointmentStatus.Canceled)
+        if (StartAt <= DateTime.UtcNow)
         {
-            throw new DomainException("Cannot reschedule a canceled appointment. Create a new one instead.");
+            throw new DomainException("Cannot reschedule an appointment that has already started.");
         }
 
-        if (Status == AppointmentStatus.NoShow)
-        {
-            throw new DomainException("Cannot reschedule a no-show appointment. Create a new one instead.");
-        }
+        ValidateTimeRange(startAt, endAt);
+        ValidateChronology(startAt, endAt);
+        ValidateStartIsInFuture(startAt);
 
-        if (newStartAt <= DateTime.UtcNow)
-        {
-            throw new DomainException("Cannot reschedule to a time in the past.");
-        }
-
-        var hoursTillCurrentStart = (StartAt - DateTime.UtcNow).TotalHours;
-        if (hoursTillCurrentStart < 24 && hoursTillCurrentStart > 0)
-        {
-            throw new DomainException("Cannot reschedule appointments less than 24 hours before start time. Please contact the store directly.");
-        }
-
-        StartAt = newStartAt;
-        EndAt = newStartAt.Add(Duration);
+        this.StartAt = startAt;
+        this.EndAt = endAt;
         MarkAsUpdated();
     }
 
@@ -257,18 +241,8 @@ public class Appointment : HistoricEntity
         MarkAsUpdated();
     }
 
-    private static void ValidateAppointmentInfo(Decimal price, DateTime startAt, DateTime endAt, string? notes = null)
+    private static void ValidateAppointmentInfo(Decimal price, string? notes = null)
     {
-        if (startAt <= DateTime.UtcNow)
-        {
-            throw new DomainException("Cannot book appointments in the past.");
-        }
-
-        if (startAt >= endAt)
-        {
-            throw new DomainException("Start time must be before end time.");
-        }
-
         if (price < 0)
         {
             throw new DomainException("Price cannot be negative.");
@@ -278,7 +252,26 @@ public class Appointment : HistoricEntity
         {
             throw new DomainException("Notes cannot be more than 500 characters.");
         }
+    }
 
+    private static void ValidateChronology(DateTime startAt, DateTime endAt)
+    {
+        if (startAt >= endAt)
+        {
+            throw new DomainException("End time must be after start time.");
+        }
+    }
+
+    private static void ValidateStartIsInFuture(DateTime startAt)
+    {
+        if (startAt <= DateTime.UtcNow)
+        {
+            throw new DomainException("Cannot schedule appointments in the past.");
+        }
+    }
+
+    private static void ValidateTimeRange(DateTime startAt, DateTime endAt)
+    {
         var duration = endAt - startAt;
         if (duration > TimeSpan.FromHours(8))
         {
