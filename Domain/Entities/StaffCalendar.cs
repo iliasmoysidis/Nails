@@ -1,3 +1,4 @@
+using Domain.ValueObjects.Calendar;
 using Domain.Exceptions;
 
 namespace Domain.Entities;
@@ -7,147 +8,58 @@ public class StaffCalendar
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
 
-    private readonly List<EmployeeSchedule> _schedules = new();
-    public IReadOnlyCollection<EmployeeSchedule> Schedules => _schedules.AsReadOnly();
+    private readonly Dictionary<DayOfWeek, WorkingDay> _workingDays = new();
+    private readonly Dictionary<DateOnly, CalendarException> _exceptions = new();
 
-    private readonly List<EmployeeScheduleSpecial> _exceptions = new();
-    public IReadOnlyCollection<EmployeeScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
-
-    private StaffCalendar() { }
-
-    public static StaffCalendar Create(int storeId, int professionalId)
+    private StaffCalendar(int storeId, int professionalId)
     {
-        return new StaffCalendar
-        {
-            StoreId = storeId,
-            ProfessionalId = professionalId
-        };
+        StoreId = storeId;
+        ProfessionalId = professionalId;
     }
 
-    public EmployeeSchedule AddStaffSchedule(DayOfWeek day, TimeSpan? startTime = null, TimeSpan? endTime = null)
+    public static StaffCalendar Create(int storeId, int professionalId) => new(storeId, professionalId);
+
+    public void SetWorkingDay(WorkingDay day)
     {
-        var schedule = EmployeeSchedule.Create(StoreId, ProfessionalId, day, startTime, endTime);
-
-        if (schedule.IsTimeOff)
-        {
-            bool isWorking = _schedules.Any(s => s.Day == day && s.IsWorking);
-
-            if (isWorking)
-            {
-                throw new DomainException("Cannot create full-day off when partial schedule exists.");
-            }
-        }
-        else
-        {
-            bool isOverlapping = _schedules.Any(
-                s => s.Day == day &&
-                s.StartTime.HasValue &&
-                s.EndTime.HasValue &&
-                s.StartTime.Value < endTime &&
-                s.EndTime.Value > startTime);
-
-            if (isOverlapping)
-            {
-                throw new DomainException("Schedule overlaps with existing schedule.");
-            }
-        }
-
-        _schedules.Add(schedule);
-        return schedule;
+        _workingDays[day.Day] = day;
     }
 
-    public void RemoveStaffSchedule(int scheduleId)
+    public void SetDayOff(DayOfWeek day)
     {
-        var schedule = _schedules.FirstOrDefault(s => s.Id == scheduleId);
-
-        if (schedule == null)
-        {
-            throw new DomainException("Could not find schedule.");
-        }
-
-        _schedules.Remove(schedule);
+        _workingDays[day] = WorkingDay.DayOff(day);
     }
 
-    public EmployeeScheduleSpecial AddStaffException(DateTime date, TimeSpan? startTime = null, TimeSpan? endTime = null, string? reason = null)
+    public void AddException(CalendarException exception)
     {
-
-        var exception = EmployeeScheduleSpecial.Create(StoreId, ProfessionalId, date, startTime, endTime, reason);
-
-        if (exception.IsDayOff)
-        {
-            bool isPartiallyWorking = _exceptions.Any(
-                e => e.Date == date &&
-                !e.IsDayOff
-            );
-
-            if (isPartiallyWorking)
-            {
-                throw new DomainException("Cannot schedule a day off for a working employee.");
-            }
-        }
-        else
-        {
-            bool isOverlapping = _exceptions.Any(
-                e => e.Date == date &&
-                e.StartTime.HasValue &&
-                e.EndTime.HasValue &&
-                e.StartTime.Value < endTime &&
-                e.EndTime.Value > startTime
-                );
-
-            if (isOverlapping)
-            {
-                throw new DomainException("Exception overlaps with an existing exception for this professional.");
-            }
-        }
-
-        _exceptions.Add(exception);
-        return exception;
+        _exceptions[exception.Date] = exception;
     }
 
-    public void RemoveStaffException(int exceptionId)
+    public void RemoveException(DateOnly date)
     {
-        var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId);
-
-        if (exception == null)
-        {
-            throw new DomainException("Exception not found.");
-        }
-
-        _exceptions.Remove(exception);
+        _exceptions.Remove(date);
     }
 
     public bool IsProfessionalAvailable(DateTime startAt, DateTime endAt)
     {
-        var day = startAt.DayOfWeek;
+        if (endAt <= startAt) throw new DomainException("End time must be after start time.");
 
-        var schedules = _schedules.Where(s => s.Day == day && s.IsWorking).ToList();
+        var date = DateOnly.FromDateTime(startAt);
 
-        if (schedules.Count == 0)
+        if (DateOnly.FromDateTime(endAt) != date) return false;
+
+        var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
+
+        if (_exceptions.TryGetValue(date, out var exception))
         {
-            return false;
+            if (exception.IsDayOff) return false;
+
+            return exception.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
         }
 
-        bool isWithinSchedule = schedules.Any(
-            s => s.StartTime.HasValue &&
-            s.EndTime.HasValue &&
-            startAt.TimeOfDay >= s.StartTime.Value &&
-            endAt.TimeOfDay <= s.EndTime.Value);
-        if (!isWithinSchedule)
-        {
-            return false;
-        }
+        if (!_workingDays.TryGetValue(startAt.DayOfWeek, out var workingDay)) return false;
 
-        var exceptions = _exceptions.Where(e => e.Date.Date == startAt.Date).ToList();
+        if (workingDay.IsDayOff) return false;
 
-        foreach (var exception in exceptions)
-        {
-            if (exception.IsBlocking(startAt, endAt))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return workingDay.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
     }
 }

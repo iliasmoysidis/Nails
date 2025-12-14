@@ -1,161 +1,82 @@
-using Domain.Exceptions;
+using Domain.ValueObjects.Calendar;
 
 namespace Domain.Entities;
 
 public class StoreCalendar
 {
-    public int StoreId { get; private set; }
+    public int StoreId { get; }
 
-    private readonly List<StoreSchedule> _schedules = new();
-    public IReadOnlyCollection<StoreSchedule> Schedules => _schedules.AsReadOnly();
+    private readonly Dictionary<DayOfWeek, WorkingDay> _workingDays = new();
+    private readonly Dictionary<DateOnly, CalendarException> _exceptions = new();
 
-    private readonly List<StoreScheduleSpecial> _exceptions = new();
-    public IReadOnlyCollection<StoreScheduleSpecial> Exceptions => _exceptions.AsReadOnly();
-
-    private StoreCalendar() { }
-
-    public static StoreCalendar Create(int storeId)
+    private StoreCalendar(int storeId)
     {
-        return new StoreCalendar
-        {
-            StoreId = storeId
-        };
+        StoreId = storeId;
     }
 
-    public StoreSchedule AddStoreSchedule(DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    public static StoreCalendar Create(int storeId) => new(storeId);
+
+    public void SetWorkingDay(WorkingDay day)
     {
-        var schedule = StoreSchedule.Create(StoreId, day, openTime, closeTime);
-
-        if (schedule.IsFullDayClosed)
-        {
-            bool isPartialOpen = _schedules.Any(e => e.Day == day && !e.IsFullDayClosed);
-
-            if (isPartialOpen)
-            {
-                throw new DomainException("Cannot create a full-day closure when partial schedule exists for the day.");
-            }
-        }
-        else
-        {
-            bool isFullClosedDay = _schedules.Any(e => e.Day == day && e.IsFullDayClosed);
-
-            if (isFullClosedDay)
-            {
-                throw new DomainException("Cannot create a partial block on a fully closed day.");
-            }
-
-            bool isOverlapping = _schedules.Any(
-                e => e.Day == day &&
-                e.OpenTime.HasValue &&
-                e.CloseTime.HasValue &&
-                e.OpenTime.Value < closeTime &&
-                e.CloseTime.Value > openTime
-                );
-
-            if (isOverlapping)
-            {
-                throw new DomainException("Operating hours overlap with an existing schedule for this day.");
-            }
-        }
-
-        _schedules.Add(schedule);
-        return schedule;
+        _workingDays[day.Day] = day;
     }
 
-    public void RemoveStoreSchedule(int scheduleId)
+    public void SetDayOff(DayOfWeek day)
     {
-        var schedule = _schedules.FirstOrDefault(s => s.Id == scheduleId);
-
-        if (schedule == null)
-        {
-            throw new DomainException("Schedule not found.");
-        }
-
-        _schedules.Remove(schedule);
+        _workingDays[day] = WorkingDay.DayOff(day);
     }
 
-    public StoreScheduleSpecial AddStoreScheduleSpecial(DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
+    public void AddException(CalendarException exception)
     {
-        var exception = StoreScheduleSpecial.Create(StoreId, date, openTime, closeTime, reason);
-
-        if (exception.IsFullDayClosed)
-        {
-            bool isPartialOpen = _exceptions.Any(e => e.Date.Date == date.Date && !e.IsFullDayClosed);
-
-            if (isPartialOpen)
-            {
-                throw new DomainException("Cannot create a full-day closure when partial exceptions exist for the day.");
-            }
-        }
-        else
-        {
-            bool isFullClosedDay = _exceptions.Any(e => e.Date.Date == date.Date && e.IsFullDayClosed);
-
-            if (isFullClosedDay)
-            {
-                throw new DomainException("Cannot create a partial block on a fully closed day.");
-            }
-
-            bool isOverlapping = _exceptions.Any(
-                e => e.Date.Date == date.Date &&
-                e.OpenTime.HasValue &&
-                e.CloseTime.HasValue &&
-                e.OpenTime.Value < closeTime &&
-                e.CloseTime.Value > openTime
-                );
-
-            if (isOverlapping)
-            {
-                throw new DomainException("Exception overlaps with an existing partial block for this day.");
-            }
-        }
-
-        _exceptions.Add(exception);
-        return exception;
+        _exceptions[exception.Date] = exception;
     }
 
-    public void RemoveStoreScheduleSpecial(int exceptionId)
+    public void RemoveException(DateOnly date)
     {
-        var exception = _exceptions.FirstOrDefault(e => e.Id == exceptionId);
+        _exceptions.Remove(date);
+    }
 
-        if (exception == null)
+    public bool IsOpenAt(DateTime dateTime)
+    {
+        var date = DateOnly.FromDateTime(dateTime);
+        var time = dateTime.TimeOfDay;
+
+        if (_exceptions.TryGetValue(date, out var exception))
         {
-            throw new DomainException("Exception not found.");
+            if (exception.IsDayOff) return false;
+
+            return exception.TimeRanges.Any(r => r.Contains(time));
         }
 
-        _exceptions.Remove(exception);
+        if (!_workingDays.TryGetValue(dateTime.DayOfWeek, out var workingDay)) return false;
+
+        if (workingDay.IsDayOff) return false;
+
+        return workingDay.TimeRanges.Any(r => r.Contains(time));
     }
 
-    public bool IsOpenAt(DateTime date)
+    public bool IsOpenOn(DateOnly date)
     {
-        var exceptions = _exceptions.Where(e => e.Date.Date == date.Date).ToList();
+        if (_exceptions.TryGetValue(date, out var exception)) return !exception.IsDayOff;
 
-        if (exceptions.Any())
+        if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay)) return !workingDay.IsDayOff;
+
+        return false;
+    }
+
+    public bool IsWithinStoreHours(DateOnly date, TimeRange range)
+    {
+        if (_exceptions.TryGetValue(date, out var exception))
         {
-            return exceptions.Any(
-                e => e.OpenTime.HasValue &&
-                e.CloseTime.HasValue &&
-                date.TimeOfDay >= e.OpenTime.Value &&
-                date.TimeOfDay < e.CloseTime.Value
-            );
+            if (exception.IsDayOff) return false;
+
+            return exception.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
         }
 
-        var schedules = _schedules.Where(h => h.Day == date.DayOfWeek).ToList();
+        if (!_workingDays.TryGetValue(date.DayOfWeek, out var workingDay)) return false;
 
-        return schedules.Any(
-            h => h.OpenTime.HasValue &&
-            h.CloseTime.HasValue &&
-            date.TimeOfDay >= h.OpenTime.Value &&
-            date.TimeOfDay < h.CloseTime.Value);
-    }
+        if (workingDay.IsDayOff) return false;
 
-    public bool IsOpenOn(DayOfWeek day)
-    {
-        return !_schedules.Any(h => h.Day == day && h.IsFullDayClosed);
-    }
-
-    public bool IsWithinStoreHours(DayOfWeek day, TimeSpan? startTime, TimeSpan? endTime)
-    {
-        return _schedules.Any(h => h.Day == day && h.OpenTime <= startTime && h.CloseTime >= endTime);
+        return workingDay.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
     }
 }
