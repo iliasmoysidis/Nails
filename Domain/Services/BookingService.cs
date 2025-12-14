@@ -89,11 +89,6 @@ public class BookingService
 
         var hours = (appointment.StartAt - DateTime.UtcNow).TotalHours;
 
-        if (hours <= 0)
-        {
-            throw new DomainException("Appointment has already started.");
-        }
-
         if (!staffManager.IsOwner(agentId))
         {
             if (hours < 24)
