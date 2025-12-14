@@ -1,75 +1,63 @@
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Repositories;
+using Domain.ValueObjects.Calendar;
 
 namespace Domain.Services;
 
 public class StoreCalendarService
 {
-    private readonly IStoreCalendarRepository _storeScheduleRepository;
+    private readonly IStoreCalendarRepository _storeCalendarRepository;
     private readonly IStaffRepository _storeStaffRepository;
 
-    public StoreCalendarService(IStoreCalendarRepository storeScheduleRepository, IStaffRepository storeStaffRepository)
+    public StoreCalendarService(IStoreCalendarRepository storeCalendarRepository, IStaffRepository storeStaffRepository)
     {
-        _storeScheduleRepository = storeScheduleRepository;
+        _storeCalendarRepository = storeCalendarRepository;
         _storeStaffRepository = storeStaffRepository;
     }
 
-    public async Task<StoreSchedule> AddStoreScheduleAsync(int ownerId, int storeId, DayOfWeek day, TimeSpan? openTime = null, TimeSpan? closeTime = null)
+    public async Task SetWorkingDayAsync(int ownerId, int storeId, WorkingDay workingDay)
     {
-        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
-        var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
+        var calendar = await GetAuthorizedCalendarAsync(ownerId, storeId);
 
-        if (!storeStaffManager.IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can modify the working schedule.");
-        }
+        calendar.SetWorkingDay(workingDay);
 
-        var schedule = storeCalendar.AddStoreSchedule(day, openTime, closeTime);
-        await _storeScheduleRepository.SaveAsync(storeCalendar);
-        return schedule;
+        await _storeCalendarRepository.SaveAsync(calendar);
     }
 
-    public async Task RemoveStoreSchedule(int ownerId, int storeId, int scheduleId)
+    public async Task SetDayOffAsync(int ownerId, int storeId, DayOfWeek day)
     {
-        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
-        var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
+        var calendar = await GetAuthorizedCalendarAsync(ownerId, storeId);
 
-        if (!storeStaffManager.IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can modify the working schedule.");
-        }
+        calendar.SetDayOff(day);
 
-        storeCalendar.RemoveStoreSchedule(scheduleId);
-        await _storeScheduleRepository.SaveAsync(storeCalendar);
+        await _storeCalendarRepository.SaveAsync(calendar);
     }
 
-    public async Task<StoreScheduleSpecial> AddStoreScheduleSpecial(int ownerId, int storeId, DateTime date, TimeSpan? openTime = null, TimeSpan? closeTime = null, string? reason = null)
+    public async Task AddExceptionAsync(int ownerId, int storeId, CalendarException exception)
     {
-        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
-        var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
+        var calendar = await GetAuthorizedCalendarAsync(ownerId, storeId);
 
-        if (!storeStaffManager.IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can modify the working schedule.");
-        }
+        calendar.AddException(exception);
 
-        var exception = storeCalendar.AddStoreScheduleSpecial(date, openTime, closeTime, reason);
-        await _storeScheduleRepository.SaveAsync(storeCalendar);
-        return exception;
+        await _storeCalendarRepository.SaveAsync(calendar);
     }
 
-    public async Task RemoveStoreScheduleSpecial(int ownerId, int storeId, int exceptionId)
+    public async Task RemoveExceptionAsync(int ownerId, int storeId, DateOnly date)
     {
-        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
-        var storeStaffManager = await _storeStaffRepository.GetByStoreAsync(storeId);
+        var calendar = await GetAuthorizedCalendarAsync(ownerId, storeId);
 
-        if (!storeStaffManager.IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can modify the working schedule.");
-        }
+        calendar.RemoveException(date);
 
-        storeCalendar.RemoveStoreScheduleSpecial(exceptionId);
-        await _storeScheduleRepository.SaveAsync(storeCalendar);
+        await _storeCalendarRepository.SaveAsync(calendar);
+    }
+
+    private async Task<StoreCalendar> GetAuthorizedCalendarAsync(int ownerId, int storeId)
+    {
+        var staff = await _storeStaffRepository.GetByStoreAsync(storeId);
+
+        if (!staff.IsOwner(ownerId)) throw new DomainException("Only an owner can modify the store calendar.");
+
+        return await _storeCalendarRepository.GetByStoreAsync(storeId);
     }
 }
