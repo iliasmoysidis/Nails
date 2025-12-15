@@ -25,4 +25,7 @@ public sealed record TimeRange
         => time >= Start && time < End;
 
     public TimeSpan Duration => End - Start;
+
+    public static bool AnyOverlap(IEnumerable<TimeRange> a, IEnumerable<TimeRange> b)
+        => a.Any(r1 => b.Any(r2 => r1.Overlaps(r2)));
 }

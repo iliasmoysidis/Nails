@@ -62,4 +62,10 @@ public class StaffCalendar
 
         return workingDay.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
     }
+
+    public bool TryGetWorkingDay(DayOfWeek day, out WorkingDay workingDay)
+        => _workingDays.TryGetValue(day, out workingDay!);
+
+    public bool TryGetException(DateOnly date, out CalendarException exception)
+        => _exceptions.TryGetValue(date, out exception!);
 }
