@@ -87,4 +87,7 @@ public class StoreCatalog
     {
         return _services.Any(s => s.Id == serviceId && !s.IsDeleted);
     }
+
+    public Service? GetService(int serviceId)
+        => _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 }

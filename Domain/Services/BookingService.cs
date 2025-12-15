@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Interfaces;
 using Domain.Repositories;
 
 namespace Domain.Services;
@@ -12,8 +13,9 @@ public class BookingService
     private readonly IProfessionalAppointmentRepository _professionalAppointmentRepository;
     private readonly IAppointmentReadRepository _appointmentReadRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly IAvailabilityService _availabilityService;
 
-    public BookingService(IStoreCalendarRepository storeScheduleRepository, IStaffCalendarRepository storeStaffScheduleRepository, IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository)
+    public BookingService(IStoreCalendarRepository storeScheduleRepository, IStaffCalendarRepository storeStaffScheduleRepository, IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository, IAvailabilityService availabilityService)
     {
         _storeScheduleRepository = storeScheduleRepository;
         _storeStaffScheduleRepository = storeStaffScheduleRepository;
@@ -21,144 +23,66 @@ public class BookingService
         _professionalAppointmentRepository = professionalAppointmentRepository;
         _appointmentReadRepository = appointmentReadRepository;
         _staffRepository = staffRepository;
+        _availabilityService = availabilityService;
     }
 
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, DateTime startAt, string? notes = null)
     {
-        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(storeId);
-        var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
-        var storeCatalog = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var professionalAppointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
+        var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var service = storeCatalog.Services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
-        if (service == null)
-        {
-            throw new DomainException("Service not found.");
-        }
+        var service = catalog.GetService(serviceId)
+            ?? throw new DomainException("Service not found.");
 
-        decimal price = service.Price;
-        DateTime endAt = startAt.Add(service.Duration);
+        var endAt = startAt.Add(service.Duration);
 
-        if (!storeCalendar.IsOpenAt(startAt))
-        {
-            throw new DomainException("Store is closed at the requested time.");
-        }
+        await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
+        await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
-        if (!storeStaffScheduleManager.IsProfessionalAvailable(startAt, endAt))
-        {
-            throw new DomainException("Professional is unavailable at the requested time.");
-        }
+        var appointment = appointments.ScheduleAppointment(userId, storeId, serviceId, service.Price, startAt, endAt, notes);
 
-        if (!storeCatalog.ServiceIsProvidedByProfessional(professionalId, serviceId))
-        {
-            throw new DomainException("Service is not offered by the professional.");
-        }
-
-        if (!storeCatalog.ServiceIsProvidedByTheStore(serviceId))
-        {
-            throw new DomainException("Service is not offered by the store.");
-        }
-
-        var appointment = professionalAppointments.ScheduleAppointment(userId, storeId, serviceId, price, startAt, endAt, notes);
-
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(professionalAppointments);
+        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
 
         return appointment;
     }
 
     public async Task<Appointment> RescheduleAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId, DateTime newStartAt)
     {
-        var staffManager = await _staffRepository.GetByStoreAsync(storeId);
-        var appointmentManager = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var staff = await _staffRepository.GetByStoreAsync(storeId);
+        var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var appointment = appointmentManager.Appointments.FirstOrDefault(a =>
-            a.Id == appointmentId &&
-            !a.IsDeleted &&
-            a.ProfessionalId == professionalId &&
-            a.StoreId == storeId);
+        var appointment = FindAppointment(appointments, appointmentId, storeId, professionalId);
 
-        if (appointment == null)
-        {
-            throw new DomainException("Appointment not found.");
-        }
+        EnsureAgentCanModifyAppointment(agentId, appointment, staff);
 
-        if (!(agentId == appointment.UserId || staffManager.IsOwner(agentId)))
-        {
-            throw new DomainException("The user is not authorized to reschedule this appointment.");
-        }
+        var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
+        var service = catalog.GetService(appointment.ServiceId)
+            ?? throw new DomainException("Service not found.");
 
-        var hours = (appointment.StartAt - DateTime.UtcNow).TotalHours;
+        var newEndAt = newStartAt.Add(service.Duration);
 
-        if (!staffManager.IsOwner(agentId))
-        {
-            if (hours < 24)
-                throw new DomainException("Only an owner can reschedule within 24 hours.");
-        }
+        await _availabilityService.EnsureStoreIsOpenAsync(storeId, newStartAt, newEndAt);
+        await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, newStartAt, newEndAt);
 
-        var storeCatalog = await _storeServiceRepository.GetByStoreAsync(appointment.StoreId);
-        var storeCalendar = await _storeScheduleRepository.GetByStoreAsync(appointment.StoreId);
-        var storeStaffScheduleManager = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(appointment.StoreId, appointment.ProfessionalId);
+        appointments.RescheduleAppointment(appointment.Id, newStartAt, newEndAt);
 
-        var service = storeCatalog.Services.FirstOrDefault(s => s.Id == appointment.ServiceId && !s.IsDeleted);
-        if (service == null)
-        {
-            throw new DomainException("Service not found.");
-        }
+        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
 
-        DateTime newEndAt = newStartAt.Add(service.Duration);
-
-        if (!storeCalendar.IsOpenAt(newStartAt) || !storeCalendar.IsOpenAt(newEndAt.AddMinutes(-1)))
-        {
-            throw new DomainException("Store is closed at the requested time.");
-        }
-
-        if (!storeStaffScheduleManager.IsProfessionalAvailable(newStartAt, newEndAt))
-        {
-            throw new DomainException("Professional is unavailable at the requested time.");
-        }
-
-        appointmentManager.RescheduleAppointment(appointment.Id, newStartAt, newEndAt);
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointmentManager);
         return appointment;
     }
 
     public async Task CancelAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId)
     {
-        var staffManager = await _staffRepository.GetByStoreAsync(storeId);
-        var appointmentManager = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var staff = await _staffRepository.GetByStoreAsync(storeId);
+        var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var appointment = appointmentManager.Appointments.FirstOrDefault(a =>
-            a.Id == appointmentId &&
-            !a.IsDeleted &&
-            a.ProfessionalId == professionalId &&
-            a.StoreId == storeId);
+        var appointment = FindAppointment(appointments, appointmentId, storeId, professionalId);
 
-        if (appointment == null)
-        {
-            throw new DomainException("Appointment not found.");
-        }
+        EnsureAgentCanModifyAppointment(agentId, appointment, staff);
 
-        if (!(agentId == appointment.UserId || staffManager.IsOwner(agentId)))
-        {
-            throw new DomainException("The user is not authorized to cancel this appointment.");
-        }
+        appointments.CancelAppointment(appointment.Id);
 
-        var hours = (appointment.StartAt - DateTime.UtcNow).TotalHours;
-
-        if (hours <= 0)
-        {
-            throw new DomainException("Appointment has already started.");
-        }
-
-        if (!staffManager.IsOwner(agentId))
-        {
-            if (hours < 24 && hours > 0)
-                throw new DomainException("Only an owner can cancel within 24 hours.");
-        }
-
-        appointmentManager.CancelAppointment(appointmentId);
-
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointmentManager);
+        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
     }
 
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, DateTime? date = null)
@@ -176,11 +100,34 @@ public class BookingService
         return await _appointmentReadRepository.GetByUserAsync(userId, date);
     }
 
-    public async Task<bool> IsProfessionalAvailableAsync(int professionalId, int storeId, DateTime startAt, TimeSpan duration)
+    private static void EnsureAgentCanModifyAppointment(int agentId, Appointment appointment, Staff staff)
     {
-        DateTime endAt = startAt.Add(duration);
+        if (!(agentId == appointment.UserId || staff.IsOwner(agentId)))
+        {
+            throw new DomainException("The user is not authorized to modify this appointment.");
+        }
 
-        var staffSchedule = await _storeStaffScheduleRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
-        return staffSchedule.IsProfessionalAvailable(startAt, endAt);
+        var hours = (appointment.StartAt - DateTime.UtcNow).TotalHours;
+
+        if (hours <= 0)
+        {
+            throw new DomainException("Appointment has already started.");
+        }
+
+        if (!staff.IsOwner(agentId))
+        {
+            if (hours < 24 && hours > 0)
+                throw new DomainException("Only an owner can modify appointments within 24 hours.");
+        }
+    }
+
+    private static Appointment FindAppointment(ProfessionalAppointments appointments, int appointmentId, int storeId, int professionalId)
+    {
+        return appointments.Appointments.FirstOrDefault(a =>
+            a.Id == appointmentId &&
+            !a.IsDeleted &&
+            a.ProfessionalId == professionalId &&
+            a.StoreId == storeId)
+            ?? throw new DomainException("Appointment not found.");
     }
 }
