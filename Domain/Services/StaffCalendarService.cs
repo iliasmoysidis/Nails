@@ -19,8 +19,12 @@ public class StaffCalendarService
     public async Task SetWorkingDayAsync(int ownerId, int storeId, int professionalId, WorkingDay workingDay)
     {
         var calendar = await GetAuthorizedCalendarAsync(ownerId, storeId, professionalId);
+        var others = await GetOtherCalendars(professionalId, storeId);
 
-        await EnsureNoCrossStoreRecurringConflict(storeId, professionalId, workingDay);
+        if (others.Any(c => c.ConflictsWithRecurring(workingDay)))
+        {
+            throw new DomainException($"Professional has a conflicting recurring schedule on {workingDay.Day}");
+        }
 
         calendar.SetWorkingDay(workingDay);
 
@@ -39,8 +43,12 @@ public class StaffCalendarService
     public async Task AddExceptionAsync(int ownerId, int storeId, int professionalId, CalendarException exception)
     {
         var calendar = await GetAuthorizedCalendarAsync(ownerId, storeId, professionalId);
+        var others = await GetOtherCalendars(professionalId, storeId);
 
-        await EnsureNoCrossStoreDateSpecificConflict(storeId, professionalId, exception);
+        if (others.Any(c => c.ConflictsWithDateSpecific(exception)))
+        {
+            throw new DomainException($"Professional has a conflicting schedule on {exception.Date}");
+        }
 
         calendar.AddException(exception);
 
@@ -67,56 +75,10 @@ public class StaffCalendarService
         return await _staffCalendarRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
     }
 
-    private async Task EnsureNoCrossStoreRecurringConflict(int storeId, int professionalId, WorkingDay workingDay)
+    private async Task<IEnumerable<StaffCalendar>> GetOtherCalendars(int professionalId, int storeId)
     {
-        if (workingDay.IsDayOff) return;
-
         var calendars = await _staffCalendarRepository.GetAllByProfessionalAsync(professionalId);
 
-        foreach (var calendar in calendars)
-        {
-            if (calendar.StoreId == storeId) continue;
-
-            if (!calendar.TryGetWorkingDay(workingDay.Day, out var other)) continue;
-
-            if (other.IsDayOff) continue;
-
-            if (TimeRange.AnyOverlap(workingDay.TimeRanges, other.TimeRanges))
-            {
-                throw new DomainException($"Professional has a conflicting schedule at another store on {workingDay.Day}");
-            }
-        }
-    }
-
-    private async Task EnsureNoCrossStoreDateSpecificConflict(int storeId, int professionalId, CalendarException exception)
-    {
-        if (exception.IsDayOff) return;
-
-        var calendars = await _staffCalendarRepository.GetAllByProfessionalAsync(professionalId);
-        var dayOfWeek = exception.Date.DayOfWeek;
-
-        foreach (var calendar in calendars)
-        {
-            if (calendar.StoreId == storeId) continue;
-
-            if (calendar.TryGetException(exception.Date, out var other))
-            {
-                if (!other.IsDayOff && TimeRange.AnyOverlap(exception.TimeRanges, other.TimeRanges))
-                {
-                    throw new DomainException($"Professional has a conflicting exception at another store on {exception.Date}.");
-                }
-
-                continue;
-            }
-
-            if (!calendar.TryGetWorkingDay(dayOfWeek, out var workingDay)) continue;
-
-            if (workingDay.IsDayOff) continue;
-
-            if (TimeRange.AnyOverlap(exception.TimeRanges, workingDay.TimeRanges))
-            {
-                throw new DomainException($"Professional has a conflicting schedule at another store on {exception.Date}.");
-            }
-        }
+        return calendars.Where(c => c.StoreId != storeId);
     }
 }

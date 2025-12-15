@@ -49,18 +49,7 @@ public class StaffCalendar
 
         var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
 
-        if (_exceptions.TryGetValue(date, out var exception))
-        {
-            if (exception.IsDayOff) return false;
-
-            return exception.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
-        }
-
-        if (!_workingDays.TryGetValue(startAt.DayOfWeek, out var workingDay)) return false;
-
-        if (workingDay.IsDayOff) return false;
-
-        return workingDay.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
+        return GetWorkingTimeRanges(date).Any(r => r.Start <= range.Start && r.End >= range.End);
     }
 
     public bool TryGetWorkingDay(DayOfWeek day, out WorkingDay workingDay)
@@ -68,4 +57,41 @@ public class StaffCalendar
 
     public bool TryGetException(DateOnly date, out CalendarException exception)
         => _exceptions.TryGetValue(date, out exception!);
+
+    public IReadOnlyCollection<TimeRange> GetWorkingTimeRanges(DateOnly date)
+    {
+        if (_exceptions.TryGetValue(date, out var exception))
+        {
+            return exception.IsDayOff ? Array.Empty<TimeRange>() : exception.TimeRanges;
+        }
+
+        if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
+        {
+            return workingDay.IsDayOff ? Array.Empty<TimeRange>() : workingDay.TimeRanges;
+        }
+
+        return Array.Empty<TimeRange>();
+    }
+
+    public bool ConflictsWithRecurring(WorkingDay day)
+    {
+        if (day.IsDayOff) return false;
+
+        if (!TryGetWorkingDay(day.Day, out var mine)) return false;
+
+        if (mine.IsDayOff) return false;
+
+        return TimeRange.AnyOverlap(mine.TimeRanges, day.TimeRanges);
+    }
+
+    public bool ConflictsWithDateSpecific(CalendarException exception)
+    {
+        if (exception.IsDayOff) return false;
+
+        var workingRanges = GetWorkingTimeRanges(exception.Date);
+
+        if (!workingRanges.Any()) return false;
+
+        return TimeRange.AnyOverlap(workingRanges, exception.TimeRanges);
+    }
 }
