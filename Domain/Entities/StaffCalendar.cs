@@ -1,5 +1,6 @@
 using Domain.ValueObjects.Calendar;
 using Domain.Exceptions;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -39,13 +40,13 @@ public class StaffCalendar
         _exceptions.Remove(date);
     }
 
-    public bool IsProfessionalAvailable(DateTime startAt, DateTime endAt)
+    public bool IsProfessionalAvailable(UtcDateTime startAt, UtcDateTime endAt)
     {
         if (endAt <= startAt) throw new DomainException("End time must be after start time.");
 
-        var date = DateOnly.FromDateTime(startAt);
+        var date = startAt.Date;
 
-        if (DateOnly.FromDateTime(endAt) != date) return false;
+        if (endAt.Date != date) return false;
 
         var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
 

@@ -1,6 +1,7 @@
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Repositories;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Services;
 
@@ -15,7 +16,7 @@ public class AvailabilityService : IAvailabilityService
         _staffCalendarRepository = staffCalendarRepository;
     }
 
-    public async Task EnsureStoreIsOpenAsync(int storeId, DateTime startAt, DateTime endAt)
+    public async Task EnsureStoreIsOpenAsync(int storeId, UtcDateTime startAt, UtcDateTime endAt)
     {
         var calendar = await _storeCalendarRepository.GetByStoreAsync(storeId);
 
@@ -25,7 +26,7 @@ public class AvailabilityService : IAvailabilityService
         }
     }
 
-    public async Task EnsureProfessionalIsAvailableAsync(int storeId, int professionalId, DateTime startAt, DateTime endAt)
+    public async Task EnsureProfessionalIsAvailableAsync(int storeId, int professionalId, UtcDateTime startAt, UtcDateTime endAt)
     {
         var calendar = await _staffCalendarRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
 

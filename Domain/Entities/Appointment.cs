@@ -1,6 +1,7 @@
 using Domain.Common;
 using Domain.Enums;
 using Domain.Exceptions;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -11,12 +12,12 @@ public class Appointment : HistoricEntity
     public int ServiceId { get; private set; }
     public int ProfessionalId { get; private set; }
     public int StoreId { get; private set; }
-    public DateTime StartAt { get; private set; }
-    public DateTime EndAt { get; private set; }
+    public UtcDateTime StartAt { get; private set; }
+    public UtcDateTime EndAt { get; private set; }
     public decimal BookedPrice { get; private set; }
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
-    public DateTime? CanceledAt { get; private set; }
+    public UtcDateTime? CanceledAt { get; private set; }
 
 
     public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
@@ -24,16 +25,16 @@ public class Appointment : HistoricEntity
     public bool IsCompleted => Status == AppointmentStatus.Completed;
     public bool IsCanceled => Status == AppointmentStatus.Canceled;
     public bool IsNoShow => Status == AppointmentStatus.NoShow;
-    public bool IsUpComing => Status == AppointmentStatus.Confirmed && StartAt > DateTime.UtcNow;
-    public bool IsPast => EndAt < DateTime.UtcNow;
-    public bool IsInProgress => Status == AppointmentStatus.Confirmed && StartAt <= DateTime.UtcNow && EndAt > DateTime.UtcNow;
+    public bool IsUpComing => Status == AppointmentStatus.Confirmed && StartAt > UtcDateTime.Now();
+    public bool IsPast => EndAt < UtcDateTime.Now();
+    public bool IsInProgress => Status == AppointmentStatus.Confirmed && StartAt <= UtcDateTime.Now() && EndAt > UtcDateTime.Now();
 
     private Appointment()
     {
         Status = AppointmentStatus.PendingConfirmation;
     }
 
-    public static Appointment Create(int userId, int professionalId, int serviceId, int storeId, decimal price, DateTime startAt, DateTime endAt, string? notes = null)
+    public static Appointment Create(int userId, int professionalId, int serviceId, int storeId, decimal price, UtcDateTime startAt, UtcDateTime endAt, string? notes = null)
     {
         ValidateAppointmentInfo(price, notes);
         ValidateTimeRange(startAt, endAt);
@@ -66,7 +67,7 @@ public class Appointment : HistoricEntity
             throw new DomainException($"Cannot confirm appointment. Current status is {Status}. Only pending appointments can be confirmed.");
         }
 
-        if (StartAt <= DateTime.UtcNow)
+        if (StartAt <= UtcDateTime.Now())
         {
             throw new DomainException("Cannot confirm appointments in the past.");
         }
@@ -97,7 +98,7 @@ public class Appointment : HistoricEntity
             throw new DomainException("Cannot cancel a no-show appointment.");
         }
 
-        var hoursTillStart = (StartAt - DateTime.UtcNow).TotalHours;
+        var hoursTillStart = (StartAt - UtcDateTime.Now()).TotalHours;
         if (hoursTillStart <= 0)
         {
             throw new DomainException("Cannot cancel an ongoing appointment.");
@@ -111,7 +112,7 @@ public class Appointment : HistoricEntity
         }
 
         Status = AppointmentStatus.Canceled;
-        CanceledAt = DateTime.UtcNow;
+        CanceledAt = UtcDateTime.Now();
         MarkAsUpdated();
     }
 
@@ -127,7 +128,7 @@ public class Appointment : HistoricEntity
             throw new DomainException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
         }
 
-        if (DateTime.UtcNow < EndAt)
+        if (UtcDateTime.Now() < EndAt)
         {
             throw new DomainException("Cannot complete appointments before its end time.");
         }
@@ -143,7 +144,7 @@ public class Appointment : HistoricEntity
             throw new DomainException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
         }
 
-        if (DateTime.UtcNow < StartAt)
+        if (UtcDateTime.Now() < StartAt)
         {
             throw new DomainException("Cannot mark as no-show before appointment start time.");
         }
@@ -152,12 +153,12 @@ public class Appointment : HistoricEntity
         MarkAsUpdated();
     }
 
-    public void Reschedule(DateTime startAt, DateTime endAt)
+    public void Reschedule(UtcDateTime startAt, UtcDateTime endAt)
     {
         if (IsDeleted || IsCompleted || IsCanceled || IsNoShow)
             throw new DomainException("Appointment cannot be rescheduled.");
 
-        if (StartAt <= DateTime.UtcNow)
+        if (StartAt <= UtcDateTime.Now())
         {
             throw new DomainException("Cannot reschedule an appointment that has already started.");
         }
@@ -247,7 +248,7 @@ public class Appointment : HistoricEntity
         }
     }
 
-    private static void ValidateChronology(DateTime startAt, DateTime endAt)
+    private static void ValidateChronology(UtcDateTime startAt, UtcDateTime endAt)
     {
         if (startAt >= endAt)
         {
@@ -255,15 +256,15 @@ public class Appointment : HistoricEntity
         }
     }
 
-    private static void ValidateStartIsInFuture(DateTime startAt)
+    private static void ValidateStartIsInFuture(UtcDateTime startAt)
     {
-        if (startAt <= DateTime.UtcNow)
+        if (startAt <= UtcDateTime.Now())
         {
             throw new DomainException("Cannot schedule appointments in the past.");
         }
     }
 
-    private static void ValidateTimeRange(DateTime startAt, DateTime endAt)
+    private static void ValidateTimeRange(UtcDateTime startAt, UtcDateTime endAt)
     {
         var duration = endAt - startAt;
         if (duration > TimeSpan.FromHours(8))

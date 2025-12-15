@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Repositories;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Services;
 
@@ -26,7 +27,7 @@ public class BookingService
         _availabilityService = availabilityService;
     }
 
-    public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, DateTime startAt, string? notes = null)
+    public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
     {
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
         var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
@@ -46,7 +47,7 @@ public class BookingService
         return appointment;
     }
 
-    public async Task<Appointment> RescheduleAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId, DateTime newStartAt)
+    public async Task<Appointment> RescheduleAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId, UtcDateTime newStartAt)
     {
         var staff = await _staffRepository.GetByStoreAsync(storeId);
         var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
@@ -85,17 +86,17 @@ public class BookingService
         await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
     }
 
-    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, DateTime? date = null)
+    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, UtcDateTime? date = null)
     {
         return await _appointmentReadRepository.GetByProfessionalAsync(professionalId, date);
     }
 
-    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForStoreAsync(int storeId, DateTime? date = null)
+    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForStoreAsync(int storeId, UtcDateTime? date = null)
     {
         return await _appointmentReadRepository.GetByStoreAsync(storeId, date);
     }
 
-    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForUserAsync(int userId, DateTime? date = null)
+    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForUserAsync(int userId, UtcDateTime? date = null)
     {
         return await _appointmentReadRepository.GetByUserAsync(userId, date);
     }
@@ -107,7 +108,7 @@ public class BookingService
             throw new DomainException("The user is not authorized to modify this appointment.");
         }
 
-        var hours = (appointment.StartAt - DateTime.UtcNow).TotalHours;
+        var hours = (appointment.StartAt - UtcDateTime.Now()).TotalHours;
 
         if (hours <= 0)
         {

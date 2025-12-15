@@ -1,10 +1,11 @@
 using Domain.Exceptions;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Common;
 
 public abstract class HistoricEntity : BaseEntity
 {
-    public DateTime? DeletedAt { get; private set; }
+    public UtcDateTime? DeletedAt { get; private set; }
     public bool IsDeleted => DeletedAt.HasValue;
 
     protected HistoricEntity() { }
@@ -16,7 +17,7 @@ public abstract class HistoricEntity : BaseEntity
             throw new DomainException($"{GetType().Name} is already deleted.");
         }
 
-        DeletedAt = DateTime.UtcNow;
+        DeletedAt = UtcDateTime.Now();
         MarkAsUpdated();
     }
 

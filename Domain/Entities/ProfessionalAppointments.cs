@@ -1,5 +1,6 @@
 using Domain.Enums;
 using Domain.Exceptions;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -20,7 +21,7 @@ public class ProfessionalAppointments
         };
     }
 
-    public Appointment ScheduleAppointment(int userId, int storeId, int serviceId, decimal price, DateTime startAt, DateTime endAt, string? notes = null)
+    public Appointment ScheduleAppointment(int userId, int storeId, int serviceId, decimal price, UtcDateTime startAt, UtcDateTime endAt, string? notes = null)
     {
         if (HasConflict(startAt, endAt))
         {
@@ -33,7 +34,7 @@ public class ProfessionalAppointments
         return appointment;
     }
 
-    public Appointment RescheduleAppointment(int appointmentId, DateTime newStartAt, DateTime newEndAt)
+    public Appointment RescheduleAppointment(int appointmentId, UtcDateTime newStartAt, UtcDateTime newEndAt)
     {
         var appointment = _appointments.FirstOrDefault(a => a.Id == appointmentId && !a.IsDeleted);
         if (appointment == null)
@@ -62,7 +63,7 @@ public class ProfessionalAppointments
         appointment.Cancel(reason);
     }
 
-    public bool HasConflict(DateTime startAt, DateTime endAt)
+    public bool HasConflict(UtcDateTime startAt, UtcDateTime endAt)
     {
         return _appointments.Any(
             a => startAt < a.EndAt &&
@@ -71,7 +72,7 @@ public class ProfessionalAppointments
             a.Status == AppointmentStatus.PendingConfirmation));
     }
 
-    public bool HasConflictExcludingAppointment(int appointmentId, DateTime startAt, DateTime endAt)
+    public bool HasConflictExcludingAppointment(int appointmentId, UtcDateTime startAt, UtcDateTime endAt)
     {
         return _appointments.Any(a => a.Id != appointmentId &&
         !a.IsDeleted &&

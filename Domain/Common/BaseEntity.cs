@@ -1,17 +1,19 @@
+using Domain.ValueObjects.Time;
+
 namespace Domain.Common;
 
 public abstract class BaseEntity
 {
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
+    public UtcDateTime CreatedAt { get; private set; }
+    public UtcDateTime? UpdatedAt { get; private set; }
 
     protected BaseEntity()
     {
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = UtcDateTime.Now();
     }
 
     public void MarkAsUpdated()
     {
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = UtcDateTime.Now();
     }
 }

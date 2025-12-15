@@ -5,5 +5,5 @@ namespace Domain.Repositories;
 public interface IStoreCatalogRepository
 {
     Task<StoreCatalog> GetByStoreAsync(int storeId);
-    Task SaveAsync(StoreCatalog manager);
+    Task SaveAsync(StoreCatalog catalog);
 }

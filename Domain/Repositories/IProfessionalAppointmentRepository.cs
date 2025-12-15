@@ -6,5 +6,5 @@ public interface IProfessionalAppointmentRepository
 {
     Task<ProfessionalAppointments> GetByProfessionalAsync(int professionalId);
 
-    Task SaveProfessionalAppointmentsAsync(ProfessionalAppointments manager);
+    Task SaveProfessionalAppointmentsAsync(ProfessionalAppointments appointments);
 }

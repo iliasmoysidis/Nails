@@ -1,4 +1,5 @@
 using Domain.ValueObjects.Calendar;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -36,9 +37,9 @@ public class StoreCalendar
         _exceptions.Remove(date);
     }
 
-    public bool IsOpenAt(DateTime dateTime)
+    public bool IsOpenAt(UtcDateTime dateTime)
     {
-        var date = DateOnly.FromDateTime(dateTime);
+        var date = dateTime.Date;
         var time = dateTime.TimeOfDay;
 
         if (_exceptions.TryGetValue(date, out var exception))
