@@ -1,5 +1,6 @@
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Offerings;
 
 namespace Domain.Entities;
 
@@ -7,11 +8,11 @@ public class StoreCatalog
 {
     public int StoreId { get; private set; }
 
-    private readonly List<Service> _services = new();
-    public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
+    private readonly List<Offering> _offerings = new();
+    public IReadOnlyCollection<Offering> Offerings => _offerings.AsReadOnly();
 
-    private readonly List<StaffService> _staffServices = new();
-    public IReadOnlyCollection<StaffService> StaffServices => _staffServices.AsReadOnly();
+    private readonly HashSet<ServiceOffering> _serviceOfferings = new();
+    public IReadOnlyCollection<ServiceOffering> ServiceOfferings => _serviceOfferings;
 
     private StoreCatalog() { }
 
@@ -23,72 +24,57 @@ public class StoreCatalog
         };
     }
 
-    public Service AddService(string name, decimal price, TimeSpan duration, string? description = null)
+    public Offering AddOffering(string name, decimal price, TimeSpan duration, IClock clock, string? description = null)
     {
-        var service = Service.Create(StoreId, name, price, duration, description);
-        _services.Add(service);
-        return service;
+        var offering = Offering.Create(StoreId, name, price, duration, clock, description);
+
+        _offerings.Add(offering);
+
+        return offering;
     }
 
-    public void RemoveService(int serviceId, IClock clock)
+    public void RemoveOffering(int offeringId, IClock clock)
     {
-        var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
+        var offering = _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
+            ?? throw new DomainException("Offering not found.");
 
-        if (service == null)
+        offering.Deactivate(clock);
+
+        _serviceOfferings.RemoveWhere(o => o.OfferingId == offeringId);
+    }
+
+    public Offering? GetOffering(int offeringId)
+        => _offerings.FirstOrDefault(o => o.Id == offeringId && !o.IsDeleted);
+
+    public bool OfferingExists(int offeringId)
+        => _offerings.Any(o => o.Id == offeringId && !o.IsDeleted);
+
+    public ServiceOffering AssignOffering(int professionalId, int offeringId)
+    {
+        if (!OfferingExists(offeringId)) throw new DomainException("Offering not found.");
+
+        var assignment = new ServiceOffering(professionalId, offeringId);
+
+        if (!_serviceOfferings.Add(assignment))
         {
-            throw new DomainException("Could not find service.");
+            throw new DomainException("Offering is already assigned to this professional.");
         }
 
-        service.Deactivate(clock);
-        _staffServices.RemoveAll(s => s.ServiceId == serviceId);
+        return assignment;
     }
 
-    public StaffService AssignStaffToService(int professionalId, int serviceId)
+    public void UnassignOffering(int professionalId, int offeringId)
     {
-        if (ServiceIsProvidedByProfessional(professionalId, serviceId))
-        {
-            throw new DomainException("Service is already offered by this professional.");
-        }
+        var assignment = new ServiceOffering(professionalId, offeringId);
 
-        if (!ServiceIsProvidedByTheStore(serviceId))
+        if (!_serviceOfferings.Remove(assignment))
         {
-            throw new DomainException("Cannot assign staff to a non-existing or inactive service.");
+            throw new DomainException("Offering is not assigned to the professional.");
         }
-
-        var staffService = StaffService.Create(professionalId, serviceId);
-        _staffServices.Add(staffService);
-        return staffService;
     }
 
-    public void UnassignStaffFromService(int professionalId, int serviceId)
+    public bool IsOfferingProvidedByProfessional(int professionalId, int offeringId)
     {
-        if (!ServiceIsProvidedByTheStore(serviceId))
-        {
-            throw new DomainException("Cannot unassign staff from a non-existing or inactive service.");
-        }
-
-        var staffService = _staffServices.FirstOrDefault(
-            ps => ps.ProfessionalId == professionalId &&
-            ps.ServiceId == serviceId);
-
-        if (staffService == null)
-        {
-            throw new DomainException("Service is not offered by the professional.");
-        }
-
-        _staffServices.Remove(staffService);
+        return _serviceOfferings.Any(so => so.ProfessionalId == professionalId && so.OfferingId == offeringId);
     }
-
-    public bool ServiceIsProvidedByProfessional(int professionalId, int serviceId)
-    {
-        return _staffServices.Any(ps => ps.ProfessionalId == professionalId && ps.ServiceId == serviceId);
-    }
-
-    public bool ServiceIsProvidedByTheStore(int serviceId)
-    {
-        return _services.Any(s => s.Id == serviceId && !s.IsDeleted);
-    }
-
-    public Service? GetService(int serviceId)
-        => _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 }

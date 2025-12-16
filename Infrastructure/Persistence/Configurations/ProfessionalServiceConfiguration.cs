@@ -8,7 +8,7 @@ public class ProfessionalServiceConfiguration : IEntityTypeConfiguration<StaffSe
 {
     public void Configure(EntityTypeBuilder<StaffService> builder)
     {
-        builder.HasKey(e => new { e.ProfessionalId, e.ServiceId });
+        builder.HasKey(e => new { e.ProfessionalId, e.OfferingId });
 
         builder.HasOne(e => e.Professional)
             .WithMany(p => p.ProvidedServices)
@@ -17,10 +17,10 @@ public class ProfessionalServiceConfiguration : IEntityTypeConfiguration<StaffSe
 
         builder.HasOne(e => e.Service)
             .WithMany(p => p.Providers)
-            .HasForeignKey(e => e.ServiceId)
+            .HasForeignKey(e => e.OfferingId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(e => e.ServiceId)
+        builder.HasIndex(e => e.OfferingId)
             .HasDatabaseName("IX_ProfessionalServices_ServiceId");
     }
 }

@@ -9,8 +9,6 @@ namespace Domain.Services;
 
 public class BookingService
 {
-    private readonly IStoreCalendarRepository _storeScheduleRepository;
-    private readonly IStaffCalendarRepository _storeStaffScheduleRepository;
     private readonly IStoreCatalogRepository _storeServiceRepository;
     private readonly IProfessionalAppointmentRepository _professionalAppointmentRepository;
     private readonly IAppointmentReadRepository _appointmentReadRepository;
@@ -18,10 +16,8 @@ public class BookingService
     private readonly IAvailabilityService _availabilityService;
     private readonly IClock _clock;
 
-    public BookingService(IStoreCalendarRepository storeScheduleRepository, IStaffCalendarRepository storeStaffScheduleRepository, IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository, IAvailabilityService availabilityService, IClock clock)
+    public BookingService(IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository, IAvailabilityService availabilityService, IClock clock)
     {
-        _storeScheduleRepository = storeScheduleRepository;
-        _storeStaffScheduleRepository = storeStaffScheduleRepository;
         _storeServiceRepository = storeServiceRepository;
         _professionalAppointmentRepository = professionalAppointmentRepository;
         _appointmentReadRepository = appointmentReadRepository;
@@ -30,12 +26,12 @@ public class BookingService
         _clock = clock;
     }
 
-    public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
+    public async Task<Appointment> ScheduleAppointmentAsync(int userId, int offeringId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
     {
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
         var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var service = catalog.GetService(serviceId)
+        var service = catalog.GetOffering(offeringId)
             ?? throw new DomainException("Service not found.");
 
         var endAt = startAt.Add(service.Duration);
@@ -43,7 +39,7 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
-        var appointment = appointments.ScheduleAppointment(userId, storeId, serviceId, service.Price, startAt, endAt, _clock, notes);
+        var appointment = appointments.ScheduleAppointment(userId, storeId, offeringId, service.Price, startAt, endAt, _clock, notes);
 
         await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
 
@@ -60,7 +56,7 @@ public class BookingService
         EnsureAgentCanModifyAppointment(agentId, appointment, staff, _clock.Now);
 
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var service = catalog.GetService(appointment.ServiceId)
+        var service = catalog.GetOffering(appointment.OfferingId)
             ?? throw new DomainException("Service not found.");
 
         var newEndAt = newStartAt.Add(service.Duration);

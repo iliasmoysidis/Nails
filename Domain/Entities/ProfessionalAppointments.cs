@@ -22,14 +22,14 @@ public class ProfessionalAppointments
         };
     }
 
-    public Appointment ScheduleAppointment(int userId, int storeId, int serviceId, decimal price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
+    public Appointment ScheduleAppointment(int userId, int storeId, int offeringId, decimal price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
     {
         if (HasConflict(startAt, endAt))
         {
             throw new DomainException("Professional already has an appointment at this time.");
         }
 
-        var appointment = Appointment.Create(userId, ProfessionalId, serviceId, storeId, price, startAt, endAt, clock, notes);
+        var appointment = Appointment.Create(userId, ProfessionalId, offeringId, storeId, price, startAt, endAt, clock, notes);
         _appointments.Add(appointment);
 
         return appointment;

@@ -4,7 +4,7 @@ using Domain.Interfaces;
 
 namespace Domain.Entities;
 
-public class Service : HistoricEntity
+public class Offering : HistoricEntity
 {
     public int Id { get; private set; }
     public int StoreId { get; private set; }
@@ -13,13 +13,13 @@ public class Service : HistoricEntity
     public TimeSpan Duration { get; private set; }
     public string? Description { get; private set; }
 
-    private Service() { }
+    private Offering() { }
 
-    public static Service Create(int storeId, string name, decimal price, TimeSpan duration, string? description = null)
+    public static Offering Create(int storeId, string name, decimal price, TimeSpan duration, IClock clock, string? description = null)
     {
         ValidateServiceInfo(name, price, duration, description);
 
-        return new Service
+        var offering = new Offering
         {
             StoreId = storeId,
             Name = name.Trim(),
@@ -27,6 +27,10 @@ public class Service : HistoricEntity
             Duration = duration,
             Description = description?.Trim()
         };
+
+        offering.MarkAsCreated(clock);
+
+        return offering;
     }
 
     public void UpdateDetails(IClock clock, string? name = null, decimal? price = null, TimeSpan? duration = null)

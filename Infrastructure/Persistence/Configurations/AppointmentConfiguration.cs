@@ -33,7 +33,7 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 
         builder.HasOne(e => e.Service)
             .WithMany()
-            .HasForeignKey(e => e.ServiceId)
+            .HasForeignKey(e => e.OfferingId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(e => e.Store)

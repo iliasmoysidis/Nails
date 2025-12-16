@@ -1,4 +1,5 @@
 using Domain.Exceptions;
+using Domain.ValueObjects.Store;
 
 namespace Domain.Entities;
 
@@ -6,19 +7,20 @@ public class Staff
 {
     public int StoreId { get; private set; }
 
-    private readonly List<StoreOwner> _owners = new();
-    public IReadOnlyCollection<StoreOwner> Owners => _owners.AsReadOnly();
+    private readonly HashSet<Owner> _owners = new();
+    public IReadOnlyCollection<Owner> Owners => _owners.AsReadOnly();
 
-    private readonly List<Employee> _employees = new();
+    private readonly HashSet<Employee> _employees = new();
     public IReadOnlyCollection<Employee> Employees => _employees.AsReadOnly();
 
     private Staff() { }
 
-    public static Staff Create(int storeId)
+    public static Staff Create(int storeId, int initialOwnerId)
     {
         return new Staff
         {
-            StoreId = storeId
+            StoreId = storeId,
+            _owners = { new Owner(storeId, initialOwnerId) }
         };
     }
 
@@ -32,76 +34,43 @@ public class Staff
         return _employees.Any(s => s.ProfessionalId == professionalId);
     }
 
-    public StoreOwner AddOwner(int ownerId, int prospectiveOwnerId)
+    public void AddOwner(int actingOwnerId, int newOwnerId)
     {
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can add an owner.");
-        }
-
-        if (IsOwner(prospectiveOwnerId))
-        {
-            throw new DomainException("This professional is already an owner of this store.");
-        }
-
-        var newOwner = StoreOwner.Create(StoreId, prospectiveOwnerId);
-        _owners.Add(newOwner);
-        return newOwner;
+        EnsureOwner(actingOwnerId);
+        if (!_owners.Add(new Owner(StoreId, newOwnerId)))
+            throw new DomainException("Professional is already an owner of this store.");
     }
 
-    public void RemoveOwner(int ownerId, int toBeRemovedOwnerId)
+    public void RemoveOwner(int actingOwnerId, int ownerToRemoveId)
     {
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can remove an owner.");
-        }
+        EnsureOwner(actingOwnerId);
 
-        var toBeRemovedOwner = _owners.FirstOrDefault(s => s.ProfessionalId == toBeRemovedOwnerId);
-
-        if (toBeRemovedOwner == null)
-        {
-            throw new DomainException("Professional is not an owner of this store.");
-        }
-
-        if (_owners.Count() == 1)
-        {
+        if (_owners.Count == 1)
             throw new DomainException("Cannot remove last owner.");
-        }
 
-        _owners.Remove(toBeRemovedOwner);
+        if (!_owners.Remove(new Owner(StoreId, ownerToRemoveId)))
+            throw new DomainException("Professional is not an owner of this store.");
     }
 
-    public Employee AddStaff(int ownerId, int professionalId)
+    public void AddStaff(int actingOwnerId, int professionalId)
     {
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can add staff.");
-        }
+        EnsureOwner(actingOwnerId);
 
-        if (IsStaff(professionalId))
-        {
-            throw new DomainException("Professional already working for the store.");
-        }
-
-        var employee = Employee.Create(StoreId, professionalId);
-        _employees.Add(employee);
-        return employee;
+        if (!_employees.Add(new Employee(StoreId, professionalId)))
+            throw new DomainException("Professional already works for the store.");
     }
 
-    public void RemoveStaff(int ownerId, int professionalId)
+    public void RemoveStaff(int actingOwnerId, int professionalId)
     {
-        if (!IsOwner(ownerId))
-        {
-            throw new DomainException("Only an owner can remove staff.");
-        }
+        EnsureOwner(actingOwnerId);
 
-        var employee = _employees.FirstOrDefault(s => s.ProfessionalId == professionalId);
-
-        if (employee == null)
-        {
+        if (!_employees.Remove(new Employee(StoreId, professionalId)))
             throw new DomainException("Professional does not work for the store.");
-        }
+    }
 
-        _employees.Remove(employee);
+    private void EnsureOwner(int professionalId)
+    {
+        if (!IsOwner(professionalId))
+            throw new DomainException("Only an owner can perform this action.");
     }
 }

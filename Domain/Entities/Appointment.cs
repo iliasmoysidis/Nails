@@ -10,7 +10,7 @@ public class Appointment : HistoricEntity
 {
     public int Id { get; private set; }
     public int UserId { get; private set; }
-    public int ServiceId { get; private set; }
+    public int OfferingId { get; private set; }
     public int ProfessionalId { get; private set; }
     public int StoreId { get; private set; }
     public UtcDateTime StartAt { get; private set; }
@@ -35,7 +35,7 @@ public class Appointment : HistoricEntity
         Status = AppointmentStatus.PendingConfirmation;
     }
 
-    public static Appointment Create(int userId, int professionalId, int serviceId, int storeId, decimal price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
+    public static Appointment Create(int userId, int professionalId, int offeringId, int storeId, decimal price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
     {
         ValidateAppointmentInfo(price, notes);
         ValidateTimeRange(startAt, endAt);
@@ -45,7 +45,7 @@ public class Appointment : HistoricEntity
         var appointment = new Appointment
         {
             UserId = userId,
-            ServiceId = serviceId,
+            OfferingId = offeringId,
             ProfessionalId = professionalId,
             StoreId = storeId,
             BookedPrice = price,

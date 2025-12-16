@@ -14,22 +14,13 @@ public class Professional : HistoricEntity
     public string Phone { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
 
-    private readonly List<StoreOwner> _ownedStores = new();
-    public IReadOnlyCollection<StoreOwner> OwnedStores => _ownedStores.AsReadOnly();
-
-    private readonly List<Employee> _workplaces = new();
-    public IReadOnlyCollection<Employee> Workplaces => _workplaces.AsReadOnly();
-
-    private readonly List<StaffService> _providedServices = new();
-    public IReadOnlyCollection<StaffService> ProvidedServices => _providedServices.AsReadOnly();
-
     private Professional() { }
 
     public static Professional Create(string name, string surname, string email, string phone, string taxIdNumber)
     {
         ValidatePersonalInfo(name, surname, email, phone, taxIdNumber);
 
-        var professional = new Professional
+        return new Professional
         {
             Name = name.Trim(),
             Surname = surname.Trim(),
@@ -37,29 +28,17 @@ public class Professional : HistoricEntity
             Phone = phone.Trim(),
             TaxIdNumber = taxIdNumber.Trim()
         };
-
-        return professional;
     }
 
     public void UpdatePersonalInfo(IClock clock, string? name = null, string? surname = null, string? phone = null)
     {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot update inactive professional.");
-        }
+        if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");
 
         var hasChanges = false;
+
         if (name != null && name != Name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new DomainException("Name cannot be empty.");
-            }
-
-            if (name.Length > 100)
-            {
-                throw new DomainException("Name cannot exceed 100 characters.");
-            }
+            ValidateName(name);
 
             Name = name.Trim();
             hasChanges = true;
@@ -67,15 +46,7 @@ public class Professional : HistoricEntity
 
         if (surname != null && surname != Surname)
         {
-            if (string.IsNullOrWhiteSpace(surname))
-            {
-                throw new DomainException("Surname cannot be empty.");
-            }
-
-            if (surname.Length > 100)
-            {
-                throw new DomainException("Surname cannot exceed 100 characters.");
-            }
+            ValidateSurname(surname);
 
             Surname = surname.Trim();
             hasChanges = true;
@@ -83,15 +54,7 @@ public class Professional : HistoricEntity
 
         if (phone != null && phone != Phone)
         {
-            if (string.IsNullOrWhiteSpace(phone))
-            {
-                throw new DomainException("Phone cannot be empty.");
-            }
-
-            if (phone.Length > 20)
-            {
-                throw new DomainException("Phone cannot exceed 20 characters.");
-            }
+            ValidatePhone(phone);
 
             Phone = phone.Trim();
             hasChanges = true;
@@ -100,91 +63,63 @@ public class Professional : HistoricEntity
         if (hasChanges) MarkAsUpdated(clock);
     }
 
-    public bool WorksAtStore(int storeId)
-    {
-        return !IsDeleted && _workplaces.Any(w => w.StoreId == storeId);
-    }
-
-    public bool IsOwnerOf(int storeId)
-    {
-        return _ownedStores.Any(m => m.StoreId == storeId && m.ProfessionalId == Id);
-    }
-
     public string FullName => $"{Name} {Surname}";
 
     public void Deactivate(IClock clock)
     {
-        if (IsDeleted)
-        {
-            throw new DomainException("Professional is already deactivated.");
-        }
+        if (IsDeleted) throw new DomainException("Professional is already deactivated.");
 
         SoftDelete(clock);
     }
 
     private static void ValidatePersonalInfo(string name, string surname, string email, string phone, string taxIdNumber)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new DomainException("Name is required.");
-        }
-
-        if (name.Length > 100)
-        {
-            throw new DomainException("Name cannot exceed 100 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(surname))
-        {
-            throw new DomainException("Surname is required.");
-        }
-
-        if (surname.Length > 100)
-        {
-            throw new DomainException("Surname cannot exceed 100 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new DomainException("Email is required.");
-        }
-
-        if (!IsValidEmail(email))
-        {
-            throw new DomainException("Invalid email format.");
-        }
-
-        if (string.IsNullOrWhiteSpace(phone))
-        {
-            throw new DomainException("Phone is required.");
-        }
-
-        if (phone.Length > 20)
-        {
-            throw new DomainException("Phone cannot exceed 20 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(taxIdNumber))
-        {
-            throw new DomainException("Tax ID number is required.");
-        }
-
-        if (taxIdNumber.Length > 50)
-        {
-            throw new DomainException("Tax ID number cannot exceed 50 characters.");
-        }
+        ValidateName(name);
+        ValidateSurname(surname);
+        ValidatePhone(phone);
+        ValidateEmail(email);
+        ValidateTaxIdNumber(taxIdNumber);
     }
 
-    private static bool IsValidEmail(string email)
+    private static void ValidateName(string name)
     {
+        if (string.IsNullOrWhiteSpace(name)) throw new DomainException("Name is required.");
+
+        if (name.Length > 100) throw new DomainException("Name cannot exceed 100 characters.");
+    }
+
+    private static void ValidateSurname(string surname)
+    {
+        if (string.IsNullOrWhiteSpace(surname)) throw new DomainException("Surname is required.");
+
+        if (surname.Length > 100) throw new DomainException("Surname cannot exceed 100 characters.");
+    }
+
+    private static void ValidatePhone(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) throw new DomainException("Phone is required.");
+
+        if (phone.Length > 20) throw new DomainException("Phone cannot exceed 20 characters.");
+    }
+
+    private static void ValidateEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) throw new DomainException("Email is required.");
+
         try
         {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
+            _ = new System.Net.Mail.MailAddress(email);
         }
         catch
         {
-            return false;
+            throw new DomainException("Invalid email.");
         }
+    }
+
+    private static void ValidateTaxIdNumber(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) throw new DomainException("Tax ID number not found.");
+
+        if (id.Length > 50) throw new DomainException("Tax ID number cannot exceed 50 characters.");
     }
 }

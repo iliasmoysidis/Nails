@@ -1,5 +1,6 @@
 using Domain.Common;
 using Domain.Exceptions;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
@@ -14,10 +15,11 @@ public class Store : HistoricEntity
 
     private Store() { }
 
-    public static Store Create(string name, string address, string taxIdNumber, string email, string phone)
+    public static Store Create(string name, string address, string taxIdNumber, string email, string phone, IClock clock)
     {
         ValidateStoreInfo(name, address, taxIdNumber, email, phone);
-        return new Store
+
+        var store = new Store
         {
             Name = name,
             Address = address,
@@ -25,6 +27,10 @@ public class Store : HistoricEntity
             Email = email,
             Phone = phone
         };
+
+        store.MarkAsCreated(clock);
+
+        return store;
     }
 
     private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string email, string phone)

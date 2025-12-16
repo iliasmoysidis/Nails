@@ -15,7 +15,7 @@ This document lists all aggregates, their roots, and their internal entities.
 **Root:** `Staff`  
 **Entities:**
 
--   `StoreOwner`
+-   `Owner`
 -   `Employee`
 
 ---
