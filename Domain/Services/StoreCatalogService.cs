@@ -24,7 +24,7 @@ public class StoreCatalogService
         var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
-        EnsureOwner(staff, ownerId);
+        staff.EnsureOwner(ownerId);
 
         var offering = catalog.AddOffering(name, price, duration, _clock, description);
 
@@ -38,7 +38,7 @@ public class StoreCatalogService
         var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
-        EnsureOwner(staff, ownerId);
+        staff.EnsureOwner(ownerId);
 
         catalog.RemoveOffering(offeringId, _clock);
 
@@ -50,9 +50,8 @@ public class StoreCatalogService
         var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
-        EnsureOwner(staff, ownerId);
-
-        EnsureStaff(staff, professionalId);
+        staff.EnsureOwner(ownerId);
+        staff.EnsureStaff(professionalId);
 
         var assignment = catalog.AssignOffering(professionalId, offeringId);
 
@@ -66,24 +65,11 @@ public class StoreCatalogService
         var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
-        EnsureOwner(staff, ownerId);
-
-        EnsureStaff(staff, professionalId);
+        staff.EnsureOwner(ownerId);
+        staff.EnsureStaff(professionalId);
 
         catalog.UnassignOffering(professionalId, offeringId);
 
         await _storeCatalogRepository.SaveAsync(catalog);
-    }
-
-    private static void EnsureOwner(Staff staff, int ownerId)
-    {
-        if (!staff.IsOwner(ownerId))
-            throw new DomainException("Only an owner can modify the employee's offered services.");
-    }
-
-    private static void EnsureStaff(Staff staff, int professionalId)
-    {
-        if (!staff.IsStaff(professionalId))
-            throw new DomainException("The professional is not working for the store.");
     }
 }

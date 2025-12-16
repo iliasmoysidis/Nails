@@ -68,9 +68,15 @@ public class Staff
             throw new DomainException("Professional does not work for the store.");
     }
 
-    private void EnsureOwner(int professionalId)
+    public void EnsureOwner(int professionalId)
     {
         if (!IsOwner(professionalId))
             throw new DomainException("Only an owner can perform this action.");
+    }
+
+    public void EnsureStaff(int professionalId)
+    {
+        if (!IsStaff(professionalId))
+            throw new DomainException("Professional does not work for the store.");
     }
 }

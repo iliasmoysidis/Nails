@@ -51,9 +51,9 @@ public class BookingService
         var staff = await _staffRepository.GetByStoreAsync(storeId);
         var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var appointment = FindAppointment(appointments, appointmentId, storeId, professionalId);
+        var appointment = appointments.FindActiveAppointmentForStore(appointmentId, storeId);
 
-        EnsureAgentCanModifyAppointment(agentId, appointment, staff, _clock.Now);
+        appointment.EnsureModifiableBy(agentId, staff, _clock.Now);
 
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
         var service = catalog.GetOffering(appointment.OfferingId)
@@ -76,9 +76,9 @@ public class BookingService
         var staff = await _staffRepository.GetByStoreAsync(storeId);
         var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
 
-        var appointment = FindAppointment(appointments, appointmentId, storeId, professionalId);
+        var appointment = appointments.FindActiveAppointmentForStore(appointmentId, storeId);
 
-        EnsureAgentCanModifyAppointment(agentId, appointment, staff, _clock.Now);
+        appointment.EnsureModifiableBy(agentId, staff, _clock.Now);
 
         appointments.CancelAppointment(appointment.Id, _clock);
 
@@ -98,36 +98,5 @@ public class BookingService
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForUserAsync(int userId, UtcDateTime? date = null)
     {
         return await _appointmentReadRepository.GetByUserAsync(userId, date);
-    }
-
-    private static void EnsureAgentCanModifyAppointment(int agentId, Appointment appointment, Staff staff, UtcDateTime now)
-    {
-        if (!(agentId == appointment.UserId || staff.IsOwner(agentId)))
-        {
-            throw new DomainException("The user is not authorized to modify this appointment.");
-        }
-
-        var hours = (appointment.StartAt - now).TotalHours;
-
-        if (hours <= 0)
-        {
-            throw new DomainException("Appointment has already started.");
-        }
-
-        if (!staff.IsOwner(agentId))
-        {
-            if (hours < 24 && hours > 0)
-                throw new DomainException("Only an owner can modify appointments within 24 hours.");
-        }
-    }
-
-    private static Appointment FindAppointment(ProfessionalAppointments appointments, int appointmentId, int storeId, int professionalId)
-    {
-        return appointments.Appointments.FirstOrDefault(a =>
-            a.Id == appointmentId &&
-            !a.IsDeleted &&
-            a.ProfessionalId == professionalId &&
-            a.StoreId == storeId)
-            ?? throw new DomainException("Appointment not found.");
     }
 }

@@ -81,4 +81,17 @@ public class ProfessionalAppointments
         startAt < a.EndAt &&
         endAt > a.StartAt);
     }
+
+    public Appointment FindActiveAppointmentForStore(int appointmentId, int storeId)
+    {
+        var appointment = _appointments.FirstOrDefault(a =>
+        a.Id == appointmentId &&
+        !a.IsDeleted &&
+        a.StoreId == storeId);
+
+        if (appointment == null)
+            throw new DomainException("Appointment not found.");
+
+        return appointment;
+    }
 }

@@ -240,4 +240,25 @@ public class Appointment : HistoricEntity
             throw new DomainException("Appointment cannot be modified.");
         }
     }
+
+    public void EnsureModifiableBy(int agentId, Staff staff, UtcDateTime now)
+    {
+        if (!(agentId == UserId || staff.IsOwner(agentId)))
+        {
+            throw new DomainException("The user is not authorized to modify this appointment.");
+        }
+
+        var hours = (StartAt - now).TotalHours;
+
+        if (hours <= 0)
+        {
+            throw new DomainException("Appointment has already started.");
+        }
+
+        if (!staff.IsOwner(agentId))
+        {
+            if (hours < 24 && hours > 0)
+                throw new DomainException("Only an owner can modify appointments within 24 hours.");
+        }
+    }
 }
