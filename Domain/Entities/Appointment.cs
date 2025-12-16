@@ -60,7 +60,7 @@ public class Appointment : HistoricEntity
         return appointment;
     }
 
-    public void Confirm(IClock clock)
+    internal void Confirm(IClock clock)
     {
         if (IsDeleted)
         {
@@ -81,7 +81,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void Cancel(IClock clock, string? reason = null)
+    internal void Cancel(IClock clock, string? reason = null)
     {
         EnsureIsMutable();
 
@@ -103,7 +103,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void Complete(IClock clock)
+    internal void Complete(IClock clock)
     {
         if (IsDeleted)
         {
@@ -124,7 +124,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void MarkAsNoShow(IClock clock)
+    internal void MarkAsNoShow(IClock clock)
     {
         if (Status != AppointmentStatus.Confirmed)
         {
@@ -140,7 +140,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void Reschedule(IClock clock, UtcDateTime startAt, UtcDateTime endAt)
+    internal void Reschedule(IClock clock, UtcDateTime startAt, UtcDateTime endAt)
     {
         EnsureIsMutable();
 
@@ -241,24 +241,11 @@ public class Appointment : HistoricEntity
         }
     }
 
-    public void EnsureModifiableBy(int agentId, Staff staff, UtcDateTime now)
+    internal bool ConflictsWith(UtcDateTime start, UtcDateTime end)
     {
-        if (!(agentId == UserId || staff.IsOwner(agentId)))
-        {
-            throw new DomainException("The user is not authorized to modify this appointment.");
-        }
+        if (Status is AppointmentStatus.Canceled or AppointmentStatus.Completed or AppointmentStatus.NoShow)
+            return false;
 
-        var hours = (StartAt - now).TotalHours;
-
-        if (hours <= 0)
-        {
-            throw new DomainException("Appointment has already started.");
-        }
-
-        if (!staff.IsOwner(agentId))
-        {
-            if (hours < 24 && hours > 0)
-                throw new DomainException("Only an owner can modify appointments within 24 hours.");
-        }
+        return start < EndAt && end > StartAt;
     }
 }

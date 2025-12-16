@@ -1,5 +1,4 @@
 using Domain.Common;
-using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
 
@@ -14,13 +13,14 @@ public class Professional : HistoricEntity
     public string Phone { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
 
-    private Professional() { }
+    private Professional()
+    { }
 
-    public static Professional Create(string name, string surname, string email, string phone, string taxIdNumber)
+    public static Professional Create(string name, string surname, string email, string phone, string taxIdNumber, IClock clock)
     {
         ValidatePersonalInfo(name, surname, email, phone, taxIdNumber);
 
-        return new Professional
+        var professional = new Professional
         {
             Name = name.Trim(),
             Surname = surname.Trim(),
@@ -28,6 +28,10 @@ public class Professional : HistoricEntity
             Phone = phone.Trim(),
             TaxIdNumber = taxIdNumber.Trim()
         };
+
+        professional.MarkAsCreated(clock);
+
+        return professional;
     }
 
     public void UpdatePersonalInfo(IClock clock, string? name = null, string? surname = null, string? phone = null)

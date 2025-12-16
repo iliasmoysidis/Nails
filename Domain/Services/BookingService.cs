@@ -2,7 +2,6 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Repositories;
-using Domain.ValueObjects;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Services;
@@ -10,17 +9,19 @@ namespace Domain.Services;
 public class BookingService
 {
     private readonly IStoreCatalogRepository _storeServiceRepository;
-    private readonly IProfessionalAppointmentRepository _professionalAppointmentRepository;
+    private readonly IProfessionalAgendaRepository _professionalAgendaRepository;
     private readonly IAppointmentReadRepository _appointmentReadRepository;
+    private readonly IAppointmentAuthorizationPolicy _appointmentAuthorizationPolicy;
     private readonly IStaffRepository _staffRepository;
     private readonly IAvailabilityService _availabilityService;
     private readonly IClock _clock;
 
-    public BookingService(IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository, IAvailabilityService availabilityService, IClock clock)
+    public BookingService(IStoreCatalogRepository storeServiceRepository, IProfessionalAgendaRepository professionalAgendaRepository, IAppointmentReadRepository appointmentReadRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, IStaffRepository staffRepository, IAvailabilityService availabilityService, IClock clock)
     {
         _storeServiceRepository = storeServiceRepository;
-        _professionalAppointmentRepository = professionalAppointmentRepository;
+        _professionalAgendaRepository = professionalAgendaRepository;
         _appointmentReadRepository = appointmentReadRepository;
+        _appointmentAuthorizationPolicy = appointmentAuthorizationPolicy;
         _staffRepository = staffRepository;
         _availabilityService = availabilityService;
         _clock = clock;
@@ -29,19 +30,19 @@ public class BookingService
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int offeringId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
     {
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var agenda = await _professionalAgendaRepository.GetAsync(professionalId);
 
-        var service = catalog.GetOffering(offeringId)
+        var offering = catalog.GetOffering(offeringId)
             ?? throw new DomainException("Service not found.");
 
-        var endAt = startAt.Add(service.Duration);
+        var endAt = startAt.Add(offering.Duration);
 
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
-        var appointment = appointments.ScheduleAppointment(userId, storeId, offeringId, service.Price, startAt, endAt, _clock, notes);
+        var appointment = agenda.Schedule(userId, storeId, offeringId, offering.Price, startAt, endAt, _clock, notes);
 
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
+        await _professionalAgendaRepository.SaveAsync(agenda);
 
         return appointment;
     }
@@ -49,24 +50,24 @@ public class BookingService
     public async Task<Appointment> RescheduleAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId, UtcDateTime newStartAt)
     {
         var staff = await _staffRepository.GetByStoreAsync(storeId);
-        var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var agenda = await _professionalAgendaRepository.GetAsync(professionalId);
 
-        var appointment = appointments.FindActiveAppointmentForStore(appointmentId, storeId);
+        var appointment = agenda.GetActive(appointmentId);
 
-        appointment.EnsureModifiableBy(agentId, staff, _clock.Now);
+        _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, staff, _clock.Now);
 
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var service = catalog.GetOffering(appointment.OfferingId)
+        var offering = catalog.GetOffering(appointment.OfferingId)
             ?? throw new DomainException("Service not found.");
 
-        var newEndAt = newStartAt.Add(service.Duration);
+        var newEndAt = newStartAt.Add(offering.Duration);
 
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, newStartAt, newEndAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, newStartAt, newEndAt);
 
-        appointments.RescheduleAppointment(appointment.Id, newStartAt, newEndAt, _clock);
+        agenda.Reschedule(appointment.Id, newStartAt, newEndAt, _clock);
 
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
+        await _professionalAgendaRepository.SaveAsync(agenda);
 
         return appointment;
     }
@@ -74,15 +75,14 @@ public class BookingService
     public async Task CancelAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId)
     {
         var staff = await _staffRepository.GetByStoreAsync(storeId);
-        var appointments = await _professionalAppointmentRepository.GetByProfessionalAsync(professionalId);
+        var agenda = await _professionalAgendaRepository.GetAsync(professionalId);
 
-        var appointment = appointments.FindActiveAppointmentForStore(appointmentId, storeId);
+        var appointment = agenda.GetActive(appointmentId);
+        _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, staff, _clock.Now);
 
-        appointment.EnsureModifiableBy(agentId, staff, _clock.Now);
+        agenda.Cancel(appointmentId, _clock);
 
-        appointments.CancelAppointment(appointment.Id, _clock);
-
-        await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
+        await _professionalAgendaRepository.SaveAsync(agenda);
     }
 
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, UtcDateTime? date = null)
