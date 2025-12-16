@@ -1,5 +1,6 @@
 using Domain.Common;
 using Domain.Exceptions;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
@@ -28,7 +29,7 @@ public class Service : HistoricEntity
         };
     }
 
-    public void UpdateDetails(string? name = null, decimal? price = null, TimeSpan? duration = null)
+    public void UpdateDetails(IClock clock, string? name = null, decimal? price = null, TimeSpan? duration = null)
     {
         if (IsDeleted)
         {
@@ -92,18 +93,18 @@ public class Service : HistoricEntity
 
         if (hasChanges)
         {
-            MarkAsUpdated();
+            MarkAsUpdated(clock);
         }
     }
 
-    public void Deactivate()
+    public void Deactivate(IClock clock)
     {
         if (IsDeleted)
         {
             throw new DomainException("Service is already deactivated.");
         }
 
-        SoftDelete();
+        SoftDelete(clock);
     }
 
     public static void ValidateServiceInfo(string name, decimal price, TimeSpan duration, string? description = null)

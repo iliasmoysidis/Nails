@@ -1,4 +1,5 @@
 using Domain.Exceptions;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
@@ -29,7 +30,7 @@ public class StoreCatalog
         return service;
     }
 
-    public void RemoveService(int serviceId)
+    public void RemoveService(int serviceId, IClock clock)
     {
         var service = _services.FirstOrDefault(s => s.Id == serviceId && !s.IsDeleted);
 
@@ -38,7 +39,7 @@ public class StoreCatalog
             throw new DomainException("Could not find service.");
         }
 
-        service.Deactivate();
+        service.Deactivate(clock);
         _staffServices.RemoveAll(s => s.ServiceId == serviceId);
     }
 

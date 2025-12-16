@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Interfaces;
 using Domain.Repositories;
 
 namespace Domain.Services;
@@ -8,11 +9,13 @@ public class StoreCatalogService
 {
     private readonly IStoreCatalogRepository _storeCatalogRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly IClock _clock;
 
-    public StoreCatalogService(IStoreCatalogRepository storeCatalogRepository, IStaffRepository staffRepository)
+    public StoreCatalogService(IStoreCatalogRepository storeCatalogRepository, IStaffRepository staffRepository, IClock clock)
     {
         _storeCatalogRepository = storeCatalogRepository;
         _staffRepository = staffRepository;
+        _clock = clock;
     }
 
     public async Task<Service> AddService(int ownerId, int storeId, string name, decimal price, TimeSpan duration, string? description = null)
@@ -40,7 +43,7 @@ public class StoreCatalogService
             throw new DomainException("Only an owner can modify the offered services.");
         }
 
-        catalog.RemoveService(serviceId);
+        catalog.RemoveService(serviceId, _clock);
         await _storeCatalogRepository.SaveAsync(catalog);
     }
 

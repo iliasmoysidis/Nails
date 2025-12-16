@@ -1,3 +1,4 @@
+using Domain.Interfaces;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Common;
@@ -7,13 +8,13 @@ public abstract class BaseEntity
     public UtcDateTime CreatedAt { get; private set; }
     public UtcDateTime? UpdatedAt { get; private set; }
 
-    protected BaseEntity()
+    protected void MarkAsCreated(IClock clock)
     {
-        CreatedAt = UtcDateTime.Now();
+        CreatedAt = clock.Now;
     }
 
-    public void MarkAsUpdated()
+    public void MarkAsUpdated(IClock clock)
     {
-        UpdatedAt = UtcDateTime.Now();
+        UpdatedAt = clock.Now;
     }
 }

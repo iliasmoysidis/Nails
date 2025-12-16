@@ -1,5 +1,6 @@
 using Domain.Common;
 using Domain.Exceptions;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
@@ -26,7 +27,7 @@ public class User : HistoricEntity
         };
     }
 
-    public void UpdatePersonalInfo(string? name = null, string? surname = null, string? phone = null)
+    public void UpdatePersonalInfo(IClock clock, string? name = null, string? surname = null, string? phone = null)
     {
         if (IsDeleted)
         {
@@ -82,7 +83,7 @@ public class User : HistoricEntity
             hasChanges = true;
         }
 
-        if (hasChanges) MarkAsUpdated();
+        if (hasChanges) MarkAsUpdated(clock);
     }
 
     private static void ValidatePersonalInfo(string name, string surname, string email, string phone)

@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Repositories;
+using Domain.ValueObjects;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Services;
@@ -15,8 +16,9 @@ public class BookingService
     private readonly IAppointmentReadRepository _appointmentReadRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IAvailabilityService _availabilityService;
+    private readonly IClock _clock;
 
-    public BookingService(IStoreCalendarRepository storeScheduleRepository, IStaffCalendarRepository storeStaffScheduleRepository, IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository, IAvailabilityService availabilityService)
+    public BookingService(IStoreCalendarRepository storeScheduleRepository, IStaffCalendarRepository storeStaffScheduleRepository, IStoreCatalogRepository storeServiceRepository, IProfessionalAppointmentRepository professionalAppointmentRepository, IAppointmentReadRepository appointmentReadRepository, IStaffRepository staffRepository, IAvailabilityService availabilityService, IClock clock)
     {
         _storeScheduleRepository = storeScheduleRepository;
         _storeStaffScheduleRepository = storeStaffScheduleRepository;
@@ -25,6 +27,7 @@ public class BookingService
         _appointmentReadRepository = appointmentReadRepository;
         _staffRepository = staffRepository;
         _availabilityService = availabilityService;
+        _clock = clock;
     }
 
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int serviceId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
@@ -40,7 +43,7 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
-        var appointment = appointments.ScheduleAppointment(userId, storeId, serviceId, service.Price, startAt, endAt, notes);
+        var appointment = appointments.ScheduleAppointment(userId, storeId, serviceId, service.Price, startAt, endAt, _clock, notes);
 
         await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
 
@@ -54,7 +57,7 @@ public class BookingService
 
         var appointment = FindAppointment(appointments, appointmentId, storeId, professionalId);
 
-        EnsureAgentCanModifyAppointment(agentId, appointment, staff);
+        EnsureAgentCanModifyAppointment(agentId, appointment, staff, _clock.Now);
 
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
         var service = catalog.GetService(appointment.ServiceId)
@@ -65,7 +68,7 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, newStartAt, newEndAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, newStartAt, newEndAt);
 
-        appointments.RescheduleAppointment(appointment.Id, newStartAt, newEndAt);
+        appointments.RescheduleAppointment(appointment.Id, newStartAt, newEndAt, _clock);
 
         await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
 
@@ -79,9 +82,9 @@ public class BookingService
 
         var appointment = FindAppointment(appointments, appointmentId, storeId, professionalId);
 
-        EnsureAgentCanModifyAppointment(agentId, appointment, staff);
+        EnsureAgentCanModifyAppointment(agentId, appointment, staff, _clock.Now);
 
-        appointments.CancelAppointment(appointment.Id);
+        appointments.CancelAppointment(appointment.Id, _clock);
 
         await _professionalAppointmentRepository.SaveProfessionalAppointmentsAsync(appointments);
     }
@@ -101,14 +104,14 @@ public class BookingService
         return await _appointmentReadRepository.GetByUserAsync(userId, date);
     }
 
-    private static void EnsureAgentCanModifyAppointment(int agentId, Appointment appointment, Staff staff)
+    private static void EnsureAgentCanModifyAppointment(int agentId, Appointment appointment, Staff staff, UtcDateTime now)
     {
         if (!(agentId == appointment.UserId || staff.IsOwner(agentId)))
         {
             throw new DomainException("The user is not authorized to modify this appointment.");
         }
 
-        var hours = (appointment.StartAt - UtcDateTime.Now()).TotalHours;
+        var hours = (appointment.StartAt - now).TotalHours;
 
         if (hours <= 0)
         {

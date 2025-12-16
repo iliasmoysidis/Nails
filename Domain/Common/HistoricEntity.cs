@@ -1,4 +1,5 @@
 using Domain.Exceptions;
+using Domain.Interfaces;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Common;
@@ -8,20 +9,18 @@ public abstract class HistoricEntity : BaseEntity
     public UtcDateTime? DeletedAt { get; private set; }
     public bool IsDeleted => DeletedAt.HasValue;
 
-    protected HistoricEntity() { }
-
-    public void SoftDelete()
+    public void SoftDelete(IClock clock)
     {
         if (IsDeleted)
         {
             throw new DomainException($"{GetType().Name} is already deleted.");
         }
 
-        DeletedAt = UtcDateTime.Now();
-        MarkAsUpdated();
+        DeletedAt = clock.Now;
+        MarkAsUpdated(clock);
     }
 
-    public void Restore()
+    public void Restore(IClock clock)
     {
         if (!IsDeleted)
         {
@@ -29,6 +28,6 @@ public abstract class HistoricEntity : BaseEntity
         }
 
         DeletedAt = null;
-        MarkAsUpdated();
+        MarkAsUpdated(clock);
     }
 }

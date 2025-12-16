@@ -1,6 +1,8 @@
+using Domain.ValueObjects.Time;
+
 namespace Domain.Interfaces;
 
 public interface IClock
 {
-    DateTime UtcNow { get; }
+    UtcDateTime Now { get; }
 }
