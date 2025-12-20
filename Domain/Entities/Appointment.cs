@@ -60,7 +60,7 @@ public class Appointment : HistoricEntity
         return appointment;
     }
 
-    internal void Confirm(IClock clock)
+    public void Confirm(IClock clock)
     {
         if (IsDeleted)
         {
@@ -81,7 +81,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    internal void Cancel(IClock clock, string? reason = null)
+    public void Cancel(IClock clock, string? reason = null)
     {
         EnsureIsMutable();
 
@@ -103,7 +103,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    internal void Complete(IClock clock)
+    public void Complete(IClock clock)
     {
         if (IsDeleted)
         {
@@ -124,7 +124,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    internal void MarkAsNoShow(IClock clock)
+    public void MarkAsNoShow(IClock clock)
     {
         if (Status != AppointmentStatus.Confirmed)
         {
@@ -140,7 +140,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    internal void Reschedule(UtcDateTime startAt, UtcDateTime endAt, IClock clock)
+    public void Reschedule(UtcDateTime startAt, UtcDateTime endAt, IClock clock)
     {
         EnsureIsMutable();
 
@@ -241,8 +241,10 @@ public class Appointment : HistoricEntity
         }
     }
 
-    internal bool ConflictsWith(UtcDateTime start, UtcDateTime end)
+    public bool ConflictsWith(UtcDateTime start, UtcDateTime end)
     {
+        if (IsDeleted) return false;
+
         if (Status is AppointmentStatus.Canceled or AppointmentStatus.Completed or AppointmentStatus.NoShow)
             return false;
 

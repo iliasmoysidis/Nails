@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.Policies;
 using Domain.Repositories;
 using Domain.ValueObjects.Time;
 
@@ -12,18 +13,18 @@ public class BookingService
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentAuthorizationPolicy _appointmentAuthorizationPolicy;
     private readonly IStaffRepository _staffRepository;
-    private readonly AppointmentConflictService _conflictChecker;
+    private readonly AppointmentOverlapPolicy _appointmentOverlapPolicy;
     private readonly IAvailabilityService _availabilityService;
     private readonly IClock _clock;
 
-    public BookingService(IStoreCatalogRepository storeServiceRepository, IProfessionalAgendaRepository professionalAgendaRepository, IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, IStaffRepository staffRepository, IAvailabilityService availabilityService, AppointmentConflictService conflictChecker, IClock clock)
+    public BookingService(IStoreCatalogRepository storeServiceRepository, IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, IStaffRepository staffRepository, IAvailabilityService availabilityService, AppointmentOverlapPolicy appointmentOverlapPolicy, IClock clock)
     {
         _storeServiceRepository = storeServiceRepository;
         _appointmentRepository = appointmentRepository;
         _appointmentAuthorizationPolicy = appointmentAuthorizationPolicy;
         _staffRepository = staffRepository;
         _availabilityService = availabilityService;
-        _conflictChecker = conflictChecker;
+        _appointmentOverlapPolicy = appointmentOverlapPolicy;
         _clock = clock;
     }
 
@@ -38,7 +39,7 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
-        await _conflictChecker.EnsureNoConflictAsync(professionalId, startAt, endAt);
+        await _appointmentOverlapPolicy.EnsureNoConflictAsync(professionalId, startAt, endAt);
 
         var appointment = Appointment.Create(userId, professionalId, offeringId, storeId, offering.Price, startAt, endAt, _clock, notes);
 
@@ -64,7 +65,7 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, newStartAt, newEndAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, newStartAt, newEndAt);
 
-        await _conflictChecker.EnsureNoConflictAsync(professionalId, newStartAt, newEndAt, appointment.Id);
+        await _appointmentOverlapPolicy.EnsureNoConflictAsync(professionalId, newStartAt, newEndAt, appointment.Id);
 
         appointment.Reschedule(newStartAt, newEndAt, _clock);
 

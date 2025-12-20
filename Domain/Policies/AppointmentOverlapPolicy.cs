@@ -2,13 +2,13 @@ using Domain.Exceptions;
 using Domain.Repositories;
 using Domain.ValueObjects.Time;
 
-namespace Domain.Services;
+namespace Domain.Policies;
 
-public sealed class AppointmentConflictService
+public sealed class AppointmentOverlapPolicy
 {
     private readonly IAppointmentRepository _appointmentRepository;
 
-    public AppointmentConflictService(IAppointmentRepository appointmentRepository)
+    public AppointmentOverlapPolicy(IAppointmentRepository appointmentRepository)
     {
         _appointmentRepository = appointmentRepository;
     }
