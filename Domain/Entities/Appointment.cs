@@ -126,6 +126,11 @@ public class Appointment : HistoricEntity
 
     public void MarkAsNoShow(IClock clock)
     {
+        if (IsDeleted)
+        {
+            throw new DomainException("Cannot mark as no-show a deleted appointment.");
+        }
+
         if (Status != AppointmentStatus.Confirmed)
         {
             throw new DomainException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
