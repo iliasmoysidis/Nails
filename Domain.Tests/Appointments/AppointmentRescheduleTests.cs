@@ -9,7 +9,7 @@ namespace Appointments;
 public class AppointmentRescheduleTests
 {
     [Fact]
-    public void Reschedule_ShouldThrowWhenAppointmentAlreadyStarted()
+    public void Reschedule_ShouldThrow_WhenAppointmentAlreadyStarted()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -32,7 +32,7 @@ public class AppointmentRescheduleTests
     }
 
     [Fact]
-    public void Reschedule_ShouldUpdateTimesWhenAppointmentNotStarted()
+    public void Reschedule_ShouldUpdateTimes_WhenAppointmentNotStarted()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -52,7 +52,7 @@ public class AppointmentRescheduleTests
     }
 
     [Fact]
-    public void Reschedule_ShouldThrowWhenAppointmentIsCanceled()
+    public void Reschedule_ShouldThrow_WhenAppointmentIsCanceled()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
