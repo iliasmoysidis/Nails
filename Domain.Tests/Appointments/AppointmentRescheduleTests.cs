@@ -30,4 +30,51 @@ public class AppointmentRescheduleTests
             .Throw<DomainException>()
             .WithMessage("*already started*");
     }
+
+    [Fact]
+    public void RescheduleShouldUpdateTimesWhenAppointmentNotStarted()
+    {
+        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+        var clock = new FakeClock(UtcDateTime.From(baseTime));
+
+        var startAt = clock.Now.AddHours(24);
+        var endAt = startAt.AddHours(1);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+
+        appointment.Confirm(clock);
+
+        var newStartAt = startAt.AddHours(1);
+        var newEndAt = newStartAt.Add(endAt - startAt);
+        appointment.Reschedule(startAt: newStartAt, endAt: newEndAt, clock);
+
+        appointment.StartAt.Should().Be(newStartAt);
+        appointment.EndAt.Should().Be(newEndAt);
+    }
+
+    [Fact]
+    public void RescheduleShouldThrowWhenAppointmentIsCanceled()
+    {
+        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+        var clock = new FakeClock(UtcDateTime.From(baseTime));
+
+        var startAt = clock.Now.AddHours(1);
+        var endAt = startAt.AddHours(2);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+
+        appointment.Confirm(clock);
+        appointment.Cancel(clock);
+
+        var newStartAt = startAt.AddHours(1);
+        var newEndAt = newStartAt.Add(endAt - startAt);
+
+        Action act = () => appointment.Reschedule(
+            startAt: newStartAt,
+            endAt: newEndAt,
+            clock
+        );
+
+        act.Should()
+            .Throw<DomainException>()
+            .WithMessage("Appointment cannot be modified.");
+    }
 }
