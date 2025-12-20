@@ -26,7 +26,7 @@ public class Appointment : HistoricEntity
     public bool IsCompleted => Status == AppointmentStatus.Completed;
     public bool IsCanceled => Status == AppointmentStatus.Canceled;
     public bool IsNoShow => Status == AppointmentStatus.NoShow;
-    public bool IsUpComing(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt > now;
+    public bool IsUpcoming(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt > now;
     public bool IsPast(UtcDateTime now) => EndAt < now;
     public bool IsInProgress(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt <= now && EndAt > now;
 
