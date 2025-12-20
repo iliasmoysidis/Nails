@@ -40,7 +40,7 @@ public class Appointment : HistoricEntity
         ValidateAppointmentInfo(price, notes);
         ValidateTimeRange(startAt, endAt);
         ValidateChronology(startAt, endAt);
-        ValidateStartIsInFuture(clock, startAt);
+        ValidateStartIsInFuture(startAt, clock);
 
         var appointment = new Appointment
         {
@@ -151,7 +151,7 @@ public class Appointment : HistoricEntity
 
         ValidateTimeRange(startAt, endAt);
         ValidateChronology(startAt, endAt);
-        ValidateStartIsInFuture(clock, startAt);
+        ValidateStartIsInFuture(startAt, clock);
 
         this.StartAt = startAt;
         this.EndAt = endAt;
@@ -166,7 +166,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void AdjustPrice(IClock clock, decimal newPrice, string reason)
+    public void AdjustPrice(decimal newPrice, string reason, IClock clock)
     {
         EnsureIsMutable();
 
@@ -185,7 +185,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    private static void ValidateAppointmentInfo(Decimal price, string? notes = null)
+    private static void ValidateAppointmentInfo(decimal price, string? notes = null)
     {
         if (price < 0)
         {
@@ -206,7 +206,7 @@ public class Appointment : HistoricEntity
         }
     }
 
-    private static void ValidateStartIsInFuture(IClock clock, UtcDateTime startAt)
+    private static void ValidateStartIsInFuture(UtcDateTime startAt, IClock clock)
     {
         if (startAt <= clock.Now)
         {
