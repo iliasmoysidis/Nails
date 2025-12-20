@@ -6,7 +6,7 @@ using Domain.Exceptions;
 
 namespace Appointments;
 
-public class AppointmentRescheduleTests
+public class RescheduleTests
 {
     [Fact]
     public void Reschedule_ShouldThrow_WhenAppointmentAlreadyStarted()
