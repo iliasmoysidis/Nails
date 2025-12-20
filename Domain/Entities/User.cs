@@ -14,17 +14,20 @@ public class User : HistoricEntity
 
     private User() { }
 
-    public static User Create(string name, string surname, string email, string phone)
+    public static User Create(string name, string surname, string email, string phone, IClock clock)
     {
         ValidatePersonalInfo(name, surname, email, phone);
 
-        return new User
+        var user = new User
         {
             Name = name.Trim(),
             Surname = surname.Trim(),
             Email = email.Trim(),
             Phone = phone.Trim()
         };
+
+        user.MarkAsCreated(clock);
+        return user;
     }
 
     public void Deactivate(IClock clock)
