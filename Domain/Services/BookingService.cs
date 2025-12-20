@@ -9,29 +9,27 @@ namespace Domain.Services;
 public class BookingService
 {
     private readonly IStoreCatalogRepository _storeServiceRepository;
-    private readonly IProfessionalAgendaRepository _professionalAgendaRepository;
-    private readonly IAppointmentReadRepository _appointmentReadRepository;
+    private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentAuthorizationPolicy _appointmentAuthorizationPolicy;
     private readonly IStaffRepository _staffRepository;
+    private readonly AppointmentConflictService _conflictChecker;
     private readonly IAvailabilityService _availabilityService;
     private readonly IClock _clock;
 
-    public BookingService(IStoreCatalogRepository storeServiceRepository, IProfessionalAgendaRepository professionalAgendaRepository, IAppointmentReadRepository appointmentReadRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, IStaffRepository staffRepository, IAvailabilityService availabilityService, IClock clock)
+    public BookingService(IStoreCatalogRepository storeServiceRepository, IProfessionalAgendaRepository professionalAgendaRepository, IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, IStaffRepository staffRepository, IAvailabilityService availabilityService, AppointmentConflictService conflictChecker, IClock clock)
     {
         _storeServiceRepository = storeServiceRepository;
-        _professionalAgendaRepository = professionalAgendaRepository;
-        _appointmentReadRepository = appointmentReadRepository;
+        _appointmentRepository = appointmentRepository;
         _appointmentAuthorizationPolicy = appointmentAuthorizationPolicy;
         _staffRepository = staffRepository;
         _availabilityService = availabilityService;
+        _conflictChecker = conflictChecker;
         _clock = clock;
     }
 
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int offeringId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
     {
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
-        var agenda = await _professionalAgendaRepository.GetAsync(professionalId);
-
         var offering = catalog.GetOffering(offeringId)
             ?? throw new DomainException("Service not found.");
 
@@ -40,20 +38,21 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
-        var appointment = agenda.Schedule(userId, storeId, offeringId, offering.Price, startAt, endAt, _clock, notes);
+        await _conflictChecker.EnsureNoConflictAsync(professionalId, startAt, endAt);
 
-        await _professionalAgendaRepository.SaveAsync(agenda);
+        var appointment = Appointment.Create(userId, professionalId, offeringId, storeId, offering.Price, startAt, endAt, _clock, notes);
+
+        await _appointmentRepository.AddAsync(appointment);
 
         return appointment;
     }
 
     public async Task<Appointment> RescheduleAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId, UtcDateTime newStartAt)
     {
+        var appointment = await _appointmentRepository.GetByIdAsync(appointmentId)
+            ?? throw new DomainException("Appointment not found.");
+
         var staff = await _staffRepository.GetByStoreAsync(storeId);
-        var agenda = await _professionalAgendaRepository.GetAsync(professionalId);
-
-        var appointment = agenda.GetActive(appointmentId);
-
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, staff, _clock.Now);
 
         var catalog = await _storeServiceRepository.GetByStoreAsync(storeId);
@@ -65,38 +64,40 @@ public class BookingService
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, newStartAt, newEndAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, newStartAt, newEndAt);
 
-        agenda.Reschedule(appointment.Id, newStartAt, newEndAt, _clock);
+        await _conflictChecker.EnsureNoConflictAsync(professionalId, newStartAt, newEndAt, appointment.Id);
 
-        await _professionalAgendaRepository.SaveAsync(agenda);
+        appointment.Reschedule(newStartAt, newEndAt, _clock);
+
+        await _appointmentRepository.UpdateAsync(appointment);
 
         return appointment;
     }
 
     public async Task CancelAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId)
     {
-        var staff = await _staffRepository.GetByStoreAsync(storeId);
-        var agenda = await _professionalAgendaRepository.GetAsync(professionalId);
+        var appointment = await _appointmentRepository.GetByIdAsync(appointmentId)
+            ?? throw new DomainException("Appointment not found.");
 
-        var appointment = agenda.GetActive(appointmentId);
+        var staff = await _staffRepository.GetByStoreAsync(storeId);
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, staff, _clock.Now);
 
-        agenda.Cancel(appointmentId, _clock);
+        appointment.Cancel(_clock);
 
-        await _professionalAgendaRepository.SaveAsync(agenda);
+        await _appointmentRepository.UpdateAsync(appointment);
     }
 
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, UtcDateTime? date = null)
     {
-        return await _appointmentReadRepository.GetByProfessionalAsync(professionalId, date);
+        return await _appointmentRepository.GetByProfessionalAsync(professionalId, date);
     }
 
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForStoreAsync(int storeId, UtcDateTime? date = null)
     {
-        return await _appointmentReadRepository.GetByStoreAsync(storeId, date);
+        return await _appointmentRepository.GetByStoreAsync(storeId, date);
     }
 
     public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForUserAsync(int userId, UtcDateTime? date = null)
     {
-        return await _appointmentReadRepository.GetByUserAsync(userId, date);
+        return await _appointmentRepository.GetByUserAsync(userId, date);
     }
 }

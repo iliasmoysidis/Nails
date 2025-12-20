@@ -3,8 +3,14 @@ using Domain.ValueObjects.Time;
 
 namespace Domain.Repositories;
 
-public interface IAppointmentReadRepository
+public interface IAppointmentRepository
 {
+    Task AddAsync(Appointment appointment);
+
+    Task UpdateAsync(Appointment appointment);
+
+    Task<Appointment?> GetByIdAsync(int appointmentId);
+
     Task<IReadOnlyCollection<Appointment>> GetByProfessionalAsync(
         int professionalId,
         UtcDateTime? date = null);

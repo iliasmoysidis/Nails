@@ -140,7 +140,7 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    internal void Reschedule(IClock clock, UtcDateTime startAt, UtcDateTime endAt)
+    internal void Reschedule(UtcDateTime startAt, UtcDateTime endAt, IClock clock)
     {
         EnsureIsMutable();
 
