@@ -9,7 +9,7 @@ namespace StaffCalendars;
 public class AvailabilityTests
 {
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnTrueWhenInsideWorkingHours()
+    public void IsProfessionalAvailable_ShouldReturnTrue_WhenInsideWorkingHours()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -33,7 +33,7 @@ public class AvailabilityTests
     }
 
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnTrueWhenInsidePartialException()
+    public void IsProfessionalAvailable_ShouldReturnTrue_WhenInsidePartialException()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -57,7 +57,7 @@ public class AvailabilityTests
     }
 
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnFalseWhenOutsideWorkingHours()
+    public void IsProfessionalAvailable_ShouldReturnFalse_WhenOutsideWorkingHours()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -81,7 +81,7 @@ public class AvailabilityTests
     }
 
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnFalseWhenDayOff()
+    public void IsProfessionalAvailable_ShouldReturnFalse_WhenDayOff()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -97,7 +97,7 @@ public class AvailabilityTests
     }
 
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnFalseWhenOutsidePartialException()
+    public void IsProfessionalAvailable_ShouldReturnFalse_WhenOutsidePartialException()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -121,7 +121,7 @@ public class AvailabilityTests
     }
 
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnFalseWhenExceptionDayOff()
+    public void IsProfessionalAvailable_ShouldReturnFalse_WhenExceptionDayOff()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -140,7 +140,7 @@ public class AvailabilityTests
     }
 
     [Fact]
-    public void IsProfessionalAvailable_ShouldReturnFalseWhenEndDateIsDifferentThanStartDate()
+    public void IsProfessionalAvailable_ShouldReturnFalse_WhenEndDateIsDifferentThanStartDate()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
