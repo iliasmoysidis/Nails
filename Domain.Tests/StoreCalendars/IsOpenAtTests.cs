@@ -7,19 +7,22 @@ namespace Domain.StoreCalendars;
 
 public class IsOpenAtTests
 {
-    [Fact]
-    public void IsOpenAt_ShouldReturnTrue_WhenInsideWorkingHours()
+    private static StoreCalendar MondayNineToFive()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
+        var calendar = StoreCalendar.Create(1);
         calendar.SetWorkingDay(
             WorkingDay.WithRanges(
                 DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
+                [new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))]
             )
         );
+        return calendar;
+    }
+
+    [Fact]
+    public void IsOpenAt_ShouldReturnTrue_WhenInsideWorkingHours()
+    {
+        var calendar = MondayNineToFive();
 
         var time = UtcDateTime.From(new DateTime(2025, 12, 22, 10, 0, 0, DateTimeKind.Utc));
 
@@ -29,16 +32,7 @@ public class IsOpenAtTests
     [Fact]
     public void IsOpenAt_ShouldReturnTrue_WhenInsidePartialException()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
-        );
+        var calendar = MondayNineToFive();
 
         calendar.AddException(CalendarException.PartialDay(
             new DateOnly(2025, 12, 22),
@@ -55,16 +49,7 @@ public class IsOpenAtTests
     [Fact]
     public void IsOpenAt_ShouldReturnTrue_AtWorkingRangeStart()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
-        );
+        var calendar = MondayNineToFive();
 
         var time = UtcDateTime.From(new DateTime(2025, 12, 22, 9, 0, 0, DateTimeKind.Utc));
 
@@ -74,16 +59,7 @@ public class IsOpenAtTests
     [Fact]
     public void IsOpenAt_ShouldReturnFalse_AtWorkingRangeEnd()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
-        );
+        var calendar = MondayNineToFive();
 
         var time = UtcDateTime.From(new DateTime(2025, 12, 22, 17, 0, 0, DateTimeKind.Utc));
 
@@ -93,16 +69,7 @@ public class IsOpenAtTests
     [Fact]
     public void IsOpenAt_ShouldReturnFalse_WhenExceptionIsDayOff()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
-        );
+        var calendar = MondayNineToFive();
 
         calendar.AddException(CalendarException.DayOff(new DateOnly(2025, 12, 22)));
 
@@ -114,16 +81,7 @@ public class IsOpenAtTests
     [Fact]
     public void IsOpenAt_ShouldReturnFalse_WhenOutsidePartialException()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
-        );
+        var calendar = MondayNineToFive();
 
         calendar.AddException(CalendarException.PartialDay(
             new DateOnly(2025, 12, 22),
@@ -140,16 +98,7 @@ public class IsOpenAtTests
     [Fact]
     public void IsOpenAt_ShouldReturnFalse_WhenNoWorkingDayDefinedForDate()
     {
-        var calendar = StoreCalendar.Create(storeId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
-        );
+        var calendar = MondayNineToFive();
 
         calendar.AddException(CalendarException.PartialDay(
             new DateOnly(2025, 12, 22),
