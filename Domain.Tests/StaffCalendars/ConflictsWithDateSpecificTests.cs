@@ -1,6 +1,5 @@
 using Domain.Entities;
 using Domain.ValueObjects.Calendar;
-using Domain.ValueObjects.Time;
 using FluentAssertions;
 
 namespace StaffCalendars;
@@ -15,19 +14,17 @@ public class ConflictsWithDateSpecificTests
         calendar.SetWorkingDay(
             WorkingDay.WithRanges(
                 DayOfWeek.Monday,
-                new[]
-                {
+                [
                     new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
+                ]
             )
         );
 
         var exception = CalendarException.PartialDay(
             new DateOnly(2025, 11, 17),
-            new[]
-            {
+            [
                 new TimeRange(TimeSpan.FromHours(10), TimeSpan.FromHours(16))
-            }
+            ]
         );
 
         calendar.ConflictsWithDateSpecific(exception).Should().Be(true);
@@ -63,10 +60,9 @@ public class ConflictsWithDateSpecificTests
         calendar.SetWorkingDay(
             WorkingDay.WithRanges(
                 DayOfWeek.Monday,
-                new[]
-                {
+                [
                     new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
+                ]
             )
         );
 
@@ -85,19 +81,17 @@ public class ConflictsWithDateSpecificTests
         calendar.SetWorkingDay(
             WorkingDay.WithRanges(
                 DayOfWeek.Monday,
-                new[]
-                {
+                [
                     new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(14))
-                }
+                ]
             )
         );
 
         var exception = CalendarException.PartialDay(
             new DateOnly(2025, 11, 17),
-            new[]
-            {
+            [
                 new TimeRange(TimeSpan.FromHours(15), TimeSpan.FromHours(21))
-            }
+            ]
         );
 
         calendar.ConflictsWithDateSpecific(exception).Should().Be(false);
@@ -110,10 +104,9 @@ public class ConflictsWithDateSpecificTests
 
         var exception = CalendarException.PartialDay(
             new DateOnly(2025, 11, 17),
-            new[]
-            {
+            [
                 new TimeRange(TimeSpan.FromHours(15), TimeSpan.FromHours(21))
-            }
+            ]
         );
 
         calendar.ConflictsWithDateSpecific(exception).Should().Be(false);
