@@ -19,7 +19,6 @@ public sealed class AppointmentOverlapPolicy
 
         bool hasConflict = appointments.Any(a =>
             a.Id != excludeAppointmentId &&
-            !a.IsDeleted &&
             a.ConflictsWith(start, end)
             );
 
