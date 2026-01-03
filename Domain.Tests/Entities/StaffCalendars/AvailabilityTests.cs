@@ -4,7 +4,7 @@ using Domain.ValueObjects.Calendar;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace StaffCalendars;
+namespace Entities.StaffCalendars;
 
 public class AvailabilityTests
 {

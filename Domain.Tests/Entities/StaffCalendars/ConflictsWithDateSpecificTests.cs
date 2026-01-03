@@ -2,7 +2,7 @@ using Domain.Entities;
 using Domain.ValueObjects.Calendar;
 using FluentAssertions;
 
-namespace StaffCalendars;
+namespace Entities.StaffCalendars;
 
 public class ConflictsWithDateSpecificTests
 {

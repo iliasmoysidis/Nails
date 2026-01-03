@@ -4,7 +4,7 @@ using FluentAssertions;
 using Domain.Tests.Fakes;
 using Domain.Exceptions;
 
-namespace Appointments;
+namespace Entities.Appointments;
 
 public class RescheduleTests
 {

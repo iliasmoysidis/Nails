@@ -4,12 +4,12 @@ using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace Appointments;
+namespace Entities.Appointments;
 
-public class NoShowTests
+public class ConfirmTests
 {
     [Fact]
-    public void NoShow_ShouldSetStatusToNoShow()
+    public void Confirm_ShouldSetStatusToConfirmed()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -18,18 +18,17 @@ public class NoShowTests
         var endAt = startAt.AddHours(2);
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
+        clock.Advance(TimeSpan.FromMinutes(10));
         appointment.Confirm(clock);
 
-        clock.Advance(startAt - clock.Now + TimeSpan.FromMinutes(1));
-
-        appointment.MarkAsNoShow(clock);
-
-        appointment.IsNoShow.Should().Be(true);
+        appointment.IsConfirmed.Should().Be(true);
         appointment.UpdatedAt.Should().Be(clock.Now);
     }
 
+
+
     [Fact]
-    public void NoShow_ShouldThrow_WhenAppointmentIsDeleted()
+    public void Confirm_ShouldThrow_WhenAppointmentIsDeleted()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -40,32 +39,15 @@ public class NoShowTests
 
         appointment.SoftDelete(clock);
 
-        Action act = () => appointment.MarkAsNoShow(clock);
+        Action act = () => appointment.Confirm(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("*mark as no-show a deleted appointment*");
+            .WithMessage("Cannot confirm deleted appointment.");
     }
 
     [Fact]
-    public void NoShow_ShouldThrow_WhenStatusIsNotConfirmed()
-    {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
-
-        Action act = () => appointment.MarkAsNoShow(clock);
-
-        act.Should()
-            .Throw<DomainException>()
-            .WithMessage("*Only confirmed appointments can be marked as no-show*");
-    }
-
-    [Fact]
-    public void NoShow_ShouldThrow_WhenTimeIsBeforeStart()
+    public void Confirm_ShouldThrow_WhenAlreadyConfirmed()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -76,10 +58,30 @@ public class NoShowTests
 
         appointment.Confirm(clock);
 
-        Action act = () => appointment.MarkAsNoShow(clock);
+        Action act = () => appointment.Confirm(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("*no-show before appointment start*");
+            .WithMessage("Cannot confirm appointment.*");
+    }
+
+    [Fact]
+    public void Confirm_ShouldThrow_WhenStartIsInThePast()
+    {
+        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+        var clock = new FakeClock(UtcDateTime.From(baseTime));
+
+        var startAt = clock.Now.AddHours(1);
+        var endAt = startAt.AddHours(2);
+
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+
+        clock.Advance(TimeSpan.FromMinutes(90));
+
+        Action act = () => appointment.Confirm(clock);
+
+        act.Should()
+            .Throw<DomainException>()
+            .WithMessage("Cannot confirm appointments in the past.");
     }
 }

@@ -3,7 +3,7 @@ using Domain.ValueObjects.Calendar;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace Domain.StoreCalendars;
+namespace Entities.StoreCalendars;
 
 public class IsOpenAtTests
 {

@@ -2,7 +2,7 @@ using Domain.Entities;
 using Domain.ValueObjects.Calendar;
 using FluentAssertions;
 
-namespace StoreCalendars;
+namespace Entities.StoreCalendars;
 
 public class IsOpenOnTests
 {

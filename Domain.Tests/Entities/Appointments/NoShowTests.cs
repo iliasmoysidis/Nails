@@ -4,12 +4,12 @@ using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace Appointments;
+namespace Entities.Appointments;
 
-public class CompleteTests
+public class NoShowTests
 {
     [Fact]
-    public void Complete_ShouldSetStatusToCompleted()
+    public void NoShow_ShouldSetStatusToNoShow()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -20,16 +20,16 @@ public class CompleteTests
 
         appointment.Confirm(clock);
 
-        clock.Advance(endAt - clock.Now);
+        clock.Advance(startAt - clock.Now + TimeSpan.FromMinutes(1));
 
-        appointment.Complete(clock);
+        appointment.MarkAsNoShow(clock);
 
-        appointment.IsCompleted.Should().Be(true);
+        appointment.IsNoShow.Should().Be(true);
         appointment.UpdatedAt.Should().Be(clock.Now);
     }
 
     [Fact]
-    public void Complete_ShouldThrow_WhenAppointmentIsDeleted()
+    public void NoShow_ShouldThrow_WhenAppointmentIsDeleted()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -38,18 +38,17 @@ public class CompleteTests
         var endAt = startAt.AddHours(2);
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
-        appointment.Confirm(clock);
         appointment.SoftDelete(clock);
 
-        Action act = () => appointment.Complete(clock);
+        Action act = () => appointment.MarkAsNoShow(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("*deleted appointment*");
+            .WithMessage("*mark as no-show a deleted appointment*");
     }
 
     [Fact]
-    public void Complete_ShouldThrow_WhenStatusIsNotConfirmed()
+    public void NoShow_ShouldThrow_WhenStatusIsNotConfirmed()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -58,15 +57,15 @@ public class CompleteTests
         var endAt = startAt.AddHours(2);
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
-        Action act = () => appointment.Complete(clock);
+        Action act = () => appointment.MarkAsNoShow(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("*Only confirmed appointments can be completed*");
+            .WithMessage("*Only confirmed appointments can be marked as no-show*");
     }
 
     [Fact]
-    public void Complete_ShouldThrow_WhenTimeIsBeforeEndTime()
+    public void NoShow_ShouldThrow_WhenTimeIsBeforeStart()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -76,12 +75,11 @@ public class CompleteTests
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
-        clock.Advance(endAt - clock.Now - TimeSpan.FromMinutes(1));
 
-        Action act = () => appointment.Complete(clock);
+        Action act = () => appointment.MarkAsNoShow(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("Cannot complete appointments before its end time.");
+            .WithMessage("*no-show before appointment start*");
     }
 }

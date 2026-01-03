@@ -4,12 +4,12 @@ using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace Appointments;
+namespace Entities.Appointments;
 
-public class ConfirmTests
+public class CompleteTests
 {
     [Fact]
-    public void Confirm_ShouldSetStatusToConfirmed()
+    public void Complete_ShouldSetStatusToCompleted()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -18,36 +18,18 @@ public class ConfirmTests
         var endAt = startAt.AddHours(2);
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
-        clock.Advance(TimeSpan.FromMinutes(10));
         appointment.Confirm(clock);
 
-        appointment.IsConfirmed.Should().Be(true);
+        clock.Advance(endAt - clock.Now);
+
+        appointment.Complete(clock);
+
+        appointment.IsCompleted.Should().Be(true);
         appointment.UpdatedAt.Should().Be(clock.Now);
     }
 
-
-
     [Fact]
-    public void Confirm_ShouldThrow_WhenAppointmentIsDeleted()
-    {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
-
-        appointment.SoftDelete(clock);
-
-        Action act = () => appointment.Confirm(clock);
-
-        act.Should()
-            .Throw<DomainException>()
-            .WithMessage("Cannot confirm deleted appointment.");
-    }
-
-    [Fact]
-    public void Confirm_ShouldThrow_WhenAlreadyConfirmed()
+    public void Complete_ShouldThrow_WhenAppointmentIsDeleted()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
@@ -57,31 +39,49 @@ public class ConfirmTests
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
+        appointment.SoftDelete(clock);
 
-        Action act = () => appointment.Confirm(clock);
+        Action act = () => appointment.Complete(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("Cannot confirm appointment.*");
+            .WithMessage("*deleted appointment*");
     }
 
     [Fact]
-    public void Confirm_ShouldThrow_WhenStartIsInThePast()
+    public void Complete_ShouldThrow_WhenStatusIsNotConfirmed()
     {
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
 
         var startAt = clock.Now.AddHours(1);
         var endAt = startAt.AddHours(2);
-
         var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
 
-        clock.Advance(TimeSpan.FromMinutes(90));
-
-        Action act = () => appointment.Confirm(clock);
+        Action act = () => appointment.Complete(clock);
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("Cannot confirm appointments in the past.");
+            .WithMessage("*Only confirmed appointments can be completed*");
+    }
+
+    [Fact]
+    public void Complete_ShouldThrow_WhenTimeIsBeforeEndTime()
+    {
+        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+        var clock = new FakeClock(UtcDateTime.From(baseTime));
+
+        var startAt = clock.Now.AddHours(1);
+        var endAt = startAt.AddHours(2);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+
+        appointment.Confirm(clock);
+        clock.Advance(endAt - clock.Now - TimeSpan.FromMinutes(1));
+
+        Action act = () => appointment.Complete(clock);
+
+        act.Should()
+            .Throw<DomainException>()
+            .WithMessage("Cannot complete appointments before its end time.");
     }
 }
