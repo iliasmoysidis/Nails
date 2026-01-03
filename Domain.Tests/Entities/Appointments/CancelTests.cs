@@ -4,7 +4,7 @@ using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace Entities.Appointments;
+namespace Domain.Tests.Entities.Appointments;
 
 public class CancelTest
 {

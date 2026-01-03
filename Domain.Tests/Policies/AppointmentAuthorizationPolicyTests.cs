@@ -5,7 +5,7 @@ using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
-namespace Policies;
+namespace Domain.Tests.Policies;
 
 public class AppointmentAuthorizationPolicyTests
 {

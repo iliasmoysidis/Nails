@@ -6,7 +6,7 @@ using Domain.ValueObjects.Time;
 using Domain.Tests.Fakes;
 using FluentAssertions;
 
-namespace Services;
+namespace Domain.Tests.Servicies;
 
 public class AvailabilityServiceProfessionalTests
 {
