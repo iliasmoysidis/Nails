@@ -1,7 +1,7 @@
 using Domain.Entities;
 using Domain.Repositories;
 
-namespace Fakes;
+namespace Domain.Tests.Fakes;
 
 public sealed class FakeStoreCalendarRepository : IStoreCalendarRepository
 {

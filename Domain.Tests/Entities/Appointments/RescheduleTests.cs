@@ -1,7 +1,7 @@
 using Domain.Entities;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
-using Fakes;
+using Domain.Tests.Fakes;
 using Domain.Exceptions;
 
 namespace Entities.Appointments;

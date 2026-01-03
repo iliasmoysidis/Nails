@@ -2,7 +2,7 @@ using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects.Time;
 
-namespace Fakes;
+namespace Domain.Tests.Fakes;
 
 public sealed class FakeAppointmentRepository : IAppointmentRepository
 {

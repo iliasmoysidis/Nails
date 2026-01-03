@@ -1,9 +1,8 @@
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Policies;
-using Fakes;
+using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
-using Fakes;
 using FluentAssertions;
 
 namespace Policies;

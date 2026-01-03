@@ -3,7 +3,7 @@ using Domain.Exceptions;
 using Domain.Services;
 using Domain.ValueObjects.Calendar;
 using Domain.ValueObjects.Time;
-using Fakes;
+using Domain.Tests.Fakes;
 using FluentAssertions;
 
 namespace Services;

@@ -1,6 +1,6 @@
 using Domain.Entities;
 using Domain.Exceptions;
-using Fakes;
+using Domain.Tests.Fakes;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
