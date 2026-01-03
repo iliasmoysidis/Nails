@@ -1,7 +1,7 @@
 using Domain.Interfaces;
 using Domain.ValueObjects.Time;
 
-namespace Domain.Tests.Fakes;
+namespace Fakes;
 
 public sealed class FakeClock : IClock
 {
