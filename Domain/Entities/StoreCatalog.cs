@@ -2,6 +2,7 @@ using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -25,7 +26,7 @@ public class StoreCatalog
         };
     }
 
-    public Offering AddOffering(string name, Money price, TimeSpan duration, IClock clock, string? description = null)
+    public Offering AddOffering(string name, Money price, Duration duration, IClock clock, string? description = null)
     {
         var offering = Offering.Create(StoreId, name, price, duration, clock, description);
 

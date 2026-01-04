@@ -3,6 +3,7 @@ using Domain.Interfaces;
 using Domain.Repositories;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Services;
 
@@ -19,7 +20,7 @@ public class StoreCatalogService
         _clock = clock;
     }
 
-    public async Task<Offering> AddOffering(int ownerId, int storeId, string name, Money price, TimeSpan duration, string? description = null)
+    public async Task<Offering> AddOffering(int ownerId, int storeId, string name, Money price, Duration duration, string? description = null)
     {
         var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
         var staff = await _staffRepository.GetByStoreAsync(storeId);

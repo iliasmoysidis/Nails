@@ -2,6 +2,7 @@ using Domain.Common;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -11,14 +12,14 @@ public class Offering : HistoricEntity
     public int StoreId { get; private set; }
     public string Name { get; private set; } = null!;
     public Money Price { get; private set; } = null!;
-    public TimeSpan Duration { get; private set; }
+    public Duration Duration { get; private set; } = null!;
     public string? Description { get; private set; }
 
     private Offering() { }
 
-    public static Offering Create(int storeId, string name, Money price, TimeSpan duration, IClock clock, string? description = null)
+    public static Offering Create(int storeId, string name, Money price, Duration duration, IClock clock, string? description = null)
     {
-        ValidateServiceInfo(name, duration, description);
+        ValidateServiceInfo(name, description);
 
         var offering = new Offering
         {
@@ -34,7 +35,7 @@ public class Offering : HistoricEntity
         return offering;
     }
 
-    public void UpdateDetails(IClock clock, string? name = null, Money? price = null, TimeSpan? duration = null)
+    public void UpdateDetails(IClock clock, string? name = null, Money? price = null, Duration? duration = null)
     {
         if (IsDeleted)
         {
@@ -65,24 +66,9 @@ public class Offering : HistoricEntity
             hasChanges = true;
         }
 
-        if (duration.HasValue && duration.Value != Duration)
+        if (duration is not null && duration != Duration)
         {
-            if (duration.Value <= TimeSpan.Zero)
-            {
-                throw new DomainException("Duration must be greater than zero.");
-            }
-
-            if (duration.Value > TimeSpan.FromHours(8))
-            {
-                throw new DomainException("Duration cannot exceed 8 hours.");
-            }
-
-            if (duration.Value.TotalMinutes % 15 != 0)
-            {
-                throw new DomainException("Duration must be in 15-minute increments.");
-            }
-
-            Duration = duration.Value;
+            Duration = duration;
             hasChanges = true;
         }
 
@@ -102,7 +88,7 @@ public class Offering : HistoricEntity
         SoftDelete(clock);
     }
 
-    public static void ValidateServiceInfo(string name, TimeSpan duration, string? description = null)
+    public static void ValidateServiceInfo(string name, string? description = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -112,21 +98,6 @@ public class Offering : HistoricEntity
         if (name.Length > 200)
         {
             throw new DomainException("Service name cannot exceed 200 characters.");
-        }
-
-        if (duration <= TimeSpan.Zero)
-        {
-            throw new DomainException("Duration must be greater than zero.");
-        }
-
-        if (duration > TimeSpan.FromHours(8))
-        {
-            throw new DomainException("Duration cannot exceed 8 hours.");
-        }
-
-        if (duration.TotalMinutes % 15 != 0)
-        {
-            throw new DomainException("Duration must be in 15-minute increments.");
         }
 
         if (description != null && description.Length > 500)

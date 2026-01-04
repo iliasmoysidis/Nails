@@ -34,7 +34,7 @@ public class BookingService
         var offering = catalog.GetOffering(offeringId)
             ?? throw new DomainException("Service not found.");
 
-        var endAt = startAt.Add(offering.Duration);
+        var endAt = startAt.Add(offering.Duration.Value);
 
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
@@ -60,7 +60,7 @@ public class BookingService
         var offering = catalog.GetOffering(appointment.OfferingId)
             ?? throw new DomainException("Service not found.");
 
-        var newEndAt = newStartAt.Add(offering.Duration);
+        var newEndAt = newStartAt.Add(offering.Duration.Value);
 
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, newStartAt, newEndAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, newStartAt, newEndAt);
