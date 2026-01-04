@@ -8,21 +8,21 @@ namespace Domain.Entities;
 public class User : HistoricEntity
 {
     public int Id { get; private set; }
-    public string Name { get; private set; } = null!;
-    public string Surname { get; private set; } = null!;
+    public FirstName FirstName { get; private set; } = null!;
+    public LastName LastName { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
     public string Phone { get; private set; } = null!;
 
     private User() { }
 
-    public static User Create(string name, string surname, Email email, string phone, IClock clock)
+    public static User Create(FirstName firstName, LastName lastName, Email email, string phone, IClock clock)
     {
-        ValidatePersonalInfo(name, surname, phone);
+        ValidatePersonalInfo(phone);
 
         var user = new User
         {
-            Name = name.Trim(),
-            Surname = surname.Trim(),
+            FirstName = firstName,
+            LastName = lastName,
             Email = email,
             Phone = phone.Trim()
         };
@@ -31,23 +31,21 @@ public class User : HistoricEntity
         return user;
     }
 
-    public void UpdatePersonalInfo(IClock clock, string? name = null, string? surname = null, string? phone = null)
+    public void UpdatePersonalInfo(IClock clock, FirstName? firstName = null, LastName? lastName = null, string? phone = null)
     {
         if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");
 
         var hasChanges = false;
 
-        if (name != null && name != Name)
+        if (firstName is not null && firstName != FirstName)
         {
-            ValidateName(name);
-            Name = name.Trim();
+            FirstName = firstName;
             hasChanges = true;
         }
 
-        if (surname != null && surname != Surname)
+        if (lastName is not null && lastName != LastName)
         {
-            ValidateSurname(surname);
-            Surname = surname.Trim();
+            LastName = lastName;
             hasChanges = true;
         }
 
@@ -61,25 +59,9 @@ public class User : HistoricEntity
         if (hasChanges) MarkAsUpdated(clock);
     }
 
-    private static void ValidatePersonalInfo(string name, string surname, string phone)
+    private static void ValidatePersonalInfo(string phone)
     {
-        ValidateName(name);
-        ValidateSurname(surname);
         ValidatePhone(phone);
-    }
-
-    private static void ValidateName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) throw new DomainException("Name is required.");
-
-        if (name.Length > 100) throw new DomainException("Name cannot exceed 100 characters.");
-    }
-
-    private static void ValidateSurname(string surname)
-    {
-        if (string.IsNullOrWhiteSpace(surname)) throw new DomainException("Surname is required.");
-
-        if (surname.Length > 100) throw new DomainException("Surname cannot exceed 100 characters.");
     }
 
     private static void ValidatePhone(string phone)
