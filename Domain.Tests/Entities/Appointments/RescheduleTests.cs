@@ -3,6 +3,7 @@ using Domain.ValueObjects.Time;
 using FluentAssertions;
 using Domain.Tests.Fakes;
 using Domain.Exceptions;
+using Domain.ValueObjects.Finance;
 
 namespace Domain.Tests.Entities.Appointments;
 
@@ -14,7 +15,7 @@ public class RescheduleTests
         var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var clock = new FakeClock(UtcDateTime.From(baseTime));
 
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: clock.Now.AddMinutes(15), endAt: clock.Now.AddMinutes(45), clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: clock.Now.AddMinutes(15), endAt: clock.Now.AddMinutes(45), clock);
 
         appointment.Confirm(clock);
 
@@ -39,7 +40,7 @@ public class RescheduleTests
 
         var startAt = clock.Now.AddHours(24);
         var endAt = startAt.AddHours(1);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
 
@@ -59,7 +60,7 @@ public class RescheduleTests
 
         var startAt = clock.Now.AddHours(1);
         var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
         appointment.Cancel(clock);

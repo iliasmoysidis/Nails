@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Policies;
 using Domain.Tests.Fakes;
+using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
@@ -18,7 +19,7 @@ public class AppointmentAuthorizationPolicyTests
             professionalId: 1,
             offeringId: 1,
             storeId: 1,
-            price: 50,
+            price: Money.EUR(50),
             startAt: start,
             endAt: start.AddHours(2),
             clock

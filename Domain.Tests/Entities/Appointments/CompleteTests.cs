@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Tests.Fakes;
+using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
@@ -16,7 +17,7 @@ public class CompleteTests
 
         var startAt = clock.Now.AddHours(1);
         var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
 
@@ -36,7 +37,7 @@ public class CompleteTests
 
         var startAt = clock.Now.AddHours(1);
         var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
         appointment.SoftDelete(clock);
@@ -56,7 +57,7 @@ public class CompleteTests
 
         var startAt = clock.Now.AddHours(1);
         var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
 
         Action act = () => appointment.Complete(clock);
 
@@ -73,7 +74,7 @@ public class CompleteTests
 
         var startAt = clock.Now.AddHours(1);
         var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: 50, startAt: startAt, endAt: endAt, clock);
+        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
 
         appointment.Confirm(clock);
         clock.Advance(endAt - clock.Now - TimeSpan.FromMinutes(1));
