@@ -31,13 +31,6 @@ public class User : HistoricEntity
         return user;
     }
 
-    public void Deactivate(IClock clock)
-    {
-        if (IsDeleted) throw new DomainException("User is already deactivated.");
-
-        SoftDelete(clock);
-    }
-
     public void UpdatePersonalInfo(IClock clock, string? name = null, string? surname = null, string? phone = null)
     {
         if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");

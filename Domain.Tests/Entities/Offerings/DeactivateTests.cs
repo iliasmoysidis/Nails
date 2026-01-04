@@ -22,7 +22,7 @@ public class DeactivateTests
             clock: clock
         );
 
-        offering.Deactivate(clock);
+        offering.SoftDelete(clock);
 
         offering.IsDeleted.Should().Be(true);
     }
@@ -42,8 +42,8 @@ public class DeactivateTests
 
         offering.SoftDelete(clock);
 
-        Action act = () => offering.Deactivate(clock);
+        Action act = () => offering.SoftDelete(clock);
 
-        act.Should().Throw<DomainException>().WithMessage("Service is already deactivated.");
+        act.Should().Throw<DomainException>().WithMessage("Offering is already deleted.");
     }
 }

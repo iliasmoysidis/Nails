@@ -50,7 +50,7 @@ public class UpdateDetailsTests
             clock: clock
         );
 
-        offering.Deactivate(clock);
+        offering.SoftDelete(clock);
 
         clock.Advance(TimeSpan.FromHours(1));
 

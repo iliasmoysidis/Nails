@@ -70,13 +70,6 @@ public class Professional : HistoricEntity
 
     public string FullName => $"{Name} {Surname}";
 
-    public void Deactivate(IClock clock)
-    {
-        if (IsDeleted) throw new DomainException("Professional is already deactivated.");
-
-        SoftDelete(clock);
-    }
-
     private static void ValidatePersonalInfo(string name, string surname, string phone, string taxIdNumber)
     {
         ValidateName(name);

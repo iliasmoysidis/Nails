@@ -40,7 +40,7 @@ public class StoreCatalog
         var offering = _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
             ?? throw new DomainException("Offering not found.");
 
-        offering.Deactivate(clock);
+        offering.SoftDelete(clock);
 
         _serviceOfferings.RemoveWhere(o => o.OfferingId == offeringId);
     }

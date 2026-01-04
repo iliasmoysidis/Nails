@@ -78,16 +78,6 @@ public class Offering : HistoricEntity
         }
     }
 
-    public void Deactivate(IClock clock)
-    {
-        if (IsDeleted)
-        {
-            throw new DomainException("Service is already deactivated.");
-        }
-
-        SoftDelete(clock);
-    }
-
     public static void ValidateServiceInfo(string name, string? description = null)
     {
         if (string.IsNullOrWhiteSpace(name))
