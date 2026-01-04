@@ -178,7 +178,7 @@ public class Appointment : HistoricEntity
 
         BookedPrice = newPrice;
 
-        var adjustmentNote = $"Price adjusted to {newPrice:C}. Reason: {reason}";
+        var adjustmentNote = $"Price adjusted to {newPrice}. Reason: {reason}";
         Notes = string.IsNullOrWhiteSpace(Notes)
             ? adjustmentNote
             : $"{Notes}\n{adjustmentNote}";

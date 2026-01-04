@@ -26,7 +26,13 @@ public sealed record Duration
     }
 
     public static Duration FromTimeSpan(TimeSpan value)
-        => FromMinutes((int)value.TotalMinutes);
+    {
+        if (value.TotalMinutes % 1 != 0)
+            throw new DomainException("Duration must be whole minutes");
+
+        return FromMinutes((int)value.TotalMinutes);
+    }
+
 
     public override string ToString()
         => $"{Value.TotalMinutes} minutes";
