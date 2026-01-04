@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Tests.Fakes;
 using Domain.ValueObjects.Finance;
+using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
@@ -16,7 +17,7 @@ public class UpdateDetailsTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
@@ -26,12 +27,12 @@ public class UpdateDetailsTests
 
         offering.UpdateDetails(
             clock: clock,
-            name: "Low Taper Fade",
+            name: OfferingName.Create("Low Taper Fade"),
             price: Money.EUR(100),
             duration: Duration.FromMinutes(120)
         );
 
-        offering.Name.Should().Be("Low Taper Fade");
+        offering.Name.Should().Be(OfferingName.Create("Low Taper Fade"));
         offering.Price.Should().Be(Money.EUR(100));
         offering.Duration.Should().Be(Duration.FromMinutes(120));
         offering.UpdatedAt.Should().Be(clock.Now);
@@ -44,7 +45,7 @@ public class UpdateDetailsTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
@@ -56,7 +57,7 @@ public class UpdateDetailsTests
 
         Action act = () => offering.UpdateDetails(
             clock: clock,
-            name: "Low Taper Fade",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(100),
             duration: Duration.FromMinutes(120)
         );
@@ -71,7 +72,7 @@ public class UpdateDetailsTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
@@ -81,7 +82,7 @@ public class UpdateDetailsTests
 
         Action act = () => offering.UpdateDetails(
             clock: clock,
-            name: ""
+            name: OfferingName.Create("")
         );
 
         act.Should().Throw<DomainException>().WithMessage("Service name cannot be empty.");
@@ -94,7 +95,7 @@ public class UpdateDetailsTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
@@ -104,7 +105,7 @@ public class UpdateDetailsTests
 
         Action act = () => offering.UpdateDetails(
             clock: clock,
-            name: new string('a', 1000)
+            name: OfferingName.Create(new string('a', 1000))
         );
 
         act.Should().Throw<DomainException>().WithMessage("Service name cannot exceed 200 characters.");

@@ -26,7 +26,7 @@ public class StoreCatalog
         };
     }
 
-    public Offering AddOffering(string name, Money price, Duration duration, IClock clock, string? description = null)
+    public Offering AddOffering(OfferingName name, Money price, Duration duration, IClock clock, string? description = null)
     {
         var offering = Offering.Create(StoreId, name, price, duration, clock, description);
 

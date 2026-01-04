@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Tests.Fakes;
 using Domain.ValueObjects.Finance;
+using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
@@ -16,7 +17,7 @@ public class DeactivateTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
@@ -34,7 +35,7 @@ public class DeactivateTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock

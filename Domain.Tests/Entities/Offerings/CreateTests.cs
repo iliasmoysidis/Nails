@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Tests.Fakes;
 using Domain.ValueObjects.Finance;
+using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
 using FluentAssertions;
 
@@ -16,14 +17,14 @@ public class CreateTests
 
         var offering = Offering.Create(
             storeId: 1,
-            name: "Haircut",
+            name: OfferingName.Create("Haircut"),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
         );
 
         offering.StoreId.Should().Be(1);
-        offering.Name.Should().Be("Haircut");
+        offering.Name.Should().Be(OfferingName.Create("Haircut"));
         offering.Price.Should().Be(Money.EUR(50));
         offering.Duration.Should().Be(Duration.FromMinutes(60));
         offering.IsDeleted.Should().Be(false);
@@ -37,7 +38,7 @@ public class CreateTests
 
         Action act = () => Offering.Create(
             storeId: 1,
-            name: "  ",
+            name: OfferingName.Create(" "),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
@@ -53,7 +54,7 @@ public class CreateTests
 
         Action act = () => Offering.Create(
             storeId: 1,
-            name: new string('a', 1000),
+            name: OfferingName.Create(new string('a', 1000)),
             price: Money.EUR(50),
             duration: Duration.FromMinutes(60),
             clock: clock
