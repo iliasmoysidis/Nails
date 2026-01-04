@@ -1,6 +1,7 @@
 using Domain.Common;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Identity;
 
 namespace Domain.Entities;
 
@@ -10,14 +11,14 @@ public class Store : HistoricEntity
     public string Name { get; private set; } = null!;
     public string Address { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
-    public string Email { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
     public string Phone { get; private set; } = null!;
 
     private Store() { }
 
-    public static Store Create(string name, string address, string taxIdNumber, string email, string phone, IClock clock)
+    public static Store Create(string name, string address, string taxIdNumber, Email email, string phone, IClock clock)
     {
-        ValidateStoreInfo(name, address, taxIdNumber, email, phone);
+        ValidateStoreInfo(name, address, taxIdNumber, phone);
 
         var store = new Store
         {
@@ -33,7 +34,7 @@ public class Store : HistoricEntity
         return store;
     }
 
-    private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string email, string phone)
+    private static void ValidateStoreInfo(string name, string address, string taxIdNumber, string phone)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -53,16 +54,6 @@ public class Store : HistoricEntity
         if (address.Length > 200)
         {
             throw new DomainException("Address cannot exceed 200 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new DomainException("Email is required.");
-        }
-
-        if (!IsValidEmail(email))
-        {
-            throw new DomainException("Invalid email format.");
         }
 
         if (string.IsNullOrWhiteSpace(phone))

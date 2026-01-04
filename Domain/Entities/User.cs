@@ -1,6 +1,7 @@
 using Domain.Common;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Identity;
 
 namespace Domain.Entities;
 
@@ -9,20 +10,20 @@ public class User : HistoricEntity
     public int Id { get; private set; }
     public string Name { get; private set; } = null!;
     public string Surname { get; private set; } = null!;
-    public string Email { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
     public string Phone { get; private set; } = null!;
 
     private User() { }
 
-    public static User Create(string name, string surname, string email, string phone, IClock clock)
+    public static User Create(string name, string surname, Email email, string phone, IClock clock)
     {
-        ValidatePersonalInfo(name, surname, email, phone);
+        ValidatePersonalInfo(name, surname, phone);
 
         var user = new User
         {
             Name = name.Trim(),
             Surname = surname.Trim(),
-            Email = email.Trim(),
+            Email = email,
             Phone = phone.Trim()
         };
 
@@ -67,11 +68,10 @@ public class User : HistoricEntity
         if (hasChanges) MarkAsUpdated(clock);
     }
 
-    private static void ValidatePersonalInfo(string name, string surname, string email, string phone)
+    private static void ValidatePersonalInfo(string name, string surname, string phone)
     {
         ValidateName(name);
         ValidateSurname(surname);
-        ValidateEmail(email);
         ValidatePhone(phone);
     }
 
@@ -94,19 +94,5 @@ public class User : HistoricEntity
         if (string.IsNullOrWhiteSpace(phone)) throw new DomainException("Phone is required.");
 
         if (phone.Length > 20) throw new DomainException("Phone cannot exceed 20 characters.");
-    }
-
-    private static void ValidateEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email)) throw new DomainException("Email is required.");
-
-        try
-        {
-            _ = new System.Net.Mail.MailAddress(email);
-        }
-        catch
-        {
-            throw new DomainException("Invalid email.");
-        }
     }
 }

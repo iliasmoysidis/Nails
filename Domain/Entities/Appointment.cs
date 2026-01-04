@@ -2,6 +2,7 @@ using Domain.Common;
 using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
@@ -15,7 +16,7 @@ public class Appointment : HistoricEntity
     public int StoreId { get; private set; }
     public UtcDateTime StartAt { get; private set; }
     public UtcDateTime EndAt { get; private set; }
-    public decimal BookedPrice { get; private set; }
+    public Money BookedPrice { get; private set; } = null!;
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
     public UtcDateTime? CanceledAt { get; private set; }
@@ -35,9 +36,9 @@ public class Appointment : HistoricEntity
         Status = AppointmentStatus.PendingConfirmation;
     }
 
-    public static Appointment Create(int userId, int professionalId, int offeringId, int storeId, decimal price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
+    public static Appointment Create(int userId, int professionalId, int offeringId, int storeId, Money price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
     {
-        ValidateAppointmentInfo(price, notes);
+        ValidateAppointmentInfo(notes);
         ValidateTimeRange(startAt, endAt);
         ValidateChronology(startAt, endAt);
         ValidateStartIsInFuture(startAt, clock);
@@ -171,14 +172,9 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void AdjustPrice(decimal newPrice, string reason, IClock clock)
+    public void AdjustPrice(Money newPrice, string reason, IClock clock)
     {
         EnsureIsMutable();
-
-        if (newPrice < 0)
-        {
-            throw new DomainException("Price cannot be negative.");
-        }
 
         BookedPrice = newPrice;
 
@@ -190,13 +186,8 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    private static void ValidateAppointmentInfo(decimal price, string? notes = null)
+    private static void ValidateAppointmentInfo(string? notes = null)
     {
-        if (price < 0)
-        {
-            throw new DomainException("Price cannot be negative.");
-        }
-
         if (notes != null && notes.Length > 500)
         {
             throw new DomainException("Notes cannot be more than 500 characters.");

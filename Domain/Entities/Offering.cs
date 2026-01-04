@@ -1,6 +1,7 @@
 using Domain.Common;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Finance;
 
 namespace Domain.Entities;
 
@@ -9,15 +10,15 @@ public class Offering : HistoricEntity
     public int Id { get; private set; }
     public int StoreId { get; private set; }
     public string Name { get; private set; } = null!;
-    public decimal Price { get; private set; }
+    public Money Price { get; private set; } = null!;
     public TimeSpan Duration { get; private set; }
     public string? Description { get; private set; }
 
     private Offering() { }
 
-    public static Offering Create(int storeId, string name, decimal price, TimeSpan duration, IClock clock, string? description = null)
+    public static Offering Create(int storeId, string name, Money price, TimeSpan duration, IClock clock, string? description = null)
     {
-        ValidateServiceInfo(name, price, duration, description);
+        ValidateServiceInfo(name, duration, description);
 
         var offering = new Offering
         {
@@ -33,7 +34,7 @@ public class Offering : HistoricEntity
         return offering;
     }
 
-    public void UpdateDetails(IClock clock, string? name = null, decimal? price = null, TimeSpan? duration = null)
+    public void UpdateDetails(IClock clock, string? name = null, Money? price = null, TimeSpan? duration = null)
     {
         if (IsDeleted)
         {
@@ -58,19 +59,9 @@ public class Offering : HistoricEntity
             hasChanges = true;
         }
 
-        if (price.HasValue && price.Value != Price)
+        if (price is not null && price != Price)
         {
-            if (price.Value <= 0)
-            {
-                throw new DomainException("Price must be greater than zero.");
-            }
-
-            if (price.Value > 10000)
-            {
-                throw new DomainException("Price cannot exceed 10,000.");
-            }
-
-            Price = price.Value;
+            Price = price;
             hasChanges = true;
         }
 
@@ -111,7 +102,7 @@ public class Offering : HistoricEntity
         SoftDelete(clock);
     }
 
-    public static void ValidateServiceInfo(string name, decimal price, TimeSpan duration, string? description = null)
+    public static void ValidateServiceInfo(string name, TimeSpan duration, string? description = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -121,16 +112,6 @@ public class Offering : HistoricEntity
         if (name.Length > 200)
         {
             throw new DomainException("Service name cannot exceed 200 characters.");
-        }
-
-        if (price <= 0)
-        {
-            throw new DomainException("Price must be greater than zero.");
-        }
-
-        if (price > 10000)
-        {
-            throw new DomainException("Price cannot exceed 10,000.");
         }
 
         if (duration <= TimeSpan.Zero)

@@ -1,6 +1,7 @@
 using Domain.Common;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Identity;
 
 namespace Domain.Entities;
 
@@ -9,22 +10,22 @@ public class Professional : HistoricEntity
     public int Id { get; private set; }
     public string Name { get; private set; } = null!;
     public string Surname { get; private set; } = null!;
-    public string Email { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
     public string Phone { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
 
     private Professional()
     { }
 
-    public static Professional Create(string name, string surname, string email, string phone, string taxIdNumber, IClock clock)
+    public static Professional Create(string name, string surname, Email email, string phone, string taxIdNumber, IClock clock)
     {
-        ValidatePersonalInfo(name, surname, email, phone, taxIdNumber);
+        ValidatePersonalInfo(name, surname, phone, taxIdNumber);
 
         var professional = new Professional
         {
             Name = name.Trim(),
             Surname = surname.Trim(),
-            Email = email.Trim().ToLowerInvariant(),
+            Email = email,
             Phone = phone.Trim(),
             TaxIdNumber = taxIdNumber.Trim()
         };
@@ -76,12 +77,11 @@ public class Professional : HistoricEntity
         SoftDelete(clock);
     }
 
-    private static void ValidatePersonalInfo(string name, string surname, string email, string phone, string taxIdNumber)
+    private static void ValidatePersonalInfo(string name, string surname, string phone, string taxIdNumber)
     {
         ValidateName(name);
         ValidateSurname(surname);
         ValidatePhone(phone);
-        ValidateEmail(email);
         ValidateTaxIdNumber(taxIdNumber);
     }
 
@@ -104,20 +104,6 @@ public class Professional : HistoricEntity
         if (string.IsNullOrWhiteSpace(phone)) throw new DomainException("Phone is required.");
 
         if (phone.Length > 20) throw new DomainException("Phone cannot exceed 20 characters.");
-    }
-
-    private static void ValidateEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email)) throw new DomainException("Email is required.");
-
-        try
-        {
-            _ = new System.Net.Mail.MailAddress(email);
-        }
-        catch
-        {
-            throw new DomainException("Invalid email.");
-        }
     }
 
     private static void ValidateTaxIdNumber(string id)
