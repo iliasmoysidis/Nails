@@ -15,7 +15,8 @@ public class Appointment : HistoricEntity
     public int ProfessionalId { get; private set; }
     public int StoreId { get; private set; }
     public UtcDateTime StartAt { get; private set; }
-    public UtcDateTime EndAt { get; private set; }
+    public Duration Duration { get; private set; } = null!;
+    public UtcDateTime EndAt => StartAt.Add(Duration.Value);
     public Money BookedPrice { get; private set; } = null!;
     public string? Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
@@ -36,12 +37,19 @@ public class Appointment : HistoricEntity
         Status = AppointmentStatus.PendingConfirmation;
     }
 
-    public static Appointment Create(int userId, int professionalId, int offeringId, int storeId, Money price, UtcDateTime startAt, UtcDateTime endAt, IClock clock, string? notes = null)
+    public static Appointment Create(
+        int userId,
+        int professionalId,
+        int offeringId, int storeId,
+        Money price,
+        UtcDateTime startAt,
+        Duration duration,
+        IClock clock,
+        string? notes = null
+        )
     {
-        ValidateAppointmentInfo(notes);
-        ValidateTimeRange(startAt, endAt);
-        ValidateChronology(startAt, endAt);
-        ValidateStartIsInFuture(startAt, clock);
+        EnsureStartIsAfterNow(startAt, clock);
+        ValidateNotes(notes);
 
         var appointment = new Appointment
         {
@@ -51,34 +59,35 @@ public class Appointment : HistoricEntity
             StoreId = storeId,
             BookedPrice = price,
             StartAt = startAt,
-            EndAt = endAt,
+            Duration = duration,
             Notes = notes?.Trim(),
             Status = AppointmentStatus.PendingConfirmation,
         };
 
         appointment.MarkAsCreated(clock);
-
         return appointment;
     }
 
     public void Confirm(IClock clock)
     {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot confirm deleted appointment.");
-        }
+        EnsureNotDeleted();
 
         if (Status != AppointmentStatus.PendingConfirmation)
-        {
             throw new DomainException($"Cannot confirm appointment. Current status is {Status}. Only pending appointments can be confirmed.");
-        }
 
         if (StartAt <= clock.Now)
-        {
             throw new DomainException("Cannot confirm appointments in the past.");
-        }
 
         Status = AppointmentStatus.Confirmed;
+        MarkAsUpdated(clock);
+    }
+
+    public void Reschedule(UtcDateTime startAt, IClock clock)
+    {
+        EnsureIsMutable();
+        EnsureStartIsAfterNow(startAt, clock);
+
+        StartAt = startAt;
         MarkAsUpdated(clock);
     }
 
@@ -86,11 +95,8 @@ public class Appointment : HistoricEntity
     {
         EnsureIsMutable();
 
-        var hoursTillStart = (StartAt - clock.Now).TotalHours;
-        if (hoursTillStart <= 0)
-        {
+        if (StartAt <= clock.Now)
             throw new DomainException("Cannot cancel an ongoing appointment.");
-        }
 
         if (reason != null)
         {
@@ -106,20 +112,13 @@ public class Appointment : HistoricEntity
 
     public void Complete(IClock clock)
     {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot complete deleted appointment.");
-        }
+        EnsureNotDeleted();
 
         if (Status != AppointmentStatus.Confirmed)
-        {
             throw new DomainException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
-        }
 
         if (clock.Now < EndAt)
-        {
-            throw new DomainException("Cannot complete appointments before its end time.");
-        }
+            throw new DomainException("Cannot complete appointment before its end time.");
 
         Status = AppointmentStatus.Completed;
         MarkAsUpdated(clock);
@@ -127,40 +126,15 @@ public class Appointment : HistoricEntity
 
     public void MarkAsNoShow(IClock clock)
     {
-        if (IsDeleted)
-        {
-            throw new DomainException("Cannot mark as no-show a deleted appointment.");
-        }
+        EnsureNotDeleted();
 
         if (Status != AppointmentStatus.Confirmed)
-        {
             throw new DomainException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
-        }
 
         if (clock.Now < StartAt)
-        {
             throw new DomainException("Cannot mark as no-show before appointment start time.");
-        }
 
         Status = AppointmentStatus.NoShow;
-        MarkAsUpdated(clock);
-    }
-
-    public void Reschedule(UtcDateTime startAt, UtcDateTime endAt, IClock clock)
-    {
-        EnsureIsMutable();
-
-        if (StartAt <= clock.Now)
-        {
-            throw new DomainException("Cannot reschedule an appointment that has already started.");
-        }
-
-        ValidateTimeRange(startAt, endAt);
-        ValidateChronology(startAt, endAt);
-        ValidateStartIsInFuture(startAt, clock);
-
-        this.StartAt = startAt;
-        this.EndAt = endAt;
         MarkAsUpdated(clock);
     }
 
@@ -186,46 +160,21 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    private static void ValidateAppointmentInfo(string? notes = null)
+    public bool ConflictsWith(UtcDateTime start, UtcDateTime end)
+    {
+        if (IsDeleted) return false;
+
+        if (Status is AppointmentStatus.Canceled or AppointmentStatus.Completed or AppointmentStatus.NoShow)
+            return false;
+
+        return start < EndAt && end > StartAt;
+    }
+
+    private static void ValidateNotes(string? notes = null)
     {
         if (notes != null && notes.Length > 500)
         {
             throw new DomainException("Notes cannot be more than 500 characters.");
-        }
-    }
-
-    private static void ValidateChronology(UtcDateTime startAt, UtcDateTime endAt)
-    {
-        if (startAt >= endAt)
-        {
-            throw new DomainException("End time must be after start time.");
-        }
-    }
-
-    private static void ValidateStartIsInFuture(UtcDateTime startAt, IClock clock)
-    {
-        if (startAt <= clock.Now)
-        {
-            throw new DomainException("Cannot schedule appointments in the past.");
-        }
-    }
-
-    private static void ValidateTimeRange(UtcDateTime startAt, UtcDateTime endAt)
-    {
-        var duration = endAt - startAt;
-        if (duration > TimeSpan.FromHours(8))
-        {
-            throw new DomainException("Appointment duration cannot exceed 8 hours.");
-        }
-
-        if (duration.TotalMinutes % 15 != 0)
-        {
-            throw new DomainException("Appointment duration must be in 15-minute increments.");
-        }
-
-        if (startAt.Minute % 15 != 0 || startAt.Second != 0)
-        {
-            throw new DomainException("Appointments must start on 15-minute intervals.");
         }
     }
 
@@ -237,13 +186,15 @@ public class Appointment : HistoricEntity
         }
     }
 
-    public bool ConflictsWith(UtcDateTime start, UtcDateTime end)
+    private static void EnsureStartIsAfterNow(UtcDateTime startAt, IClock clock)
     {
-        if (IsDeleted) return false;
+        if (startAt <= clock.Now)
+            throw new DomainException("Appointment start time must be in the future.");
+    }
 
-        if (Status is AppointmentStatus.Canceled or AppointmentStatus.Completed or AppointmentStatus.NoShow)
-            return false;
-
-        return start < EndAt && end > StartAt;
+    private void EnsureNotDeleted()
+    {
+        if (IsDeleted)
+            throw new DomainException("Appointment is deleted.");
     }
 }

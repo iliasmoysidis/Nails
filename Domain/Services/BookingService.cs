@@ -34,14 +34,15 @@ public class BookingService
         var offering = catalog.GetOffering(offeringId)
             ?? throw new DomainException("Service not found.");
 
-        var endAt = startAt.Add(offering.Duration.Value);
+        var duration = offering.Duration;
+        var endAt = startAt.Add(duration.Value);
 
         await _availabilityService.EnsureStoreIsOpenAsync(storeId, startAt, endAt);
         await _availabilityService.EnsureProfessionalIsAvailableAsync(storeId, professionalId, startAt, endAt);
 
         await _appointmentOverlapPolicy.EnsureNoConflictAsync(professionalId, startAt, endAt);
 
-        var appointment = Appointment.Create(userId, professionalId, offeringId, storeId, offering.Price, startAt, endAt, _clock, notes);
+        var appointment = Appointment.Create(userId, professionalId, offeringId, storeId, offering.Price, startAt, duration, _clock, notes);
 
         await _appointmentRepository.AddAsync(appointment);
 
@@ -67,7 +68,7 @@ public class BookingService
 
         await _appointmentOverlapPolicy.EnsureNoConflictAsync(professionalId, newStartAt, newEndAt, appointment.Id);
 
-        appointment.Reschedule(newStartAt, newEndAt, _clock);
+        appointment.Reschedule(newStartAt, _clock);
 
         await _appointmentRepository.UpdateAsync(appointment);
 
