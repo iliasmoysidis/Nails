@@ -67,17 +67,4 @@ public class Store : HistoricEntity
             throw new DomainException("Tax ID number cannot exceed 50 characters.");
         }
     }
-
-    private static bool IsValidEmail(string email)
-    {
-        try
-        {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
-        }
-        catch
-        {
-            return false;
-        }
-    }
 }
