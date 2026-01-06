@@ -14,21 +14,19 @@ public class Offering : HistoricEntity
     public OfferingName Name { get; private set; } = null!;
     public Money Price { get; private set; } = null!;
     public Duration Duration { get; private set; } = null!;
-    public string? Description { get; private set; }
+    public Description Description { get; private set; } = Description.Empty();
 
     private Offering() { }
 
     public static Offering Create(int storeId, OfferingName name, Money price, Duration duration, IClock clock, string? description = null)
     {
-        ValidateServiceInfo(description);
-
         var offering = new Offering
         {
             StoreId = storeId,
             Name = name,
             Price = price,
             Duration = duration,
-            Description = description?.Trim()
+            Description = Description.From(description)
         };
 
         offering.MarkAsCreated(clock);
@@ -36,7 +34,7 @@ public class Offering : HistoricEntity
         return offering;
     }
 
-    public void UpdateDetails(IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null)
+    public void UpdateDetails(IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, string? description = null)
     {
         if (IsDeleted)
         {
@@ -63,17 +61,16 @@ public class Offering : HistoricEntity
             hasChanges = true;
         }
 
+        var newDescription = Description.From(description);
+        if (newDescription != Description)
+        {
+            Description = newDescription;
+            hasChanges = true;
+        }
+
         if (hasChanges)
         {
             MarkAsUpdated(clock);
-        }
-    }
-
-    public static void ValidateServiceInfo(string? description = null)
-    {
-        if (description != null && description.Length > 500)
-        {
-            throw new DomainException("Description cannot exceed 500 characters.");
         }
     }
 }

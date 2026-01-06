@@ -11,27 +11,25 @@ public class User : HistoricEntity
     public FirstName FirstName { get; private set; } = null!;
     public LastName LastName { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
-    public string Phone { get; private set; } = null!;
+    public Phone Phone { get; private set; } = null!;
 
     private User() { }
 
-    public static User Create(FirstName firstName, LastName lastName, Email email, string phone, IClock clock)
+    public static User Create(FirstName firstName, LastName lastName, Email email, Phone phone, IClock clock)
     {
-        ValidatePersonalInfo(phone);
-
         var user = new User
         {
             FirstName = firstName,
             LastName = lastName,
             Email = email,
-            Phone = phone.Trim()
+            Phone = phone
         };
 
         user.MarkAsCreated(clock);
         return user;
     }
 
-    public void UpdatePersonalInfo(IClock clock, FirstName? firstName = null, LastName? lastName = null, string? phone = null)
+    public void UpdatePersonalInfo(IClock clock, FirstName? firstName = null, LastName? lastName = null, Phone? phone = null)
     {
         if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");
 
@@ -51,23 +49,10 @@ public class User : HistoricEntity
 
         if (phone != null && phone != Phone)
         {
-            ValidatePhone(phone);
-            Phone = phone.Trim();
+            Phone = phone;
             hasChanges = true;
         }
 
         if (hasChanges) MarkAsUpdated(clock);
-    }
-
-    private static void ValidatePersonalInfo(string phone)
-    {
-        ValidatePhone(phone);
-    }
-
-    private static void ValidatePhone(string phone)
-    {
-        if (string.IsNullOrWhiteSpace(phone)) throw new DomainException("Phone is required.");
-
-        if (phone.Length > 20) throw new DomainException("Phone cannot exceed 20 characters.");
     }
 }

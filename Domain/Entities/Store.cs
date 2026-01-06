@@ -13,13 +13,13 @@ public class Store : HistoricEntity
     public string Address { get; private set; } = null!;
     public string TaxIdNumber { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
-    public string Phone { get; private set; } = null!;
+    public Phone Phone { get; private set; } = null!;
 
     private Store() { }
 
-    public static Store Create(StoreName name, string address, string taxIdNumber, Email email, string phone, IClock clock)
+    public static Store Create(StoreName name, string address, string taxIdNumber, Email email, Phone phone, IClock clock)
     {
-        ValidateStoreInfo(address, taxIdNumber, phone);
+        ValidateStoreInfo(address, taxIdNumber);
 
         var store = new Store
         {
@@ -35,7 +35,7 @@ public class Store : HistoricEntity
         return store;
     }
 
-    private static void ValidateStoreInfo(string address, string taxIdNumber, string phone)
+    private static void ValidateStoreInfo(string address, string taxIdNumber)
     {
         if (string.IsNullOrWhiteSpace(address))
         {
@@ -45,16 +45,6 @@ public class Store : HistoricEntity
         if (address.Length > 200)
         {
             throw new DomainException("Address cannot exceed 200 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(phone))
-        {
-            throw new DomainException("Phone is required.");
-        }
-
-        if (phone.Length > 20)
-        {
-            throw new DomainException("Phone cannot exceed 20 characters.");
         }
 
         if (string.IsNullOrWhiteSpace(taxIdNumber))
