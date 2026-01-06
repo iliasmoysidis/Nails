@@ -7,57 +7,109 @@ using FluentAssertions;
 
 namespace Domain.Tests.Entities.Appointments;
 
-public class CancelTest
+public class CancelTests
 {
+    private static (Appointment appointment, FakeClock clock)
+    CreateFutureAppointment()
+    {
+        var baseTime = new UtcDateTime(
+            new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc));
+
+        var clock = new FakeClock(baseTime);
+
+        var appointment = Appointment.Create(
+            userId: 1,
+            professionalId: 1,
+            offeringId: 1,
+            storeId: 1,
+            price: Money.EUR(50),
+            startAt: clock.Now.AddHours(1),
+            duration: Duration.FromMinutes(60),
+            clock);
+
+        return (appointment, clock);
+    }
+
     [Fact]
     public void Cancel_ShouldSetStatusToCanceled()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
         appointment.Cancel(clock);
 
         appointment.IsCanceled.Should().Be(true);
-        appointment.CanceledAt.Should().NotBeNull();
+        appointment.CanceledAt.Should().Be(clock.Now);
     }
 
     [Fact]
-    public void Cancel_ShouldSetCanceledAt()
+    public void Cancel_ShouldThrow_WhenAppointmentStarted()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
+        clock.Advance(TimeSpan.FromMinutes(61));
 
+        Action act = () => appointment.Cancel(clock);
 
-        clock.Advance(TimeSpan.FromMinutes(5));
-        appointment.Cancel(clock);
-        var cancelTime = clock.Now;
-
-        appointment.CanceledAt.Should().Be(cancelTime);
+        act.Should()
+        .Throw<DomainException>()
+        .WithMessage("Cannot cancel an ongoing appointment.");
     }
 
     [Fact]
     public void Cancel_ShouldThrow_WhenAlreadyCanceled()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
         appointment.Cancel(clock);
+
+        Action act = () => appointment.Cancel(clock);
+
+        act.Should()
+        .Throw<DomainException>()
+        .WithMessage("Appointment cannot be modified.");
+    }
+
+    [Fact]
+    public void Cancel_ShouldThrow_WhenAppointmentIsDeleted()
+    {
+        var (appointment, clock) = CreateFutureAppointment();
+
+        appointment.SoftDelete(clock);
+
+        Action act = () => appointment.Cancel(clock);
+
+        act.Should()
+        .Throw<DomainException>()
+        .WithMessage("Appointment cannot be modified.");
+    }
+
+    [Fact]
+    public void Cancel_ShouldThrow_WhenAppointmentIsCompleted()
+    {
+        var (appointment, clock) = CreateFutureAppointment();
+
+        appointment.Confirm(clock);
+        clock.Advance(TimeSpan.FromMinutes(61));
+        appointment.Complete(clock);
+
+        Action act = () => appointment.Cancel(clock);
+
+        act.Should()
+        .Throw<DomainException>()
+        .WithMessage("Appointment cannot be modified.");
+    }
+
+    [Fact]
+    public void Cancel_ShouldThrow_WhenAppointmentIsNoShow()
+    {
+        var (appointment, clock) = CreateFutureAppointment();
+
+        appointment.Confirm(clock);
+        clock.Advance(TimeSpan.FromMinutes(61));
+        appointment.MarkAsNoShow(clock);
 
         Action act = () => appointment.Cancel(clock);
 

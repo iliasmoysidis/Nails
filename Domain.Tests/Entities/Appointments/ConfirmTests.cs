@@ -9,17 +9,32 @@ namespace Domain.Tests.Entities.Appointments;
 
 public class ConfirmTests
 {
+    private static (Appointment appointment, FakeClock clock)
+    CreateFutureAppointment()
+    {
+        var baseTime = new UtcDateTime(
+            new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc));
+
+        var clock = new FakeClock(baseTime);
+
+        var appointment = Appointment.Create(
+            userId: 1,
+            professionalId: 1,
+            offeringId: 1,
+            storeId: 1,
+            price: Money.EUR(50),
+            startAt: clock.Now.AddHours(1),
+            duration: Duration.FromMinutes(60),
+            clock);
+
+        return (appointment, clock);
+    }
+
     [Fact]
     public void Confirm_ShouldSetStatusToConfirmed()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
+        var (appointment, clock) = CreateFutureAppointment();
 
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
-
-        clock.Advance(TimeSpan.FromMinutes(10));
         appointment.Confirm(clock);
 
         appointment.IsConfirmed.Should().Be(true);
@@ -31,12 +46,7 @@ public class ConfirmTests
     [Fact]
     public void Confirm_ShouldThrow_WhenAppointmentIsDeleted()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.SoftDelete(clock);
 
@@ -50,12 +60,7 @@ public class ConfirmTests
     [Fact]
     public void Confirm_ShouldThrow_WhenAlreadyConfirmed()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
 
@@ -69,15 +74,9 @@ public class ConfirmTests
     [Fact]
     public void Confirm_ShouldThrow_WhenStartIsInThePast()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
+        var (appointment, clock) = CreateFutureAppointment();
 
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
-
-        clock.Advance(TimeSpan.FromMinutes(90));
+        clock.Advance(TimeSpan.FromMinutes(61));
 
         Action act = () => appointment.Confirm(clock);
 

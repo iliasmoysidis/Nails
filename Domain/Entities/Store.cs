@@ -1,5 +1,4 @@
 using Domain.Common;
-using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
 using Domain.ValueObjects.Store;

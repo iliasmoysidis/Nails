@@ -9,20 +9,34 @@ namespace Domain.Tests.Entities.Appointments;
 
 public class NoShowTests
 {
-    [Fact]
-    public void NoShow_ShouldSetStatusToNoShow()
+    private static (Appointment appointment, FakeClock clock)
+    CreateFutureAppointment()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
+        var baseTime = new UtcDateTime(
+            new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc));
 
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var clock = new FakeClock(baseTime);
+
+        var appointment = Appointment.Create(
+            userId: 1,
+            professionalId: 1,
+            offeringId: 1,
+            storeId: 1,
+            price: Money.EUR(50),
+            startAt: clock.Now.AddHours(1),
+            duration: Duration.FromMinutes(60),
+            clock);
+
+        return (appointment, clock);
+    }
+
+    [Fact]
+    public void MarkAsNoShow_ShouldSetStatusToNoShow()
+    {
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
-
-        clock.Advance(startAt - clock.Now + TimeSpan.FromMinutes(1));
-
+        clock.Advance(TimeSpan.FromMinutes(61));
         appointment.MarkAsNoShow(clock);
 
         appointment.IsNoShow.Should().Be(true);
@@ -30,14 +44,9 @@ public class NoShowTests
     }
 
     [Fact]
-    public void NoShow_ShouldThrow_WhenAppointmentIsDeleted()
+    public void MarkAsNoShow_ShouldThrow_WhenAppointmentIsDeleted()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.SoftDelete(clock);
 
@@ -49,14 +58,9 @@ public class NoShowTests
     }
 
     [Fact]
-    public void NoShow_ShouldThrow_WhenStatusIsNotConfirmed()
+    public void MarkAsNoShow_ShouldThrow_WhenStatusIsNotConfirmed()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         Action act = () => appointment.MarkAsNoShow(clock);
 
@@ -66,14 +70,9 @@ public class NoShowTests
     }
 
     [Fact]
-    public void NoShow_ShouldThrow_WhenTimeIsBeforeStart()
+    public void MarkAsNoShow_ShouldThrow_WhenTimeIsBeforeStart()
     {
-        var baseTime = new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-        var clock = new FakeClock(UtcDateTime.From(baseTime));
-
-        var startAt = clock.Now.AddHours(1);
-        var endAt = startAt.AddHours(2);
-        var appointment = Appointment.Create(userId: 1, professionalId: 1, offeringId: 1, storeId: 1, price: Money.EUR(50), startAt: startAt, endAt: endAt, clock);
+        var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
 
