@@ -11,15 +11,15 @@ public class Store : HistoricEntity
     public int Id { get; private set; }
     public StoreName Name { get; private set; } = null!;
     public string Address { get; private set; } = null!;
-    public string TaxIdNumber { get; private set; } = null!;
+    public TaxIdentificationNumber TaxIdNumber { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
     public Phone Phone { get; private set; } = null!;
 
     private Store() { }
 
-    public static Store Create(StoreName name, string address, string taxIdNumber, Email email, Phone phone, IClock clock)
+    public static Store Create(StoreName name, string address, TaxIdentificationNumber taxIdNumber, Email email, Phone phone, IClock clock)
     {
-        ValidateStoreInfo(address, taxIdNumber);
+        ValidateStoreInfo(address);
 
         var store = new Store
         {
@@ -35,7 +35,7 @@ public class Store : HistoricEntity
         return store;
     }
 
-    private static void ValidateStoreInfo(string address, string taxIdNumber)
+    private static void ValidateStoreInfo(string address)
     {
         if (string.IsNullOrWhiteSpace(address))
         {
@@ -45,16 +45,6 @@ public class Store : HistoricEntity
         if (address.Length > 200)
         {
             throw new DomainException("Address cannot exceed 200 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(taxIdNumber))
-        {
-            throw new DomainException("Tax ID number is required.");
-        }
-
-        if (taxIdNumber.Length > 50)
-        {
-            throw new DomainException("Tax ID number cannot exceed 50 characters.");
         }
     }
 }

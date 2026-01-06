@@ -12,22 +12,20 @@ public class Professional : HistoricEntity
     public LastName LastName { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
     public Phone Phone { get; private set; } = null!;
-    public string TaxIdNumber { get; private set; } = null!;
+    public TaxIdentificationNumber TaxIdNumber { get; private set; } = null!;
 
     private Professional()
     { }
 
-    public static Professional Create(FirstName firstName, LastName lastName, Email email, Phone phone, string taxIdNumber, IClock clock)
+    public static Professional Create(FirstName firstName, LastName lastName, Email email, Phone phone, TaxIdentificationNumber taxIdNumber, IClock clock)
     {
-        ValidatePersonalInfo(taxIdNumber);
-
         var professional = new Professional
         {
             FirstName = firstName,
             LastName = lastName,
             Email = email,
             Phone = phone,
-            TaxIdNumber = taxIdNumber.Trim()
+            TaxIdNumber = taxIdNumber
         };
 
         professional.MarkAsCreated(clock);
@@ -63,16 +61,4 @@ public class Professional : HistoricEntity
     }
 
     public string FullName => $"{FirstName} {LastName}";
-
-    private static void ValidatePersonalInfo(string taxIdNumber)
-    {
-        ValidateTaxIdNumber(taxIdNumber);
-    }
-
-    private static void ValidateTaxIdNumber(string id)
-    {
-        if (string.IsNullOrWhiteSpace(id)) throw new DomainException("Tax ID number not found.");
-
-        if (id.Length > 50) throw new DomainException("Tax ID number cannot exceed 50 characters.");
-    }
 }
