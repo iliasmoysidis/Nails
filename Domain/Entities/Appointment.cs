@@ -2,6 +2,7 @@ using Domain.Common;
 using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.ValueObjects.Appointments;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Time;
 
@@ -18,7 +19,7 @@ public class Appointment : HistoricEntity
     public Duration Duration { get; private set; } = null!;
     public UtcDateTime EndAt => StartAt.Add(Duration.Value);
     public Money BookedPrice { get; private set; } = null!;
-    public string? Notes { get; private set; }
+    public Notes Notes { get; private set; } = Notes.Empty();
     public AppointmentStatus Status { get; private set; }
     public UtcDateTime? CanceledAt { get; private set; }
 
@@ -49,7 +50,6 @@ public class Appointment : HistoricEntity
         )
     {
         EnsureStartIsAfterNow(startAt, clock);
-        ValidateNotes(notes);
 
         var appointment = new Appointment
         {
@@ -60,7 +60,7 @@ public class Appointment : HistoricEntity
             BookedPrice = price,
             StartAt = startAt,
             Duration = duration,
-            Notes = notes?.Trim(),
+            Notes = Notes.From(notes),
             Status = AppointmentStatus.PendingConfirmation,
         };
 
@@ -98,12 +98,7 @@ public class Appointment : HistoricEntity
         if (StartAt <= clock.Now)
             throw new DomainException("Cannot cancel an ongoing appointment.");
 
-        if (reason != null)
-        {
-            Notes = string.IsNullOrWhiteSpace(Notes)
-            ? $"Cancellation reason: {reason}"
-            : $"{Notes}\nCancellation reason: {reason}";
-        }
+        Notes = Notes.Append("Cancellation reason", reason);
 
         Status = AppointmentStatus.Canceled;
         CanceledAt = clock.Now;
@@ -142,7 +137,7 @@ public class Appointment : HistoricEntity
     {
         EnsureIsMutable();
 
-        Notes = notes?.Trim();
+        Notes = Notes.From(notes);
         MarkAsUpdated(clock);
     }
 
@@ -151,11 +146,7 @@ public class Appointment : HistoricEntity
         EnsureIsMutable();
 
         BookedPrice = newPrice;
-
-        var adjustmentNote = $"Price adjusted to {newPrice}. Reason: {reason}";
-        Notes = string.IsNullOrWhiteSpace(Notes)
-            ? adjustmentNote
-            : $"{Notes}\n{adjustmentNote}";
+        Notes = Notes.Append("Price adjusted", $"{newPrice}. {reason}");
 
         MarkAsUpdated(clock);
     }
@@ -168,14 +159,6 @@ public class Appointment : HistoricEntity
             return false;
 
         return start < EndAt && end > StartAt;
-    }
-
-    private static void ValidateNotes(string? notes = null)
-    {
-        if (notes != null && notes.Length > 500)
-        {
-            throw new DomainException("Notes cannot be more than 500 characters.");
-        }
     }
 
     private void EnsureIsMutable()
