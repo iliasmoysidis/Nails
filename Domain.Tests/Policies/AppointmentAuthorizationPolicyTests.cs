@@ -21,7 +21,7 @@ public class AppointmentAuthorizationPolicyTests
             storeId: 1,
             price: Money.EUR(50),
             startAt: start,
-            endAt: start.AddHours(2),
+            duration: Duration.FromMinutes(120),
             clock
         );
 

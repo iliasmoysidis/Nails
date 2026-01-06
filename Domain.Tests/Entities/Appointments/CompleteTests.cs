@@ -55,7 +55,7 @@ public class CompleteTests
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("*deleted appointment*");
+            .WithMessage("Appointment is deleted.");
     }
 
     [Fact]
@@ -82,6 +82,6 @@ public class CompleteTests
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("Cannot complete appointments before its end time.");
+            .WithMessage("Cannot complete appointment before its end time.");
     }
 }

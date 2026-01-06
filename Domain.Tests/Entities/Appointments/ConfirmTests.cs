@@ -54,7 +54,7 @@ public class ConfirmTests
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("Cannot confirm deleted appointment.");
+            .WithMessage("Appointment is deleted.");
     }
 
     [Fact]

@@ -92,7 +92,7 @@ public class CancelTests
         var (appointment, clock) = CreateFutureAppointment();
 
         appointment.Confirm(clock);
-        clock.Advance(TimeSpan.FromMinutes(61));
+        clock.Advance(TimeSpan.FromMinutes(121));
         appointment.Complete(clock);
 
         Action act = () => appointment.Cancel(clock);

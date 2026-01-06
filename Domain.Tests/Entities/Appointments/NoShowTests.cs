@@ -54,7 +54,7 @@ public class NoShowTests
 
         act.Should()
             .Throw<DomainException>()
-            .WithMessage("*mark as no-show a deleted appointment*");
+            .WithMessage("Appointment is deleted.");
     }
 
     [Fact]

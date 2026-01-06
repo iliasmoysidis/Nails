@@ -10,11 +10,12 @@ namespace Domain.Tests.Policies;
 
 public class AppointmentOverlapPolicyTests
 {
-    private static Appointment CreateConfirmedAppointment(int id, UtcDateTime start, UtcDateTime end)
+    private static Appointment CreateConfirmedAppointment(
+    int id,
+    UtcDateTime start,
+    Duration duration)
     {
-        var clock = new FakeClock(
-            start.AddHours(-1)
-        );
+        var clock = new FakeClock(start.AddHours(-1));
 
         var appointment = Appointment.Create(
             userId: 1,
@@ -23,13 +24,15 @@ public class AppointmentOverlapPolicyTests
             storeId: 1,
             price: Money.EUR(50),
             startAt: start,
-            endAt: end,
+            duration: duration,
             clock
         );
 
         appointment.Confirm(clock);
 
-        typeof(Appointment).GetProperty(nameof(Appointment.Id))!.SetValue(appointment, id);
+        typeof(Appointment)
+        .GetProperty(nameof(Appointment.Id))!
+        .SetValue(appointment, id);
 
         return appointment;
     }
@@ -50,16 +53,20 @@ public class AppointmentOverlapPolicyTests
     public async Task EnsureNoCoflictAsync_ShouldThrow_WhenAppointmentConflicts()
     {
         var appointment = CreateConfirmedAppointment(
-            id: 1,
-            start: UtcDateTime.From(new DateTime(2025, 1, 1, 10, 0, 0)),
-            end: UtcDateTime.From(new DateTime(2025, 1, 1, 11, 0, 0)));
+        id: 1,
+        start: UtcDateTime.From(new DateTime(2025, 1, 1, 10, 0, 0, DateTimeKind.Utc)),
+        duration: Duration.FromMinutes(120)
+    );
 
         var repo = new FakeAppointmentRepository([appointment]);
         var policy = new AppointmentOverlapPolicy(repo);
 
-        var start = UtcDateTime.From(new DateTime(2025, 1, 1, 10, 30, 0));
+        var start = UtcDateTime.From(new DateTime(2025, 1, 1, 10, 30, 0, DateTimeKind.Utc));
         var end = start.AddHours(1);
 
-        await policy.Invoking(p => p.EnsureNoConflictAsync(1, start, end)).Should().ThrowAsync<DomainException>().WithMessage("Professional already has an appointment at this time.");
+        await policy.Invoking(p => p.EnsureNoConflictAsync(1, start, end))
+        .Should()
+        .ThrowAsync<DomainException>()
+        .WithMessage("Professional already has an appointment at this time.");
     }
 }
