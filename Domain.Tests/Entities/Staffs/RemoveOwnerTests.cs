@@ -12,8 +12,7 @@ public class RemoveOwnerTests
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
         staff.AddOwner(10, 11);
-
-        staff.Invoking(s => s.RemoveOwner(10, 11)).Should().NotThrow();
+        staff.RemoveOwner(10, 11);
 
         staff.IsOwner(11).Should().Be(false);
     }
@@ -23,7 +22,9 @@ public class RemoveOwnerTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.RemoveOwner(10, 10)).Should().Throw<DomainException>().WithMessage("Cannot remove last owner.");
+        Action act = () => staff.RemoveOwner(10, 10);
+
+        act.Should().Throw<DomainException>().WithMessage("Cannot remove last owner.");
     }
 
     [Fact]
@@ -33,6 +34,8 @@ public class RemoveOwnerTests
 
         staff.AddOwner(10, 11);
 
-        staff.Invoking(s => s.RemoveOwner(10, 12)).Should().Throw<DomainException>().WithMessage("Professional is not an owner of this store.");
+        Action act = () => staff.RemoveOwner(10, 12);
+
+        act.Should().Throw<DomainException>().WithMessage("Professional is not an owner of this store.");
     }
 }

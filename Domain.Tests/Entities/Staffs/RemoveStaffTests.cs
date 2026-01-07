@@ -12,8 +12,7 @@ public class RemoveStaffTests
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
         staff.AddStaff(10, 11);
-
-        staff.Invoking(s => s.RemoveStaff(10, 11)).Should().NotThrow();
+        staff.RemoveStaff(10, 11);
 
         staff.IsStaff(11).Should().Be(false);
     }
@@ -23,6 +22,8 @@ public class RemoveStaffTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.RemoveStaff(10, 11)).Should().Throw<DomainException>().WithMessage("Professional does not work for the store.");
+        Action act = () => staff.RemoveStaff(10, 11);
+
+        act.Should().Throw<DomainException>().WithMessage("Professional does not work for the store.");
     }
 }

@@ -11,7 +11,9 @@ public class EnsureOwnerTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.EnsureOwner(10)).Should().NotThrow();
+        Action act = () => staff.EnsureOwner(10);
+
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -19,6 +21,8 @@ public class EnsureOwnerTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.EnsureOwner(9)).Should().Throw<DomainException>().WithMessage("Only an owner can perform this action.");
+        Action act = () => staff.EnsureOwner(9);
+
+        act.Should().Throw<DomainException>().WithMessage("Only an owner can perform this action.");
     }
 }

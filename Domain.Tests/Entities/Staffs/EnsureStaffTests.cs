@@ -12,7 +12,9 @@ public class EnsureStaffTests
 
         staff.AddStaff(10, 11);
 
-        staff.Invoking(s => s.EnsureStaff(11)).Should().NotThrow();
+        Action act = () => staff.EnsureStaff(11);
+
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -20,6 +22,8 @@ public class EnsureStaffTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.EnsureStaff(11)).Should().Throw().WithMessage("Professional does not work for the store.");
+        Action act = () => staff.EnsureStaff(11);
+
+        act.Should().Throw().WithMessage("Professional does not work for the store.");
     }
 }

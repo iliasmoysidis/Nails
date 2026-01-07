@@ -6,7 +6,7 @@ namespace Domain.Tests.Entities.Staffs;
 public class CreateTests
 {
     [Fact]
-    public void Create_ShouldAddInitialOwner()
+    public void Create_ShouldAddInitialOwner_WhenDataIsValid()
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 

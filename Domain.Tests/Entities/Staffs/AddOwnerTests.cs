@@ -11,7 +11,7 @@ public class AddOwnerTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.AddOwner(10, 11)).Should().NotThrow();
+        staff.AddOwner(10, 11);
 
         staff.IsOwner(11).Should().Be(true);
     }
@@ -21,6 +21,8 @@ public class AddOwnerTests
     {
         var staff = Staff.Create(storeId: 1, initialOwnerId: 10);
 
-        staff.Invoking(s => s.AddOwner(10, 10)).Should().Throw<DomainException>().WithMessage("Professional is already an owner of this store.");
+        Action act = () => staff.AddOwner(10, 10);
+
+        act.Should().Throw<DomainException>().WithMessage("Professional is already an owner of this store.");
     }
 }
