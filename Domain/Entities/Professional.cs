@@ -8,8 +8,7 @@ namespace Domain.Entities;
 public class Professional : HistoricEntity
 {
     public int Id { get; private set; }
-    public FirstName FirstName { get; private set; } = null!;
-    public LastName LastName { get; private set; } = null!;
+    public FullName FullName { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
     public Phone Phone { get; private set; } = null!;
     public TaxIdentificationNumber TaxIdNumber { get; private set; } = null!;
@@ -17,12 +16,11 @@ public class Professional : HistoricEntity
     private Professional()
     { }
 
-    public static Professional Create(FirstName firstName, LastName lastName, Email email, Phone phone, TaxIdentificationNumber taxIdNumber, IClock clock)
+    public static Professional Create(FullName fullName, Email email, Phone phone, TaxIdentificationNumber taxIdNumber, IClock clock)
     {
         var professional = new Professional
         {
-            FirstName = firstName,
-            LastName = lastName,
+            FullName = fullName,
             Email = email,
             Phone = phone,
             TaxIdNumber = taxIdNumber
@@ -33,21 +31,15 @@ public class Professional : HistoricEntity
         return professional;
     }
 
-    public void UpdatePersonalInfo(IClock clock, FirstName? firstName = null, LastName? lastName = null, Phone? phone = null)
+    public void UpdatePersonalInfo(IClock clock, FullName? fullName = null, Phone? phone = null)
     {
         if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");
 
         var hasChanges = false;
 
-        if (firstName is not null && firstName != FirstName)
+        if (fullName is not null && fullName != FullName)
         {
-            FirstName = firstName;
-            hasChanges = true;
-        }
-
-        if (lastName is not null && lastName != LastName)
-        {
-            LastName = lastName;
+            FullName = fullName;
             hasChanges = true;
         }
 
@@ -59,6 +51,4 @@ public class Professional : HistoricEntity
 
         if (hasChanges) MarkAsUpdated(clock);
     }
-
-    public string FullName => $"{FirstName} {LastName}";
 }

@@ -11,7 +11,7 @@ public sealed record Email
         Value = value;
     }
 
-    public static Email Create(string value)
+    public static Email From(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("Email cannot be empty.");
