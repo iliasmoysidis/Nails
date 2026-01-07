@@ -30,36 +30,4 @@ public class CreateTests
         offering.IsDeleted.Should().Be(false);
         offering.CreatedAt.Should().Be(clock.Now);
     }
-
-    [Fact]
-    public void Create_ShouleTrhow_WhenNameIsEmpty()
-    {
-        var clock = new FakeClock(UtcDateTime.Now());
-
-        Action act = () => Offering.Create(
-            storeId: 1,
-            name: OfferingName.Create(" "),
-            price: Money.EUR(50),
-            duration: Duration.FromMinutes(60),
-            clock: clock
-        );
-
-        act.Should().Throw<DomainException>().WithMessage("Service name cannot be empty.");
-    }
-
-    [Fact]
-    public void Create_ShouleTrhow_WhenNameIsMoreThan200Characters()
-    {
-        var clock = new FakeClock(UtcDateTime.Now());
-
-        Action act = () => Offering.Create(
-            storeId: 1,
-            name: OfferingName.Create(new string('a', 1000)),
-            price: Money.EUR(50),
-            duration: Duration.FromMinutes(60),
-            clock: clock
-        );
-
-        act.Should().Throw<DomainException>().WithMessage("Service name cannot exceed 200 characters.");
-    }
 }

@@ -11,7 +11,7 @@ namespace Domain.Tests.Entities.Appointments;
 public class CreateTests
 {
     [Fact]
-    public void Create_ShouldNotThrow_WhenDataIsValid()
+    public void Create_ShouldCreateAppointment_WhenDataIsValid()
     {
         var baseTime = new UtcDateTime(
         new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Utc));
