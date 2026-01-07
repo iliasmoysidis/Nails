@@ -1,5 +1,4 @@
 using Domain.Entities;
-using Domain.Exceptions;
 using Domain.Tests.Fakes;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;

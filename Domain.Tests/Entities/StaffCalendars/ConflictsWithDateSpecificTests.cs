@@ -6,109 +6,113 @@ namespace Domain.Tests.Entities.StaffCalendars;
 
 public class ConflictsWithDateSpecificTests
 {
-    [Fact]
-    public void ConflictsWithDateSpecific_ShouldReturnTrue_WhenExceptionOverlapsWithWorkingRanges()
+    private static StaffCalendar CreateCalendar()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
         calendar.SetWorkingDay(
             WorkingDay.WithRanges(
                 DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
+                [Range(9, 17)]
             )
         );
+
+        calendar.SetWorkingDay(
+            WorkingDay.WithRanges(
+                DayOfWeek.Tuesday,
+                [Range(9, 17)]
+            )
+        );
+
+        calendar.SetWorkingDay(
+            WorkingDay.WithRanges(
+                DayOfWeek.Wednesday,
+                [Range(9, 17)]
+            )
+        );
+
+        calendar.SetDayOff(DayOfWeek.Sunday);
+
+        calendar.AddException(
+            CalendarException.PartialDay(
+                new DateOnly(2025, 1, 9),
+                [Range(17, 21)]
+            )
+        );
+
+        calendar.AddException(
+            CalendarException.DayOff(
+                new DateOnly(2025, 1, 20)
+            )
+        );
+
+        return calendar;
+    }
+
+    private static TimeRange Range(int startHour, int endHour)
+        => new(TimeSpan.FromHours(startHour), TimeSpan.FromHours(endHour));
+
+    [Fact]
+    public void ConflictsWithDateSpecific_ReturnsTrue_WhenExceptionOverlapsWorkingHours()
+    {
+        var calendar = CreateCalendar();
 
         var exception = CalendarException.PartialDay(
             new DateOnly(2025, 11, 17),
-            [
-                new TimeRange(TimeSpan.FromHours(10), TimeSpan.FromHours(16))
-            ]
+            [Range(10, 16)]
         );
 
-        calendar.ConflictsWithDateSpecific(exception).Should().Be(true);
+        calendar.ConflictsWithDateSpecific(exception).Should().BeTrue();
     }
 
     [Fact]
-    public void ConflictsWithDateSpecific_ShouldReturnFalse_WhenExceptionIsDayOff()
+    public void ConflictsWithDateSpecific_ReturnsFalse_WhenExceptionIsDayOff()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                new[]
-                {
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
-            )
-        );
+        var calendar = CreateCalendar();
 
         var exception = CalendarException.DayOff(
             new DateOnly(2025, 11, 17)
         );
 
-        calendar.ConflictsWithDateSpecific(exception).Should().Be(false);
+        calendar.ConflictsWithDateSpecific(exception).Should().BeFalse();
     }
 
     [Fact]
-    public void ConflictsWithDateSpecific_ShouldReturnFalse_WhenNoWorkDays()
+    public void ConflictsWithDateSpecific_ReturnsFalse_WhenNoWorkingDayConfiguredForDate()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
+        var calendar = CreateCalendar();
 
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                ]
-            )
+        var exception = CalendarException.PartialDay(
+            new DateOnly(2025, 11, 22),
+            [Range(10, 12)]
         );
 
-        var exception = CalendarException.DayOff(
-            new DateOnly(2025, 11, 17)
-        );
-
-        calendar.ConflictsWithDateSpecific(exception).Should().Be(false);
+        calendar.ConflictsWithDateSpecific(exception).Should().BeFalse();
     }
 
     [Fact]
-    public void ConflictsWithDateSpecific_ShouldReturnFalse_WhenNoOverlap()
+    public void ConflictsWithDateSpecific_ReturnsFalse_WhenNoOverlapWithWorkingHours()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                [
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(14))
-                ]
-            )
-        );
+        var calendar = CreateCalendar();
 
         var exception = CalendarException.PartialDay(
             new DateOnly(2025, 11, 17),
-            [
-                new TimeRange(TimeSpan.FromHours(15), TimeSpan.FromHours(21))
-            ]
+            [Range(18, 21)]
         );
 
-        calendar.ConflictsWithDateSpecific(exception).Should().Be(false);
+        calendar.ConflictsWithDateSpecific(exception).Should().BeFalse();
     }
 
     [Fact]
-    public void ConflictsWithDateSpecific_ShouldReturnFalse_WhenNoWorkingRangesExist()
+    public void ConflictsWithDateSpecific_ReturnsFalse_WhenCalendarHasNoWorkingRanges()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
         var exception = CalendarException.PartialDay(
-            new DateOnly(2025, 11, 17),
-            [
-                new TimeRange(TimeSpan.FromHours(15), TimeSpan.FromHours(21))
-            ]
+            new DateOnly(2025, 1, 20),
+            [Range(15, 21)]
         );
 
-        calendar.ConflictsWithDateSpecific(exception).Should().Be(false);
+        calendar.ConflictsWithDateSpecific(exception).Should().BeFalse();
     }
 }

@@ -6,10 +6,9 @@ using FluentAssertions;
 
 namespace Domain.Tests.Entities.StaffCalendars;
 
-public class AvailabilityTests
+public class IsProfessionalAvailableTests
 {
-    [Fact]
-    public void IsProfessionalAvailable_ShouldReturnTrue_WhenInsideWorkingHours()
+    private static StaffCalendar CreateCalendar()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -22,6 +21,52 @@ public class AvailabilityTests
                 }
             )
         );
+
+        calendar.SetWorkingDay(
+            WorkingDay.WithRanges(
+                DayOfWeek.Tuesday,
+                new[]
+                {
+                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
+                }
+            )
+        );
+
+        calendar.SetWorkingDay(
+            WorkingDay.WithRanges(
+                DayOfWeek.Wednesday,
+                new[]
+                {
+                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
+                }
+            )
+        );
+
+        calendar.AddException(
+            CalendarException.PartialDay(
+                new DateOnly(2025, 1, 9),
+                new[]
+                {
+                    new TimeRange(TimeSpan.FromHours(17), TimeSpan.FromHours(21))
+
+                }
+            )
+        );
+
+        calendar.AddException(CalendarException.DayOff(
+            new DateOnly(2025, 1, 20)
+            )
+        );
+
+        calendar.SetDayOff(DayOfWeek.Sunday);
+
+        return calendar;
+    }
+
+    [Fact]
+    public void IsProfessionalAvailable_ShouldReturnTrue_WhenInsideWorkingHours()
+    {
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
             new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)
@@ -35,20 +80,10 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldReturnTrue_WhenInsidePartialException()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.AddException(CalendarException.PartialDay(
-            new DateOnly(2025, 1, 6),
-            new[]
-            {
-                new TimeRange(TimeSpan.FromHours(17), TimeSpan.FromHours(21))
-
-            }
-        )
-        );
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
-            new DateTime(2025, 1, 6, 18, 0, 0, DateTimeKind.Utc)  // Monday
+            new DateTime(2025, 1, 9, 18, 0, 0, DateTimeKind.Utc)
         );
 
         var end = start.AddHours(2);
@@ -59,17 +94,7 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldReturnFalse_WhenOutsideWorkingHours()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                new[]
-                {
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
-            )
-        );
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
             new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)
@@ -83,12 +108,10 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldReturnFalse_WhenDayOff()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetDayOff(DayOfWeek.Monday);
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
-            new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)  // Monday
+            new DateTime(2025, 1, 12, 10, 0, 0, DateTimeKind.Utc)
         );
 
         var end = start.AddHours(2);
@@ -99,20 +122,10 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldReturnFalse_WhenOutsidePartialException()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.AddException(CalendarException.PartialDay(
-            new DateOnly(2025, 1, 6),
-            new[]
-            {
-                new TimeRange(TimeSpan.FromHours(17), TimeSpan.FromHours(21))
-
-            }
-        )
-        );
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
-            new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)  // Monday
+            new DateTime(2025, 1, 9, 10, 0, 0, DateTimeKind.Utc)
         );
 
         var end = start.AddHours(2);
@@ -123,15 +136,10 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldReturnFalse_WhenExceptionDayOff()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.AddException(CalendarException.DayOff(
-            new DateOnly(2025, 1, 6)
-            )
-        );
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
-            new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)  // Monday
+            new DateTime(2025, 1, 20, 10, 0, 0, DateTimeKind.Utc)
         );
 
         var end = start.AddHours(2);
@@ -142,17 +150,7 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldReturnFalse_WhenEndDateIsDifferentThanStartDate()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                new[]
-                {
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
-            )
-        );
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
             new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)
@@ -166,17 +164,7 @@ public class AvailabilityTests
     [Fact]
     public void IsProfessionalAvailable_ShouldThrow_WhenEndBeforeStartTime()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                new[]
-                {
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
-            )
-        );
+        var calendar = CreateCalendar();
 
         var start = UtcDateTime.From(
             new DateTime(2025, 1, 6, 10, 0, 0, DateTimeKind.Utc)

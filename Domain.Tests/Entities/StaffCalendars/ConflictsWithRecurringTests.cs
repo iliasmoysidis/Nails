@@ -6,8 +6,7 @@ namespace Domain.Tests.Entities.StaffCalendars;
 
 public class ConflictsWithRecurringTests
 {
-    [Fact]
-    public void ConflictsWithRecurring_ShouldReturnTrue_WhenTimeRangeOverlaps()
+    private static StaffCalendar CreateCalendar()
     {
         var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
 
@@ -20,6 +19,52 @@ public class ConflictsWithRecurringTests
                 }
             )
         );
+
+        calendar.SetWorkingDay(
+            WorkingDay.WithRanges(
+                DayOfWeek.Tuesday,
+                new[]
+                {
+                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
+                }
+            )
+        );
+
+        calendar.SetWorkingDay(
+            WorkingDay.WithRanges(
+                DayOfWeek.Wednesday,
+                new[]
+                {
+                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
+                }
+            )
+        );
+
+        calendar.AddException(
+            CalendarException.PartialDay(
+                new DateOnly(2025, 1, 9),
+                new[]
+                {
+                    new TimeRange(TimeSpan.FromHours(17), TimeSpan.FromHours(21))
+
+                }
+            )
+        );
+
+        calendar.AddException(CalendarException.DayOff(
+            new DateOnly(2025, 1, 20)
+            )
+        );
+
+        calendar.SetDayOff(DayOfWeek.Sunday);
+
+        return calendar;
+    }
+
+    [Fact]
+    public void ConflictsWithRecurring_ShouldReturnTrue_WhenTimeRangeOverlaps()
+    {
+        var calendar = CreateCalendar();
 
         var incoming = WorkingDay.WithRanges(
                 DayOfWeek.Monday,
@@ -35,17 +80,7 @@ public class ConflictsWithRecurringTests
     [Fact]
     public void ConflictsWithRecurring_ShouldReturnFalse_WhenDayOff()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                new[]
-                {
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
-            )
-        );
+        var calendar = CreateCalendar();
 
         var incoming = WorkingDay.DayOff(DayOfWeek.Monday);
 
@@ -55,23 +90,13 @@ public class ConflictsWithRecurringTests
     [Fact]
     public void ConflictsWithRecurring_ShouldReturnFalse_WhenThereIsNoOverlap()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.WithRanges(
-                DayOfWeek.Monday,
-                new[]
-                {
-                    new TimeRange(TimeSpan.FromHours(9), TimeSpan.FromHours(17))
-                }
-            )
-        );
+        var calendar = CreateCalendar();
 
         var incoming = WorkingDay.WithRanges(
                 DayOfWeek.Tuesday,
                 new[]
                 {
-                    new TimeRange(TimeSpan.FromHours(12), TimeSpan.FromHours(15))
+                    new TimeRange(TimeSpan.FromHours(18), TimeSpan.FromHours(20))
                 }
             );
 
@@ -81,14 +106,10 @@ public class ConflictsWithRecurringTests
     [Fact]
     public void ConflictsWithRecurring_ShouldReturnFalse_WhenItOverlapsWithDayOff()
     {
-        var calendar = StaffCalendar.Create(storeId: 1, professionalId: 1);
-
-        calendar.SetWorkingDay(
-            WorkingDay.DayOff(DayOfWeek.Monday)
-        );
+        var calendar = CreateCalendar();
 
         var incoming = WorkingDay.WithRanges(
-                DayOfWeek.Monday,
+                DayOfWeek.Sunday,
                 new[]
                 {
                     new TimeRange(TimeSpan.FromHours(12), TimeSpan.FromHours(15))
