@@ -3,7 +3,7 @@ using Domain.ValueObjects.Time;
 
 namespace Domain.Services.Booking;
 
-public sealed class BookingBookingContextFactory
+public sealed class BookingContextFactory
 {
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
@@ -11,7 +11,7 @@ public sealed class BookingBookingContextFactory
     private readonly IStaffRepository _staffRepo;
     private readonly IAppointmentRepository _appointmentRepo;
 
-    public BookingBookingContextFactory(
+    public BookingContextFactory(
         IStoreCatalogRepository storeCatalogRepo,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
