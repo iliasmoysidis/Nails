@@ -6,9 +6,10 @@ namespace Domain.Services.Booking.Rules;
 
 public sealed class ProfessionalMustBeAvailableRule : IBookingRule
 {
-    public void EnsureSatisfied(Context ctx, int offeringId, int professionalId, UtcDateTime startAt, int? excludeAppointmentId = null)
+    public void EnsureSatisfied(BookingContext ctx, int offeringId, int professionalId, UtcDateTime startAt, int? excludeAppointmentId = null)
     {
-        var offering = ctx.StoreCatalog.GetOffering(offeringId)!;
+        var offering = ctx.StoreCatalog.GetOffering(offeringId)
+            ?? throw new DomainException("Service not found.");
         var endAt = startAt.Add(offering.Duration.Value);
 
         if (!ctx.StaffCalendar.IsProfessionalAvailable(startAt, endAt))

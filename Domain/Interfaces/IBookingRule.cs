@@ -5,5 +5,5 @@ namespace Domain.Interfaces;
 
 public interface IBookingRule
 {
-    void EnsureSatisfied(Context ctx, int offeringId, int professionalId, UtcDateTime startAt, int? excludeAppointmentId = null);
+    void EnsureSatisfied(BookingContext ctx, int offeringId, int professionalId, UtcDateTime startAt, int? excludeAppointmentId = null);
 }

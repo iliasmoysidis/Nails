@@ -13,7 +13,7 @@ public sealed class RuleEngine
     }
 
     public void EnsureAllSatisfied(
-        Context ctx,
+        BookingContext ctx,
         int offeringId,
         int professionalId,
         UtcDateTime startAt,

@@ -3,7 +3,7 @@ using Domain.ValueObjects.Time;
 
 namespace Domain.Services.Booking;
 
-public sealed class ContextFactory
+public sealed class BookingBookingContextFactory
 {
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
@@ -11,7 +11,7 @@ public sealed class ContextFactory
     private readonly IStaffRepository _staffRepo;
     private readonly IAppointmentRepository _appointmentRepo;
 
-    public ContextFactory(
+    public BookingBookingContextFactory(
         IStoreCatalogRepository storeCatalogRepo,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
@@ -26,7 +26,7 @@ public sealed class ContextFactory
         _appointmentRepo = appointmentRepo;
     }
 
-    public async Task<Context> CreateAsync(
+    public async Task<BookingContext> CreateAsync(
         int storeId,
         int professionalId,
         UtcDateTime? date = null
@@ -38,6 +38,6 @@ public sealed class ContextFactory
         var staff = await _staffRepo.GetByStoreAsync(storeId);
         var appointments = await _appointmentRepo.GetByProfessionalAsync(professionalId, date);
 
-        return new Context(catalog, storeCalendar, staffCalendar, staff, appointments);
+        return new BookingContext(catalog, storeCalendar, staffCalendar, staff, appointments);
     }
 }

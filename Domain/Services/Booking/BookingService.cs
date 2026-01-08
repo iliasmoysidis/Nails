@@ -13,20 +13,20 @@ public class BookingService
     private readonly IAppointmentAuthorizationPolicy _appointmentAuthorizationPolicy;
     private readonly IClock _clock;
     private readonly RuleEngine _ruleEngine;
-    private readonly ContextFactory _contextFactory;
+    private readonly BookingBookingContextFactory _BookingBookingContextFactory;
 
-    public BookingService(IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, RuleEngine ruleEngine, ContextFactory contextFactory, IClock clock)
+    public BookingService(IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, RuleEngine ruleEngine, BookingBookingContextFactory BookingBookingContextFactory, IClock clock)
     {
         _appointmentRepository = appointmentRepository;
         _appointmentAuthorizationPolicy = appointmentAuthorizationPolicy;
         _ruleEngine = ruleEngine;
-        _contextFactory = contextFactory;
+        _BookingBookingContextFactory = BookingBookingContextFactory;
         _clock = clock;
     }
 
     public async Task<Appointment> ScheduleAppointmentAsync(int userId, int offeringId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
     {
-        var ctx = await _contextFactory.CreateAsync(storeId, professionalId);
+        var ctx = await _BookingBookingContextFactory.CreateAsync(storeId, professionalId);
 
         _ruleEngine.EnsureAllSatisfied(ctx, offeringId, professionalId, startAt);
 
@@ -44,7 +44,7 @@ public class BookingService
         var appointment = await _appointmentRepository.GetByIdAsync(appointmentId)
             ?? throw new DomainException("Appointment not found.");
 
-        var ctx = await _contextFactory.CreateAsync(storeId, professionalId);
+        var ctx = await _BookingBookingContextFactory.CreateAsync(storeId, professionalId);
 
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, ctx.Staff, _clock.Now);
 
@@ -62,7 +62,7 @@ public class BookingService
         var appointment = await _appointmentRepository.GetByIdAsync(appointmentId)
             ?? throw new DomainException("Appointment not found.");
 
-        var ctx = await _contextFactory.CreateAsync(storeId, professionalId);
+        var ctx = await _BookingBookingContextFactory.CreateAsync(storeId, professionalId);
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, ctx.Staff, _clock.Now);
 
         appointment.Cancel(_clock);

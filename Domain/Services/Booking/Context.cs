@@ -2,7 +2,7 @@ using Domain.Entities;
 
 namespace Domain.Services.Booking;
 
-public sealed class Context
+public sealed class BookingContext
 {
     public StoreCatalog StoreCatalog { get; }
     public StoreCalendar StoreCalendar { get; }
@@ -10,7 +10,7 @@ public sealed class Context
     public Staff Staff { get; }
     public IReadOnlyCollection<Appointment> Appointments { get; }
 
-    public Context(
+    public BookingContext(
         StoreCatalog storeCatalog,
         StoreCalendar storeCalendar,
         StaffCalendar staffCalendar,
