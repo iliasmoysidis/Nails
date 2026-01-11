@@ -68,9 +68,11 @@ public class StaffCalendarService
     {
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
-        if (!staff.IsOwner(ownerId)) throw new DomainException("Only an owner can modify staff schedules.");
+        if (!staff.IsOwner(ownerId))
+            throw new DomainException("Only an owner can modify staff schedules.");
 
-        if (!staff.IsStaff(professionalId)) throw new DomainException("Employee not found.");
+        if (!staff.IsEmployee(professionalId))
+            throw new DomainException("Employee not found.");
 
         return await _staffCalendarRepository.GetByStoreAndProfessionalAsync(storeId, professionalId);
     }

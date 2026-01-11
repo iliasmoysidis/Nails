@@ -1,5 +1,6 @@
 using Domain.Entities;
-using Domain.ValueObjects.Store;
+using Domain.Enums;
+using Domain.ValueObjects.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,40 +17,43 @@ public sealed class StaffConfig : IEntityTypeConfiguration<Staff>
         builder.Property(s => s.StoreId)
             .ValueGeneratedNever();
 
-        builder.OwnsMany<Owner>("_owners", o =>
+        builder.OwnsMany<StaffMember>("_members", m =>
         {
-            o.ToTable("store_owners");
+            m.ToTable("staff_members");
 
-            o.WithOwner()
-                .HasForeignKey("StoreId");
+            m.WithOwner()
+             .HasForeignKey("StoreId");
 
-            o.Property<int>("StoreId");
+            m.Property<int>("StoreId");
 
-            o.Property(x => x.ProfessionalId)
-                .IsRequired();
+            m.Property(x => x.ProfessionalId)
+             .IsRequired();
 
-            o.HasKey("StoreId", nameof(Owner.ProfessionalId));
+            m.HasKey("StoreId", nameof(StaffMember.ProfessionalId));
+
+            m.OwnsMany<StaffMemberRole>("_roles", r =>
+            {
+                r.ToTable("staff_member_roles");
+
+                r.WithOwner()
+                    .HasForeignKey("StoreId", "ProfessionalId");
+
+                r.Property<int>("StoreId");
+                r.Property<int>("ProfessionalId");
+
+                r.Property(x => x.Role)
+                    .HasColumnName("RoleId")
+                    .HasConversion<int>()
+                    .IsRequired();
+
+                r.HasKey("StoreId", "ProfessionalId", "RoleId");
+            });
+
+            m.Navigation("_roles")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
         });
 
-        builder.Navigation("_owners")
-           .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.OwnsMany<Employee>("_employees", e =>
-        {
-            e.ToTable("store_employees");
-
-            e.WithOwner()
-                .HasForeignKey("StoreId");
-
-            e.Property<int>("StoreId");
-
-            e.Property(x => x.ProfessionalId)
-                .IsRequired();
-
-            e.HasKey("StoreId", nameof(Employee.ProfessionalId));
-        });
-
-        builder.Navigation("_employees")
+        builder.Navigation("_members")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

@@ -52,7 +52,7 @@ public class StoreCatalogService
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
         staff.EnsureOwner(ownerId);
-        staff.EnsureStaff(professionalId);
+        staff.EnsureEmployee(professionalId);
 
         var assignment = catalog.AssignOffering(professionalId, offeringId);
 
@@ -67,7 +67,7 @@ public class StoreCatalogService
         var staff = await _staffRepository.GetByStoreAsync(storeId);
 
         staff.EnsureOwner(ownerId);
-        staff.EnsureStaff(professionalId);
+        staff.EnsureEmployee(professionalId);
 
         catalog.UnassignOffering(professionalId, offeringId);
 
