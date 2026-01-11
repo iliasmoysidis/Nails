@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Domain.Services;
-using Domain.ValueObjects.Time;
 
 namespace Infrastructure.Persistence;
 
