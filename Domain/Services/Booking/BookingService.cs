@@ -15,12 +15,12 @@ public class BookingService
     private readonly RuleEngine _ruleEngine;
     private readonly BookingContextFactory _bookingContextFactory;
 
-    public BookingService(IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, RuleEngine ruleEngine, BookingContextFactory BookingContextFactory, IClock clock)
+    public BookingService(IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, RuleEngine ruleEngine, BookingContextFactory bookingContextFactory, IClock clock)
     {
         _appointmentRepository = appointmentRepository;
         _appointmentAuthorizationPolicy = appointmentAuthorizationPolicy;
         _ruleEngine = ruleEngine;
-        _bookingContextFactory = BookingContextFactory;
+        _bookingContextFactory = bookingContextFactory;
         _clock = clock;
     }
 
