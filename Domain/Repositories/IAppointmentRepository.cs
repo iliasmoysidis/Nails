@@ -5,9 +5,7 @@ namespace Domain.Repositories;
 
 public interface IAppointmentRepository
 {
-    Task AddAsync(Appointment appointment);
-
-    Task UpdateAsync(Appointment appointment);
+    void Add(Appointment appointment);
 
     Task<Appointment?> GetByIdAsync(int appointmentId);
 

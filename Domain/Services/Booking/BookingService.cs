@@ -1,86 +1,42 @@
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
-using Domain.Repositories;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Services.Booking;
 
-public class BookingService
+public sealed class BookingService
 {
-    private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentAuthorizationPolicy _appointmentAuthorizationPolicy;
     private readonly IClock _clock;
     private readonly RuleEngine _ruleEngine;
-    private readonly BookingContextFactory _bookingContextFactory;
 
-    public BookingService(IAppointmentRepository appointmentRepository, IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, RuleEngine ruleEngine, BookingContextFactory bookingContextFactory, IClock clock)
+    public BookingService(IAppointmentAuthorizationPolicy appointmentAuthorizationPolicy, RuleEngine ruleEngine, IClock clock)
     {
-        _appointmentRepository = appointmentRepository;
         _appointmentAuthorizationPolicy = appointmentAuthorizationPolicy;
         _ruleEngine = ruleEngine;
-        _bookingContextFactory = bookingContextFactory;
         _clock = clock;
     }
 
-    public async Task<Appointment> ScheduleAppointmentAsync(int userId, int offeringId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
+    public Appointment ScheduleAppointment(BookingContext ctx, int userId, int offeringId, int professionalId, int storeId, UtcDateTime startAt, string? notes = null)
     {
-        var ctx = await _bookingContextFactory.CreateAsync(storeId, professionalId);
-
         _ruleEngine.EnsureAllSatisfied(ctx, offeringId, professionalId, startAt);
+        var offering = ctx.StoreCatalog.GetOffering(offeringId)
+            ?? throw new DomainException("Offering not found.");
 
-        var offering = ctx.StoreCatalog.GetOffering(offeringId)!;
-
-        var appointment = Appointment.Create(userId, professionalId, offeringId, storeId, offering.Price, startAt, offering.Duration, _clock, notes);
-
-        await _appointmentRepository.AddAsync(appointment);
-
-        return appointment;
+        return Appointment.Create(userId, professionalId, offeringId, storeId, offering.Price, startAt, offering.Duration, _clock, notes);
     }
 
-    public async Task<Appointment> RescheduleAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId, UtcDateTime newStartAt)
+    public void RescheduleAppointment(BookingContext ctx, Appointment appointment, int agentId, int professionalId, UtcDateTime newStartAt)
     {
-        var appointment = await _appointmentRepository.GetByIdAsync(appointmentId)
-            ?? throw new DomainException("Appointment not found.");
-
-        var ctx = await _bookingContextFactory.CreateAsync(storeId, professionalId);
-
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, ctx.Staff, _clock.Now);
-
         _ruleEngine.EnsureAllSatisfied(ctx, appointment.OfferingId, professionalId, newStartAt, appointment.Id);
-
         appointment.Reschedule(newStartAt, _clock);
-
-        await _appointmentRepository.UpdateAsync(appointment);
-
-        return appointment;
     }
 
-    public async Task CancelAppointmentAsync(int agentId, int storeId, int professionalId, int appointmentId)
+    public void CancelAppointment(BookingContext ctx, Appointment appointment, int agentId)
     {
-        var appointment = await _appointmentRepository.GetByIdAsync(appointmentId)
-            ?? throw new DomainException("Appointment not found.");
-
-        var ctx = await _bookingContextFactory.CreateAsync(storeId, professionalId);
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, ctx.Staff, _clock.Now);
-
         appointment.Cancel(_clock);
-
-        await _appointmentRepository.UpdateAsync(appointment);
-    }
-
-    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForProfessionalAsync(int professionalId, UtcDateTime? date = null)
-    {
-        return await _appointmentRepository.GetByProfessionalAsync(professionalId, date);
-    }
-
-    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForStoreAsync(int storeId, UtcDateTime? date = null)
-    {
-        return await _appointmentRepository.GetByStoreAsync(storeId, date);
-    }
-
-    public async Task<IReadOnlyCollection<Appointment>> GetAppointmentsForUserAsync(int userId, UtcDateTime? date = null)
-    {
-        return await _appointmentRepository.GetByUserAsync(userId, date);
     }
 }

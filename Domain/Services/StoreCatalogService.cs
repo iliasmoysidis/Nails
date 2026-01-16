@@ -1,76 +1,43 @@
 using Domain.Entities;
 using Domain.Interfaces;
-using Domain.Repositories;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Services;
 
-public class StoreCatalogService
+public sealed class StoreCatalogService
 {
-    private readonly IStoreCatalogRepository _storeCatalogRepository;
-    private readonly IStaffRepository _staffRepository;
     private readonly IClock _clock;
 
-    public StoreCatalogService(IStoreCatalogRepository storeCatalogRepository, IStaffRepository staffRepository, IClock clock)
+    public StoreCatalogService(IClock clock)
     {
-        _storeCatalogRepository = storeCatalogRepository;
-        _staffRepository = staffRepository;
         _clock = clock;
     }
 
-    public async Task<Offering> AddOffering(int ownerId, int storeId, OfferingName name, Money price, Duration duration, string? description = null)
+    public Offering AddOffering(StoreCatalog catalog, Staff staff, int ownerId, OfferingName name, Money price, Duration duration, string? description = null)
     {
-        var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
-        var staff = await _staffRepository.GetByStoreAsync(storeId);
-
         staff.EnsureOwner(ownerId);
-
-        var offering = catalog.AddOffering(name, price, duration, _clock, description);
-
-        await _storeCatalogRepository.SaveAsync(catalog);
-
-        return offering;
+        return catalog.AddOffering(name, price, duration, _clock, description);
     }
 
-    public async Task RemoveOffering(int ownerId, int storeId, int offeringId)
+    public void RemoveOffering(StoreCatalog catalog, Staff staff, int ownerId, int offeringId)
     {
-        var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
-        var staff = await _staffRepository.GetByStoreAsync(storeId);
-
         staff.EnsureOwner(ownerId);
-
         catalog.RemoveOffering(offeringId, _clock);
-
-        await _storeCatalogRepository.SaveAsync(catalog);
     }
 
-    public async Task<ServiceOffering> AssignOffering(int ownerId, int storeId, int professionalId, int offeringId)
+    public ServiceOffering AssignOffering(StoreCatalog catalog, Staff staff, int ownerId, int professionalId, int offeringId)
     {
-        var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
-        var staff = await _staffRepository.GetByStoreAsync(storeId);
-
         staff.EnsureOwner(ownerId);
         staff.EnsureEmployee(professionalId);
-
-        var assignment = catalog.AssignOffering(professionalId, offeringId);
-
-        await _storeCatalogRepository.SaveAsync(catalog);
-
-        return assignment;
+        return catalog.AssignOffering(professionalId, offeringId);
     }
 
-    public async Task UnassignOffering(int ownerId, int storeId, int professionalId, int offeringId)
+    public void UnassignOffering(StoreCatalog catalog, Staff staff, int ownerId, int professionalId, int offeringId)
     {
-        var catalog = await _storeCatalogRepository.GetByStoreAsync(storeId);
-        var staff = await _staffRepository.GetByStoreAsync(storeId);
-
         staff.EnsureOwner(ownerId);
         staff.EnsureEmployee(professionalId);
-
         catalog.UnassignOffering(professionalId, offeringId);
-
-        await _storeCatalogRepository.SaveAsync(catalog);
     }
 }

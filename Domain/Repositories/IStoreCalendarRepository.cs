@@ -4,6 +4,6 @@ namespace Domain.Repositories;
 
 public interface IStoreCalendarRepository
 {
-    Task<StoreCalendar> GetByStoreAsync(int storeId);
-    Task SaveAsync(StoreCalendar calendar);
+    Task<StoreCalendar?> GetByStoreAsync(int storeId);
+    void Add(StoreCalendar calendar);
 }
