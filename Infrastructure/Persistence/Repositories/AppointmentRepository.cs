@@ -22,6 +22,7 @@ internal sealed class AppointmentRepository : IAppointmentRepository
 
     public async Task UpdateAsync(Appointment appointment)
     {
+        _db.Appointments.Update(appointment);
         await _db.SaveChangesAsync();
     }
 
