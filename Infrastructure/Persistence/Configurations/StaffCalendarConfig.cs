@@ -28,7 +28,6 @@ public sealed class StaffCalendarConfig : IEntityTypeConfiguration<StaffCalendar
 
             wd.Property<int>("StoreId");
             wd.Property<int>("ProfessionalId");
-            wd.Property<int>("Day");
 
             wd.Property(w => w.Day)
                 .HasConversion<int>()

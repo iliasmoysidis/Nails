@@ -44,6 +44,8 @@ public sealed class StoreCatalogConfig : IEntityTypeConfiguration<StoreCatalog>
 
             so.Property(x => x.OfferingId)
                 .IsRequired();
+
+            so.HasIndex(x => new { x.ProfessionalId, x.OfferingId });
         });
 
         builder.Navigation("_serviceOfferings")

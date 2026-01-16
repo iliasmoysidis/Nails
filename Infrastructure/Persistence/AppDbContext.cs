@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
+using Infrastructure.Persistence.Filters;
 
 namespace Infrastructure.Persistence;
 
@@ -16,5 +17,11 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        SoftDeleteFilters.ApplySoftDeleteFilter<Appointment>(modelBuilder);
+        SoftDeleteFilters.ApplySoftDeleteFilter<Offering>(modelBuilder);
+        SoftDeleteFilters.ApplySoftDeleteFilter<User>(modelBuilder);
+        SoftDeleteFilters.ApplySoftDeleteFilter<Professional>(modelBuilder);
+        SoftDeleteFilters.ApplySoftDeleteFilter<Store>(modelBuilder);
     }
 }

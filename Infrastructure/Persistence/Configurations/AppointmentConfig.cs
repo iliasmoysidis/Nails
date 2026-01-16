@@ -65,5 +65,8 @@ public sealed class AppointmentConfig : IEntityTypeConfiguration<Appointment>
         builder.HasIndex(a => new { a.ProfessionalId, a.StartAt });
         builder.HasIndex(a => a.StoreId);
         builder.HasIndex(a => a.UserId);
+        builder.HasIndex(a => new { a.ProfessionalId, a.EndAt });
+        builder.HasIndex(a => new { a.ProfessionalId, a.Status, a.StartAt });
+        builder.HasIndex(a => new { a.StoreId, a.StartAt });
     }
 }
