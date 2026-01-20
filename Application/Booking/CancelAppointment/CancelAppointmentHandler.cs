@@ -1,16 +1,16 @@
 using Application.Abstractions;
 using Domain.Services.Booking;
 
-namespace Application.Booking.RescheduleAppointment;
+namespace Application.Booking.CancelAppointment;
 
-public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleAppointmentCommand>
+public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointmentCommand>
 {
     private readonly IBookingRepository _repo;
     private readonly BookingService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
-    public RescheduleAppointmentHandler(
+    public CancelAppointmentHandler(
         IBookingRepository repo,
         BookingService bookingService,
         ICurrentUser currentUser,
@@ -24,25 +24,27 @@ public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleApp
     }
 
     public async Task Handle(
-        RescheduleAppointmentCommand command,
+        CancelAppointmentCommand command,
         CancellationToken ct
     )
     {
         var appointment = await _repo.GetAppointmentAsync(
-            command.AppointmentId, ct)
-            ?? throw new ApplicationException("Appointment not found.");
+            command.appointmentId,
+            ct);
+
+        if (appointment is null)
+            throw new ApplicationException("Appointment not found.");
 
         var ctx = await _repo.LoadContextAsync(
             appointment.StoreId,
             appointment.ProfessionalId,
-            ct);
+            ct
+        );
 
-        _bookingService.RescheduleAppointment(
+        _bookingService.CancelAppointment(
             ctx,
             appointment,
-            _currentUser.UserId,
-            command.ProfessionalId,
-            command.NewStartAt
+            agentId: _currentUser.UserId
         );
 
         await _uow.SaveChangesAsync(ct);

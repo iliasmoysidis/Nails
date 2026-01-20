@@ -2,7 +2,7 @@
 using Application.Abstractions;
 using Domain.ValueObjects.Time;
 
-namespace Application.Booking.Commands;
+namespace Application.Booking.RescheduleAppointment;
 
 public sealed record RescheduleAppointmentCommand(
     int AppointmentId,

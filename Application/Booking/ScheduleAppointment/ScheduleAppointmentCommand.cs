@@ -2,7 +2,7 @@
 using Application.Abstractions;
 using Domain.ValueObjects.Time;
 
-namespace Application.Booking.Commands;
+namespace Application.Booking.ScheduleAppointment;
 
 public sealed record ScheduleAppointmentCommand(
     int StoreId,
