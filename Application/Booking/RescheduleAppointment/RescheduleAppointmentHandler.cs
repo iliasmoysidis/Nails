@@ -1,4 +1,5 @@
 using Application.Abstractions;
+using Application.Exceptions;
 using Domain.Services.Booking;
 
 namespace Application.Booking.RescheduleAppointment;
@@ -30,7 +31,7 @@ public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleApp
     {
         var appointment = await _repo.GetAppointmentAsync(
             command.AppointmentId, ct)
-            ?? throw new ApplicationException("Appointment not found.");
+            ?? throw new ApplicationLayerException("Appointment not found.");
 
         var ctx = await _repo.LoadContextAsync(
             appointment.StoreId,

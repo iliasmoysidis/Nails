@@ -1,6 +1,6 @@
 namespace Application.Exceptions;
 
-public sealed class ApplicationException : Exception
+public sealed class ApplicationLayerException : Exception
 {
-    public ApplicationException(string message) : base(message) { }
+    public ApplicationLayerException(string message) : base(message) { }
 }

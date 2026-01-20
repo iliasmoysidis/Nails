@@ -34,9 +34,9 @@ public sealed class BookingService
         appointment.Reschedule(newStartAt, _clock);
     }
 
-    public void CancelAppointment(BookingContext ctx, Appointment appointment, int agentId)
+    public void CancelAppointment(BookingContext ctx, Appointment appointment, int agentId, string? reason = null)
     {
         _appointmentAuthorizationPolicy.EnsureCanModify(agentId, appointment, ctx.Staff, _clock.Now);
-        appointment.Cancel(_clock);
+        appointment.Cancel(_clock, reason);
     }
 }

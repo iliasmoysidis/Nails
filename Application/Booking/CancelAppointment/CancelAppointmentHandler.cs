@@ -1,5 +1,6 @@
 using Application.Abstractions;
 using Domain.Services.Booking;
+using Application.Exceptions;
 
 namespace Application.Booking.CancelAppointment;
 
@@ -29,11 +30,11 @@ public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointment
     )
     {
         var appointment = await _repo.GetAppointmentAsync(
-            command.appointmentId,
+            command.AppointmentId,
             ct);
 
         if (appointment is null)
-            throw new ApplicationException("Appointment not found.");
+            throw new ApplicationLayerException("Appointment not found");
 
         var ctx = await _repo.LoadContextAsync(
             appointment.StoreId,
@@ -44,7 +45,8 @@ public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointment
         _bookingService.CancelAppointment(
             ctx,
             appointment,
-            agentId: _currentUser.UserId
+            agentId: _currentUser.UserId,
+            reason: command.Reason
         );
 
         await _uow.SaveChangesAsync(ct);
