@@ -2,7 +2,7 @@ using Application.Abstractions;
 using Application.Exceptions;
 using Domain.Services.Booking;
 
-namespace Application.Booking.RescheduleAppointment;
+namespace Application.UseCases.Booking.RescheduleAppointment;
 
 public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleAppointmentCommand>
 {

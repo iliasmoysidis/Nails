@@ -1,7 +1,7 @@
 using Application.Abstractions;
 using Domain.ValueObjects.Calendar;
 
-namespace Application.StaffCalendar.SetWorkingDay;
+namespace Application.UseCases.StaffCalendar.SetWorkingDay;
 
 public sealed record SetStaffWorkingDayCommand(
     int StoreId,

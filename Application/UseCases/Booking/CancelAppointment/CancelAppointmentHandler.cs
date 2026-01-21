@@ -2,7 +2,7 @@ using Application.Abstractions;
 using Domain.Services.Booking;
 using Application.Exceptions;
 
-namespace Application.Booking.CancelAppointment;
+namespace Application.UseCases.Booking.CancelAppointment;
 
 public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointmentCommand>
 {

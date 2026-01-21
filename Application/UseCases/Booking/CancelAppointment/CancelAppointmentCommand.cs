@@ -1,6 +1,6 @@
 using Application.Abstractions;
 
-namespace Application.Booking.CancelAppointment;
+namespace Application.UseCases.Booking.CancelAppointment;
 
 public sealed record CancelAppointmentCommand(
     int AppointmentId,

@@ -3,7 +3,7 @@ using Application.Exceptions;
 using Application.Repositories;
 using Domain.Services;
 
-namespace Application.StaffCalendar.SetWorkingDay;
+namespace Application.UseCases.StaffCalendar.SetWorkingDay;
 
 public sealed class SetStaffWorkingDayHandler : ICommandHandler<SetStaffWorkingDayCommand>
 {

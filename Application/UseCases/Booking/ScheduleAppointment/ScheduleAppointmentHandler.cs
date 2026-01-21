@@ -1,7 +1,7 @@
 using Application.Abstractions;
 using Domain.Services.Booking;
 
-namespace Application.Booking.ScheduleAppointment;
+namespace Application.UseCases.Booking.ScheduleAppointment;
 
 public sealed class ScheduleAppointmentCommandHandler : ICommandHandler<ScheduleAppointmentCommand>
 {
