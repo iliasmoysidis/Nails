@@ -1,7 +1,7 @@
 using Domain.Entities;
 using Domain.Services.Booking;
 
-namespace Application.Abstractions;
+namespace Application.Repositories;
 
 public interface IBookingRepository
 {

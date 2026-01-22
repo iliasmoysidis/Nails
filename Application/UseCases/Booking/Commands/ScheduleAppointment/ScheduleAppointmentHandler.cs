@@ -1,4 +1,5 @@
 using Application.Abstractions;
+using Application.Repositories;
 using Domain.Services.Booking;
 
 namespace Application.UseCases.Booking.Commands.ScheduleAppointment;

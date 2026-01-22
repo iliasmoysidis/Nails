@@ -1,5 +1,6 @@
 using Application.Abstractions;
 using Application.Exceptions;
+using Application.Repositories;
 using Domain.Services.Booking;
 
 namespace Application.UseCases.Booking.Commands.RescheduleAppointment;

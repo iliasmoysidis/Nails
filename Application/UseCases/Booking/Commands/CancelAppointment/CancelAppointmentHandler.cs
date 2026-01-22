@@ -1,6 +1,8 @@
-using Application.Abstractions;
+
 using Domain.Services.Booking;
 using Application.Exceptions;
+using Application.Abstractions;
+using Application.Repositories;
 
 namespace Application.UseCases.Booking.Commands.CancelAppointment;
 
