@@ -13,8 +13,8 @@ public sealed class GetUserAppointmentsHandler : IQueryHandler<GetUserAppointmen
         _repo = repo;
     }
 
-    public Task<IReadOnlyCollection<AppointmentListItemDTO>> Handle(GetUserAppointmentsQuery query, CancellationToken ct)
+    public async Task<IReadOnlyCollection<AppointmentListItemDTO>> Handle(GetUserAppointmentsQuery query, CancellationToken ct)
     {
-        return _repo.GetForUserAsync(query.UserId, ct);
+        return await _repo.GetForUserAsync(query.UserId, ct);
     }
 }
