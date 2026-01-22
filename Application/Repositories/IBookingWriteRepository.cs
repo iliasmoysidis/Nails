@@ -3,7 +3,7 @@ using Domain.Services.Booking;
 
 namespace Application.Repositories;
 
-public interface IBookingRepository
+public interface IBookingWriteRepository
 {
     Task<BookingContext> LoadContextAsync(
         int storeId,

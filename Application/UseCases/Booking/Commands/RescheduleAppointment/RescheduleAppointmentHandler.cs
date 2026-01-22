@@ -7,13 +7,13 @@ namespace Application.UseCases.Booking.Commands.RescheduleAppointment;
 
 public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleAppointmentCommand>
 {
-    private readonly IBookingRepository _repo;
+    private readonly IBookingWriteRepository _repo;
     private readonly BookingService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public RescheduleAppointmentHandler(
-        IBookingRepository repo,
+        IBookingWriteRepository repo,
         BookingService bookingService,
         ICurrentUser currentUser,
         IUnitOfWork uow

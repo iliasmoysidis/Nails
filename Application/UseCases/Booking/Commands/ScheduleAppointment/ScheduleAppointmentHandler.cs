@@ -6,13 +6,13 @@ namespace Application.UseCases.Booking.Commands.ScheduleAppointment;
 
 public sealed class ScheduleAppointmentCommandHandler : ICommandHandler<ScheduleAppointmentCommand>
 {
-    private readonly IBookingRepository _repo;
+    private readonly IBookingWriteRepository _repo;
     private readonly BookingService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public ScheduleAppointmentCommandHandler(
-        IBookingRepository repo,
+        IBookingWriteRepository repo,
         BookingService bookingService,
         ICurrentUser currentUser,
         IUnitOfWork uow
