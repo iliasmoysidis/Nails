@@ -5,14 +5,14 @@ using Domain.Services;
 
 namespace Application.UseCases.StaffCalendar.SetWorkingDay;
 
-public sealed class SetStaffWorkingDayHandler : ICommandHandler<SetStaffWorkingDayCommand>
+public sealed class SetWorkingDayHandler : ICommandHandler<SetWorkingDayCommand>
 {
     private readonly IStaffCalendarRepository _repo;
     private readonly StaffCalendarService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
-    public SetStaffWorkingDayHandler(
+    public SetWorkingDayHandler(
         IStaffCalendarRepository repo,
         StaffCalendarService service,
         ICurrentUser currentUser,
@@ -25,7 +25,7 @@ public sealed class SetStaffWorkingDayHandler : ICommandHandler<SetStaffWorkingD
         _uow = uow;
     }
 
-    public async Task Handle(SetStaffWorkingDayCommand command, CancellationToken ct)
+    public async Task Handle(SetWorkingDayCommand command, CancellationToken ct)
     {
         var calendar = await _repo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerException("Staff calendar not found.");
