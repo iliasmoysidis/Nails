@@ -6,5 +6,7 @@ namespace Application.UseCases.StaffCalendar.Commands.AddException;
 public sealed record AddExceptionCommand(
     int StoreId,
     int ProfessionalId,
-    CalendarException exception
+    DateOnly Date,
+    bool IsDayOff,
+    IReadOnlyCollection<TimeRange> TimeRanges
 ) : ICommand;

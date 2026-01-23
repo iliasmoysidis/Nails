@@ -2,6 +2,7 @@ using Application.Abstractions;
 using Application.Exceptions;
 using Application.Repositories;
 using Domain.Services;
+using Domain.ValueObjects.Calendar;
 
 namespace Application.UseCases.StaffCalendar.Commands.AddException;
 
@@ -33,7 +34,11 @@ public sealed class AddExceptionHandler : ICommandHandler<AddExceptionCommand>
 
         var otherCalendars = await _repo.GetOtherCalendarsAsync(command.StoreId, command.ProfessionalId, ct);
 
-        _service.AddException(calendar, otherCalendars, staff, _currentUser.UserId, command.exception);
+        var exception = command.IsDayOff
+        ? CalendarException.DayOff(command.Date)
+        : CalendarException.PartialDay(command.Date, command.TimeRanges);
+
+        _service.AddException(calendar, otherCalendars, staff, _currentUser.UserId, exception);
 
         await _uow.SaveChangesAsync(ct);
     }

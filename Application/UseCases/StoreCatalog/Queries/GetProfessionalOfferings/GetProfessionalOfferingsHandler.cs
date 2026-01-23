@@ -5,7 +5,7 @@ using Application.Repositories;
 namespace Application.UseCases.StoreCatalog.Queries.GetProfessionalOfferings;
 
 public sealed class GetProfessionalOfferingsHandler
-    : IQueryHandler<GetProfessionalOfferingsQuery, IReadOnlyCollection<StoreOfferingDTO>>
+    : IQueryHandler<GetProfessionalOfferingsQuery, IReadOnlyCollection<OfferingDetailsDTO>>
 {
     private readonly IStoreCatalogReadRepository _repo;
 
@@ -14,7 +14,7 @@ public sealed class GetProfessionalOfferingsHandler
         _repo = repo;
     }
 
-    public async Task<IReadOnlyCollection<StoreOfferingDTO>> Handle(
+    public async Task<IReadOnlyCollection<OfferingDetailsDTO>> Handle(
         GetProfessionalOfferingsQuery query,
         CancellationToken ct
     )
