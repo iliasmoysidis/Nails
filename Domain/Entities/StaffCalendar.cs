@@ -95,4 +95,7 @@ public class StaffCalendar
 
         return TimeRange.AnyOverlap(workingRanges, exception.TimeRanges);
     }
+
+    public IReadOnlyCollection<CalendarException> GetExceptions()
+        => _exceptions.Values.ToList().AsReadOnly();
 }
