@@ -1,4 +1,3 @@
-using System.Security.Authentication.ExtendedProtection;
 using Application.Abstractions;
 using Application.Exceptions;
 using Application.Policies.Interfaces;
@@ -30,10 +29,10 @@ public sealed class GetCalendarExceptionsHandler
         CancellationToken ct
     )
     {
+        await _policy.EnsureIsOwnerAsync(_currentUser.UserId, query.StoreId, ct);
+
         var calendar = await _repo.GetAsync(query.StoreId, ct)
             ?? throw new ApplicationLayerException("Store calendar not found.");
-
-        await _policy.EnsureIsOwnerAsync(_currentUser.UserId, query.StoreId, ct);
 
         return calendar.GetExceptions();
     }
