@@ -39,45 +39,38 @@ public class StoreCalendar
 
     public bool IsOpenAt(UtcDateTime dateTime)
     {
-        var date = dateTime.Date;
+        var ranges = GetWorkingTimeRanges(dateTime.Date);
         var time = dateTime.TimeOfDay;
 
-        if (_exceptions.TryGetValue(date, out var exception))
-        {
-            if (exception.IsDayOff) return false;
-
-            return exception.TimeRanges.Any(r => r.Contains(time));
-        }
-
-        if (!_workingDays.TryGetValue(dateTime.DayOfWeek, out var workingDay)) return false;
-
-        if (workingDay.IsDayOff) return false;
-
-        return workingDay.TimeRanges.Any(r => r.Contains(time));
+        return ranges.Any(r => r.Contains(time));
     }
 
     public bool IsOpenOn(DateOnly date)
     {
-        if (_exceptions.TryGetValue(date, out var exception)) return !exception.IsDayOff;
-
-        if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay)) return !workingDay.IsDayOff;
-
-        return false;
+        return GetWorkingTimeRanges(date).Any();
     }
 
     public bool IsWithinStoreHours(DateOnly date, TimeRange range)
     {
+        var ranges = GetWorkingTimeRanges(date);
+        return ranges.Any(r => r.Start <= range.Start && r.End >= range.End);
+    }
+
+    public IReadOnlyCollection<TimeRange> GetWorkingTimeRanges(DateOnly date)
+    {
         if (_exceptions.TryGetValue(date, out var exception))
         {
-            if (exception.IsDayOff) return false;
-
-            return exception.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
+            return exception.IsDayOff ? Array.Empty<TimeRange>() : exception.TimeRanges;
         }
 
-        if (!_workingDays.TryGetValue(date.DayOfWeek, out var workingDay)) return false;
+        if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
+        {
+            return workingDay.IsDayOff ? Array.Empty<TimeRange>() : workingDay.TimeRanges;
+        }
 
-        if (workingDay.IsDayOff) return false;
-
-        return workingDay.TimeRanges.Any(r => r.Start <= range.Start && r.End >= range.End);
+        return Array.Empty<TimeRange>();
     }
+
+    public IReadOnlyCollection<CalendarException> GetExceptions()
+        => _exceptions.Values.ToList().AsReadOnly();
 }
