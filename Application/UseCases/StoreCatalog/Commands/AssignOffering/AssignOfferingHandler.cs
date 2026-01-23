@@ -7,13 +7,13 @@ namespace Application.UseCases.StoreCatalog.Commands.AssignOffering;
 
 public sealed class AssignOfferingHandler : ICommandHandler<AssignOfferingCommand>
 {
-    private readonly IStoreCatalogRepository _repo;
+    private readonly IStoreCatalogWriteRepository _repo;
     private readonly StoreCatalogService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public AssignOfferingHandler(
-        IStoreCatalogRepository repo,
+        IStoreCatalogWriteRepository repo,
         StoreCatalogService service,
         ICurrentUser currentUser,
         IUnitOfWork uow

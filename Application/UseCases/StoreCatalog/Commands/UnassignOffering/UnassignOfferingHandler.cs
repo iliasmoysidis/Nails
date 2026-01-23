@@ -7,13 +7,13 @@ namespace Application.UseCases.StoreCatalog.Commands.UnassignOffering;
 
 public sealed class UnassignOfferingHandler : ICommandHandler<UnassignOfferingCommand>
 {
-    private readonly IStoreCatalogRepository _repo;
+    private readonly IStoreCatalogWriteRepository _repo;
     private readonly StoreCatalogService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public UnassignOfferingHandler(
-        IStoreCatalogRepository repo,
+        IStoreCatalogWriteRepository repo,
         StoreCatalogService service,
         ICurrentUser currentUser,
         IUnitOfWork uow

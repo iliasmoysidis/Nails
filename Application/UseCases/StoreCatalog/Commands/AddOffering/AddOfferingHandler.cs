@@ -7,13 +7,13 @@ namespace Application.UseCases.StoreCatalog.Commands.AddOffering;
 
 public sealed class AddOfferingHandler : ICommandHandler<AddOfferingCommand>
 {
-    private readonly IStoreCatalogRepository _repo;
+    private readonly IStoreCatalogWriteRepository _repo;
     private readonly StoreCatalogService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public AddOfferingHandler(
-        IStoreCatalogRepository repo,
+        IStoreCatalogWriteRepository repo,
         StoreCatalogService service,
         ICurrentUser currentUser,
         IUnitOfWork uow
