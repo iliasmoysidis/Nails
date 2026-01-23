@@ -1,4 +1,4 @@
-namespace Application.Abstractions;
+namespace Application.Policies.Interfaces;
 
 public interface IProfessionalAppointmentsAccessPolicy
 {

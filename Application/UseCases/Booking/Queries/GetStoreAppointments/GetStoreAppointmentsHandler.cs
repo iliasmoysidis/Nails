@@ -1,5 +1,6 @@
 using Application.Abstractions;
 using Application.DTO;
+using Application.Policies.Interfaces;
 using Application.Repositories;
 
 namespace Application.UseCases.Booking.Queries.GetStoreAppointments;

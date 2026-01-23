@@ -1,8 +1,9 @@
-using Application.Abstractions;
+
 using Application.Exceptions;
+using Application.Policies.Interfaces;
 using Application.Repositories;
 
-namespace Application.Policies;
+namespace Application.Implementation.Policies;
 
 public sealed class ProfessionalAppointmentsAccessPolicy : IProfessionalAppointmentsAccessPolicy
 {

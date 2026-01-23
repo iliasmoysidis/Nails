@@ -1,6 +1,6 @@
 using Domain.Entities;
 
-namespace Application.Abstractions;
+namespace Application.Policies.Interfaces;
 
 public interface IAppointmentVisibilityPolicy
 {

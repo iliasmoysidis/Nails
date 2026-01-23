@@ -1,9 +1,10 @@
-using Application.Abstractions;
+
 using Application.Exceptions;
+using Application.Policies.Interfaces;
 using Application.Repositories;
 using Domain.Entities;
 
-namespace Application.Policies;
+namespace Application.Implementation.Policies;
 
 public sealed class AppointmentVisibilityPolicy : IAppointmentVisibilityPolicy
 {

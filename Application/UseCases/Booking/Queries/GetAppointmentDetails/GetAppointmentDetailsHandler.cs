@@ -1,6 +1,7 @@
 using Application.Abstractions;
 using Application.DTO;
 using Application.Exceptions;
+using Application.Policies.Interfaces;
 using Application.Repositories;
 
 namespace Application.UseCases.Booking.Queries.GetAppointmentDetails;
