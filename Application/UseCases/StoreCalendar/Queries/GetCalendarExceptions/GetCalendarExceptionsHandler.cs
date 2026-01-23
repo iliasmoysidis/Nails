@@ -1,6 +1,7 @@
 using Application.Abstractions;
+using Application.Contexts;
 using Application.Exceptions;
-using Application.Policies.Interfaces;
+using Application.Policies;
 using Application.Repositories;
 using Domain.ValueObjects.Calendar;
 
@@ -10,18 +11,18 @@ public sealed class GetCalendarExceptionsHandler
     : IQueryHandler<GetCalendarExceptionsQuery, IReadOnlyCollection<CalendarException>>
 {
     private readonly IStoreCalendarRepository _repo;
-    private readonly IStoreOwnerAccessPolicy _policy;
-    private readonly ICurrentUser _currentUser;
+    private readonly ActorContextFactory _factory;
+    private readonly AuthorizationPolicy _policy;
 
     public GetCalendarExceptionsHandler(
         IStoreCalendarRepository repo,
-        IStoreOwnerAccessPolicy policy,
-        ICurrentUser currentUser
+        AuthorizationPolicy policy,
+        ActorContextFactory factory
     )
     {
         _repo = repo;
+        _factory = factory;
         _policy = policy;
-        _currentUser = currentUser;
     }
 
     public async Task<IReadOnlyCollection<CalendarException>> Handle(
@@ -29,7 +30,8 @@ public sealed class GetCalendarExceptionsHandler
         CancellationToken ct
     )
     {
-        await _policy.EnsureIsOwnerAsync(_currentUser.UserId, query.StoreId, ct);
+        var actor = await _factory.CreateAsync(query.StoreId, ct);
+        _policy.EnsureIsStoreOwner(actor);
 
         var calendar = await _repo.GetAsync(query.StoreId, ct)
             ?? throw new ApplicationLayerException("Store calendar not found.");

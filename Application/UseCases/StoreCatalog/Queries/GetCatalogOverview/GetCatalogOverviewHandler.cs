@@ -1,6 +1,7 @@
 using Application.Abstractions;
+using Application.Contexts;
 using Application.DTO;
-using Application.Policies.Interfaces;
+using Application.Policies;
 using Application.Repositories;
 
 namespace Application.UseCases.StoreCatalog.Queries.GetCatalogOverview;
@@ -9,18 +10,18 @@ public sealed class GetCatalogOverviewHandler
     : IQueryHandler<GetCatalogOverviewQuery, IReadOnlyCollection<OfferingOverviewDTO>>
 {
     private readonly IStoreCatalogReadRepository _repo;
-    private readonly IStoreOwnerAccessPolicy _policy;
-    private readonly ICurrentUser _currentUser;
+    private readonly ActorContextFactory _factory;
+    private readonly AuthorizationPolicy _policy;
 
     public GetCatalogOverviewHandler(
         IStoreCatalogReadRepository repo,
-        IStoreOwnerAccessPolicy policy,
-        ICurrentUser currentUser
+        ActorContextFactory factory,
+        AuthorizationPolicy policy
         )
     {
         _repo = repo;
+        _factory = factory;
         _policy = policy;
-        _currentUser = currentUser;
     }
 
     public async Task<IReadOnlyCollection<OfferingOverviewDTO>> Handle(
@@ -28,7 +29,9 @@ public sealed class GetCatalogOverviewHandler
         CancellationToken ct
     )
     {
-        await _policy.EnsureIsOwnerAsync(_currentUser.UserId, query.StoreId, ct);
+        var actor = await _factory.CreateAsync(query.StoreId, ct);
+        _policy.EnsureIsStoreOwner(actor);
+
         return await _repo.GetCatalogOverviewAsync(query.StoreId, ct);
     }
 }

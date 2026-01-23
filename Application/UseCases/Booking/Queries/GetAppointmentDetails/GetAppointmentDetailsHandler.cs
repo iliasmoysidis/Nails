@@ -1,7 +1,7 @@
 using Application.Abstractions;
 using Application.DTO;
 using Application.Exceptions;
-using Application.Policies.Interfaces;
+using Application.Policies;
 using Application.Repositories;
 
 namespace Application.UseCases.Booking.Queries.GetAppointmentDetails;
@@ -9,14 +9,17 @@ namespace Application.UseCases.Booking.Queries.GetAppointmentDetails;
 public sealed class GetAppointmentDetailsHandler : IQueryHandler<GetAppointmentDetailsQuery, AppointmentDetailsDTO?>
 {
     private readonly IBookingReadRepository _repo;
-    private readonly IAppointmentVisibilityPolicy _policy;
-    private readonly ICurrentUser _currentUser;
+    private readonly ActorContextFactory _factory;
+    private readonly AuthorizationPolicy _policy;
 
-    public GetAppointmentDetailsHandler(IBookingReadRepository repo, IAppointmentVisibilityPolicy policy, ICurrentUser currentUser)
+    public GetAppointmentDetailsHandler(
+        IBookingReadRepository repo,
+        AuthorizationPolicy policy,
+        ActorContextFactory factory)
     {
         _repo = repo;
+        _factory = factory;
         _policy = policy;
-        _currentUser = currentUser;
     }
 
     public async Task<AppointmentDetailsDTO?> Handle(GetAppointmentDetailsQuery query, CancellationToken ct)
@@ -24,7 +27,9 @@ public sealed class GetAppointmentDetailsHandler : IQueryHandler<GetAppointmentD
         var appointment = await _repo.GetAppointmentAsync(query.AppointmentId, ct)
             ?? throw new ApplicationLayerException("Appointment not found.");
 
-        await _policy.EnsureCanViewAsync(appointment, _currentUser.UserId, ct);
+        var actor = await _factory.CreateAsync(appointment.StoreId, ct);
+
+        _policy.EnsureCanViewAppointment(actor, appointment);
 
         return await _repo.GetDetailsAsync(query.AppointmentId, ct);
     }
