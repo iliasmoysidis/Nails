@@ -24,28 +24,6 @@ public class Staff
         };
     }
 
-    public bool IsOwner(int professionalId)
-        => _members.Any(m =>
-                m.ProfessionalId == professionalId &&
-                m.HasRole(StaffRole.Owner));
-
-    public bool IsEmployee(int professionalId)
-        => _members.Any(m =>
-                m.ProfessionalId == professionalId &&
-                m.HasRole(StaffRole.Employee));
-
-    public void EnsureOwner(int professionalId)
-    {
-        if (!IsOwner(professionalId))
-            throw new DomainException("Only an owner can perform this action.");
-    }
-
-    public void EnsureEmployee(int professionalId)
-    {
-        if (!IsEmployee(professionalId))
-            throw new DomainException("Professional does not work for the store.");
-    }
-
     public void AddOwner(int professionalId)
     {
         var member = _members.FirstOrDefault(m => m.ProfessionalId == professionalId);
@@ -94,5 +72,27 @@ public class Staff
 
         if (!member.Roles.Any())
             _members.Remove(member);
+    }
+
+    public bool IsOwner(int professionalId)
+        => _members.Any(m =>
+                m.ProfessionalId == professionalId &&
+                m.HasRole(StaffRole.Owner));
+
+    public bool IsEmployee(int professionalId)
+        => _members.Any(m =>
+                m.ProfessionalId == professionalId &&
+                m.HasRole(StaffRole.Employee));
+
+    public void EnsureOwner(int professionalId)
+    {
+        if (!IsOwner(professionalId))
+            throw new DomainException("Only an owner can perform this action.");
+    }
+
+    public void EnsureEmployee(int professionalId)
+    {
+        if (!IsEmployee(professionalId))
+            throw new DomainException("Professional does not work for the store.");
     }
 }

@@ -1,19 +1,19 @@
 using Application.Abstractions;
 using Application.Repositories;
-using Domain.Services.Booking;
+using Domain.Services;
 
 namespace Application.UseCases.Appointment.Commands.ScheduleAppointment;
 
 public sealed class ScheduleAppointmentCommandHandler : ICommandHandler<ScheduleAppointmentCommand>
 {
     private readonly IAppointmentWriteRepository _repo;
-    private readonly BookingService _bookingService;
+    private readonly AppointmentService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public ScheduleAppointmentCommandHandler(
         IAppointmentWriteRepository repo,
-        BookingService bookingService,
+        AppointmentService bookingService,
         ICurrentUser currentUser,
         IUnitOfWork uow
     )

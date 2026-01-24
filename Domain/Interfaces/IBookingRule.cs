@@ -1,4 +1,4 @@
-using Domain.Services.Booking;
+using Domain.Services;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Interfaces;

@@ -164,7 +164,7 @@ Domain services coordinate aggregates when logic:
 
 Examples:
 
-- `BookingService`
+- `AppointmentService`
 - `StoreCatalogService`
 - `StoreCalendarService`
 - `StaffCalendarService`

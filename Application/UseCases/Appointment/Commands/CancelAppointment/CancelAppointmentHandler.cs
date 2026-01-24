@@ -1,5 +1,5 @@
 
-using Domain.Services.Booking;
+using Domain.Services;
 using Application.Exceptions;
 using Application.Abstractions;
 using Application.Repositories;
@@ -9,13 +9,13 @@ namespace Application.UseCases.Appointment.Commands.CancelAppointment;
 public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointmentCommand>
 {
     private readonly IAppointmentWriteRepository _repo;
-    private readonly BookingService _bookingService;
+    private readonly AppointmentService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public CancelAppointmentHandler(
         IAppointmentWriteRepository repo,
-        BookingService bookingService,
+        AppointmentService bookingService,
         ICurrentUser currentUser,
         IUnitOfWork uow
     )

@@ -1,20 +1,20 @@
 using Application.Abstractions;
 using Application.Exceptions;
 using Application.Repositories;
-using Domain.Services.Booking;
+using Domain.Services;
 
 namespace Application.UseCases.Appointment.Commands.RescheduleAppointment;
 
 public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleAppointmentCommand>
 {
     private readonly IAppointmentWriteRepository _repo;
-    private readonly BookingService _bookingService;
+    private readonly AppointmentService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
     public RescheduleAppointmentHandler(
         IAppointmentWriteRepository repo,
-        BookingService bookingService,
+        AppointmentService bookingService,
         ICurrentUser currentUser,
         IUnitOfWork uow
     )

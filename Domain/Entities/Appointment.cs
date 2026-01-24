@@ -41,10 +41,11 @@ public class Appointment : HistoricEntity
     public static Appointment Create(
         int userId,
         int professionalId,
-        int offeringId, int storeId,
-        Money price,
+        int offeringId,
+        decimal price,
+        string currency,
         UtcDateTime startAt,
-        Duration duration,
+        TimeSpan duration,
         IClock clock,
         string? notes = null
         )
@@ -56,10 +57,9 @@ public class Appointment : HistoricEntity
             UserId = userId,
             OfferingId = offeringId,
             ProfessionalId = professionalId,
-            StoreId = storeId,
-            BookedPrice = price,
+            BookedPrice = Money.Create(price, currency),
             StartAt = startAt,
-            Duration = duration,
+            Duration = Duration.FromTimeSpan(duration),
             Notes = Notes.From(notes),
             Status = AppointmentStatus.PendingConfirmation,
         };
