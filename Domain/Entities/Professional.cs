@@ -8,23 +8,38 @@ namespace Domain.Entities;
 public class Professional : HistoricEntity
 {
     public int Id { get; private set; }
-    public FullName FullName { get; private set; } = null!;
-    public Email Email { get; private set; } = null!;
-    public Phone Phone { get; private set; } = null!;
-    public TaxIdentificationNumber TaxIdNumber { get; private set; } = null!;
+    public FullName FullName { get; private set; }
+    public Email Email { get; private set; }
+    public Phone Phone { get; private set; }
+    public TaxIdentificationNumber TaxIdNumber { get; private set; }
 
-    private Professional()
-    { }
-
-    public static Professional Create(FullName fullName, Email email, Phone phone, TaxIdentificationNumber taxIdNumber, IClock clock)
+    private Professional(
+        FullName fullName,
+        Email email,
+        Phone phone,
+        TaxIdentificationNumber taxIdNumber
+    )
     {
-        var professional = new Professional
-        {
-            FullName = fullName,
-            Email = email,
-            Phone = phone,
-            TaxIdNumber = taxIdNumber
-        };
+        FullName = fullName;
+        Email = email;
+        Phone = phone;
+        TaxIdNumber = taxIdNumber;
+    }
+
+    public static Professional Create(
+        FullName fullName,
+        Email email,
+        Phone phone,
+        TaxIdentificationNumber taxIdNumber,
+        IClock clock
+        )
+    {
+        var professional = new Professional(
+            fullName: fullName,
+            email: email,
+            phone: phone,
+            taxIdNumber: taxIdNumber
+        );
 
         professional.MarkAsCreated(clock);
 
@@ -33,22 +48,33 @@ public class Professional : HistoricEntity
 
     public void UpdatePersonalInfo(IClock clock, FullName? fullName = null, Phone? phone = null)
     {
-        if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");
+        EnsureNotDeleted();
 
-        var hasChanges = false;
+        var changed = false;
 
-        if (fullName is not null && fullName != FullName)
-        {
-            FullName = fullName;
-            hasChanges = true;
-        }
+        changed |= TryUpdateFullName(fullName);
+        changed |= TryUpdatePhone(phone);
 
-        if (phone != null && phone != Phone)
-        {
-            Phone = phone;
-            hasChanges = true;
-        }
+        if (changed) MarkAsUpdated(clock);
+    }
 
-        if (hasChanges) MarkAsUpdated(clock);
+    private bool TryUpdateFullName(FullName? fullName)
+    {
+        if (fullName is null || fullName == FullName) return false;
+        FullName = fullName;
+        return true;
+    }
+
+    private bool TryUpdatePhone(Phone? phone)
+    {
+        if (phone is null || phone == Phone) return false;
+        Phone = phone;
+        return true;
+    }
+
+    private void EnsureNotDeleted()
+    {
+        if (IsDeleted)
+            throw new DomainException("Professional is deleted.");
     }
 }

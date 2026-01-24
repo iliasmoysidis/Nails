@@ -64,8 +64,7 @@ public class Offering : HistoricEntity
         changed |= TryUpdateDuration(duration);
         changed |= TryUpdateDescription(description);
 
-        if (changed)
-            MarkAsUpdated(clock);
+        if (changed) MarkAsUpdated(clock);
     }
 
     private bool TryUpdateName(OfferingName? name)
@@ -105,8 +104,6 @@ public class Offering : HistoricEntity
     private void EnsureNotDeleted()
     {
         if (IsDeleted)
-        {
             throw new DomainException("Offering is deleted.");
-        }
     }
 }
