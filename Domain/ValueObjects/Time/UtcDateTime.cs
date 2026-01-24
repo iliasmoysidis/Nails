@@ -1,35 +1,29 @@
+using Domain.Exceptions;
+
 namespace Domain.ValueObjects.Time;
 
 public readonly struct UtcDateTime : IComparable<UtcDateTime>
 {
     public DateTime Value { get; }
 
-    public UtcDateTime(DateTime value)
+    private UtcDateTime(DateTime value)
     {
         if (value.Kind != DateTimeKind.Utc)
-        {
-            throw new InvalidOperationException("UtcDateTime must be in UTC.");
-        }
+            throw new DomainException("UtcDateTime must be in UTC.");
 
         Value = value;
     }
 
-    public static UtcDateTime From(DateTime dateTime)
-        => new(dateTime.Kind == DateTimeKind.Utc
-            ? dateTime
-            : dateTime.ToUniversalTime());
+    public static UtcDateTime FromUtc(DateTime dateTime)
+    {
+        return new UtcDateTime(dateTime);
+    }
 
     public static UtcDateTime Now()
-        => new(DateTime.UtcNow);
-
-    public UtcDateTime AddMinutes(double minutes)
-        => new(Value.AddMinutes(minutes));
-
-    public UtcDateTime AddHours(double hours)
-        => new(Value.AddHours(hours));
+        => FromUtc(DateTime.UtcNow);
 
     public UtcDateTime Add(TimeSpan duration)
-        => new(Value.Add(duration));
+        => FromUtc(Value.Add(duration));
 
     public DateOnly Date => DateOnly.FromDateTime(Value);
 
@@ -51,6 +45,16 @@ public readonly struct UtcDateTime : IComparable<UtcDateTime>
     public static bool operator <(UtcDateTime a, UtcDateTime b) => a.Value < b.Value;
     public static bool operator >=(UtcDateTime a, UtcDateTime b) => a.Value >= b.Value;
     public static bool operator <=(UtcDateTime a, UtcDateTime b) => a.Value <= b.Value;
+    public static bool operator ==(UtcDateTime a, UtcDateTime b)
+        => a.Value == b.Value;
+    public static bool operator !=(UtcDateTime a, UtcDateTime b)
+        => a.Value != b.Value;
+
+    public override bool Equals(object? obj)
+        => obj is UtcDateTime other && Value == other.Value;
+
+    public override int GetHashCode()
+        => Value.GetHashCode();
 
     public override string ToString()
         => Value.ToString("O");

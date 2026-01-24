@@ -12,14 +12,14 @@ public class Appointment : HistoricEntity
 {
     public int Id { get; private set; }
     public int UserId { get; private set; }
-    public int OfferingId { get; private set; }
     public int ProfessionalId { get; private set; }
+    public int OfferingId { get; private set; }
     public int StoreId { get; private set; }
     public UtcDateTime StartAt { get; private set; }
-    public Duration Duration { get; private set; } = null!;
+    public Duration Duration { get; private set; }
     public UtcDateTime EndAt => StartAt.Add(Duration.Value);
-    public Money BookedPrice { get; private set; } = null!;
-    public Notes Notes { get; private set; } = Notes.Empty();
+    public Money Price { get; private set; }
+    public Notes Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
     public UtcDateTime? CanceledAt { get; private set; }
 
@@ -33,8 +33,24 @@ public class Appointment : HistoricEntity
     public bool IsPast(UtcDateTime now) => EndAt < now;
     public bool IsInProgress(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt <= now && EndAt > now;
 
-    private Appointment()
+    private Appointment(
+        int userId,
+        int professionalId,
+        int offeringId,
+        int storeId,
+        UtcDateTime startAt,
+        Duration duration,
+        Money price,
+        Notes notes)
     {
+        UserId = userId;
+        ProfessionalId = professionalId;
+        OfferingId = offeringId;
+        StoreId = storeId;
+        StartAt = startAt;
+        Duration = duration;
+        Price = price;
+        Notes = notes;
         Status = AppointmentStatus.PendingConfirmation;
     }
 
@@ -42,27 +58,26 @@ public class Appointment : HistoricEntity
         int userId,
         int professionalId,
         int offeringId,
-        decimal price,
-        string currency,
+        int storeId,
         UtcDateTime startAt,
-        TimeSpan duration,
-        IClock clock,
-        string? notes = null
+        Duration duration,
+        Money price,
+        Notes notes,
+        IClock clock
         )
     {
         EnsureStartIsAfterNow(startAt, clock);
 
-        var appointment = new Appointment
-        {
-            UserId = userId,
-            OfferingId = offeringId,
-            ProfessionalId = professionalId,
-            BookedPrice = Money.Create(price, currency),
-            StartAt = startAt,
-            Duration = Duration.FromTimeSpan(duration),
-            Notes = Notes.From(notes),
-            Status = AppointmentStatus.PendingConfirmation,
-        };
+        var appointment = new Appointment(
+            userId: userId,
+            professionalId: professionalId,
+            offeringId: offeringId,
+            storeId: storeId,
+            startAt: startAt,
+            duration: duration,
+            price: price,
+            notes: notes
+        );
 
         appointment.MarkAsCreated(clock);
         return appointment;
@@ -73,7 +88,8 @@ public class Appointment : HistoricEntity
         EnsureNotDeleted();
 
         if (Status != AppointmentStatus.PendingConfirmation)
-            throw new DomainException($"Cannot confirm appointment. Current status is {Status}. Only pending appointments can be confirmed.");
+            throw new DomainException(
+                $"Cannot confirm appointment. Current status is {Status}.");
 
         if (StartAt <= clock.Now)
             throw new DomainException("Cannot confirm appointments in the past.");
@@ -84,7 +100,8 @@ public class Appointment : HistoricEntity
 
     public void Reschedule(UtcDateTime startAt, IClock clock)
     {
-        EnsureIsMutable();
+        EnsureNotDeleted();
+        EnsureNotTerminal();
         EnsureStartIsAfterNow(startAt, clock);
 
         StartAt = startAt;
@@ -93,7 +110,8 @@ public class Appointment : HistoricEntity
 
     public void Cancel(IClock clock, string? reason = null)
     {
-        EnsureIsMutable();
+        EnsureNotDeleted();
+        EnsureNotTerminal();
 
         if (StartAt <= clock.Now)
             throw new DomainException("Cannot cancel an ongoing appointment.");
@@ -135,7 +153,8 @@ public class Appointment : HistoricEntity
 
     public void UpdateNotes(IClock clock, string? notes)
     {
-        EnsureIsMutable();
+        EnsureNotDeleted();
+        EnsureNotTerminal();
 
         Notes = Notes.From(notes);
         MarkAsUpdated(clock);
@@ -143,9 +162,13 @@ public class Appointment : HistoricEntity
 
     public void AdjustPrice(Money newPrice, string reason, IClock clock)
     {
-        EnsureIsMutable();
+        EnsureNotDeleted();
+        EnsureNotTerminal();
 
-        BookedPrice = newPrice;
+        if (newPrice.Currency != Price.Currency)
+            throw new DomainException("Cannot change appointment currency.");
+
+        Price = newPrice;
         Notes = Notes.Append("Price adjusted", $"{newPrice}. {reason}");
 
         MarkAsUpdated(clock);
@@ -155,15 +178,29 @@ public class Appointment : HistoricEntity
     {
         if (IsDeleted) return false;
 
-        if (Status is AppointmentStatus.Canceled or AppointmentStatus.Completed or AppointmentStatus.NoShow)
+        if (end <= start)
+            throw new DomainException("Invalid time range.");
+
+        if (IsTerminal())
             return false;
 
         return start < EndAt && end > StartAt;
     }
 
-    private void EnsureIsMutable()
+    private bool IsTerminal()
+        => Status is AppointmentStatus.Completed
+            or AppointmentStatus.Canceled
+            or AppointmentStatus.NoShow;
+
+    private void EnsureNotDeleted()
     {
-        if (IsDeleted || IsCompleted || IsCanceled || IsNoShow)
+        if (IsDeleted)
+            throw new DomainException("Appointment is deleted.");
+    }
+
+    private void EnsureNotTerminal()
+    {
+        if (IsTerminal())
         {
             throw new DomainException("Appointment cannot be modified.");
         }
@@ -173,11 +210,5 @@ public class Appointment : HistoricEntity
     {
         if (startAt <= clock.Now)
             throw new DomainException("Appointment start time must be in the future.");
-    }
-
-    private void EnsureNotDeleted()
-    {
-        if (IsDeleted)
-            throw new DomainException("Appointment is deleted.");
     }
 }
