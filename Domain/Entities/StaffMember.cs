@@ -1,38 +1,36 @@
 using Domain.Enums;
-using Domain.ValueObjects.Staff;
 
 namespace Domain.Entities;
 
 public sealed class StaffMember
 {
-    public int StoreId { get; }
-    public int ProfessionalId { get; }
+    public int StoreId { get; private set; }
+    public int ProfessionalId { get; private set; }
 
-    private readonly HashSet<StaffMemberRole> _roles;
-    public IReadOnlyCollection<StaffMemberRole> Roles => _roles.AsReadOnly();
+    private HashSet<StaffRole> _roles = new();
+    public IReadOnlyCollection<StaffRole> Roles => _roles;
 
-    private StaffMember(int storeId, int professionalId, IEnumerable<StaffMemberRole> roles)
+    private StaffMember() { }
+
+    private StaffMember(
+        int storeId,
+        int professionalId,
+        IEnumerable<StaffRole> roles
+        )
     {
         StoreId = storeId;
         ProfessionalId = professionalId;
-        _roles = new HashSet<StaffMemberRole>(roles);
+        _roles = new HashSet<StaffRole>(roles);
     }
 
     public static StaffMember CreateOwner(int storeId, int professionalId)
-        => new(storeId, professionalId, [new StaffMemberRole(StaffRole.Owner)]);
+        => new(storeId, professionalId, [StaffRole.Owner]);
 
 
     public static StaffMember CreateEmployee(int storeId, int professionalId)
-        => new(storeId, professionalId, [new StaffMemberRole(StaffRole.Employee)]);
+        => new(storeId, professionalId, [StaffRole.Employee]);
 
-    public bool HasRole(StaffRole role) => _roles.Any(r => r.Role == role);
-
-    public void AddRole(StaffRole role) => _roles.Add(new StaffMemberRole(role));
-
-    public void RemoveRole(StaffRole role)
-    {
-        var existing = _roles.FirstOrDefault(r => r.Role == role);
-        if (existing is not null)
-            _roles.Remove(existing);
-    }
+    public bool HasRole(StaffRole role) => _roles.Contains(role);
+    public void AddRole(StaffRole role) => _roles.Add(role);
+    public void RemoveRole(StaffRole role) => _roles.Remove(role);
 }
