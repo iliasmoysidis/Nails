@@ -1,6 +1,5 @@
 using Application.Abstractions;
 using Application.Exceptions;
-using Application.Policies;
 using Application.Repositories;
 using Domain.ValueObjects.Calendar;
 
@@ -10,14 +9,12 @@ public sealed class GetCalendarExceptionsHandler
     : IQueryHandler<GetCalendarExceptionsQuery, IReadOnlyCollection<CalendarException>>
 {
     private readonly IStaffCalendarRepository _repo;
-    private readonly AuthorizationPolicy _policy;
-    private readonly ActorContextFactory _factory;
+    private readonly IAuthorizationService _auth;
 
-    public GetCalendarExceptionsHandler(IStaffCalendarRepository repo, ActorContextFactory factory, AuthorizationPolicy policy)
+    public GetCalendarExceptionsHandler(IStaffCalendarRepository repo, IAuthorizationService auth)
     {
         _repo = repo;
-        _factory = factory;
-        _policy = policy;
+        _auth = auth;
     }
 
     public async Task<IReadOnlyCollection<CalendarException>> Handle(
@@ -28,9 +25,7 @@ public sealed class GetCalendarExceptionsHandler
         var calendar = await _repo.GetAsync(query.StoreId, query.ProfessionalId, ct)
             ?? throw new ApplicationLayerException("Staff calendar not found");
 
-        var actor = await _factory.CreateAsync(query.StoreId, ct);
-
-        _policy.EnsureCanViewExceptions(actor, query.ProfessionalId);
+        await _auth.RequireProfessionalAccess(query.StoreId, query.ProfessionalId, ct);
 
         return calendar.GetExceptions();
     }

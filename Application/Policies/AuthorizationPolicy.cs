@@ -12,16 +12,9 @@ public sealed class AuthorizationPolicy
             throw new ApplicationLayerException("Only the store owner can perform this action.");
     }
 
-    public void EnsureCanViewProfessionalAppointments(ActorContext actor, int professionalId)
+    public void EnsureCanAccessProfessional(ActorContext actor, int professionalId)
     {
-        if (!IsOwnerOrSelf(actor, professionalId))
-            throw new ApplicationLayerException("You are not allowed to view this professional's appointments.");
-    }
-
-    public void EnsureCanViewExceptions(ActorContext actor, int professionalId)
-    {
-        if (!IsOwnerOrSelf(actor, professionalId))
-            throw new ApplicationLayerException("You are not allowed to view this professional's exceptions.");
+        EnsureOwnerOrSelf(actor, professionalId, "You are not allowed to access this professional's data.");
     }
 
     public void EnsureCanViewAppointment(ActorContext actor, Appointment appointment)
@@ -32,6 +25,16 @@ public sealed class AuthorizationPolicy
             throw new ApplicationLayerException("You are not allowed to view this appointment.");
     }
 
-    private bool IsOwnerOrSelf(ActorContext actor, int professionalId)
-        => actor.IsOwner || actor.UserId == professionalId;
+    private static bool IsOwnerOrSelf(ActorContext actor, int subjectId)
+        => actor.IsOwner || actor.UserId == subjectId;
+
+    private static void EnsureOwnerOrSelf(
+        ActorContext actor,
+        int subjectId,
+        string errorMessage
+    )
+    {
+        if (!IsOwnerOrSelf(actor, subjectId))
+            throw new ApplicationLayerException(errorMessage);
+    }
 }
