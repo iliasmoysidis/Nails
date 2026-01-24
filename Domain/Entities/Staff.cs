@@ -46,10 +46,8 @@ public class Staff
             throw new DomainException("Professional does not work for the store.");
     }
 
-    public void AddOwner(int actingOwnerId, int professionalId)
+    public void AddOwner(int professionalId)
     {
-        EnsureOwner(actingOwnerId);
-
         var member = _members.FirstOrDefault(m => m.ProfessionalId == professionalId);
 
         if (member is null)
@@ -62,11 +60,9 @@ public class Staff
         }
     }
 
-    public void RemoveOwner(int actingOwnerId, int ownerToRemoveId)
+    public void RemoveOwner(int professionalId)
     {
-        EnsureOwner(actingOwnerId);
-
-        var member = _members.FirstOrDefault(m => m.ProfessionalId == ownerToRemoveId)
+        var member = _members.FirstOrDefault(m => m.ProfessionalId == professionalId)
             ?? throw new DomainException("Professional is not part of this store.");
 
         if (member.HasRole(StaffRole.Owner) && _members.Count(m => m.HasRole(StaffRole.Owner)) == 1)
@@ -78,10 +74,8 @@ public class Staff
             _members.Remove(member);
     }
 
-    public void AddEmployee(int actingOwnerId, int professionalId)
+    public void AddEmployee(int professionalId)
     {
-        EnsureOwner(actingOwnerId);
-
         var member = _members.FirstOrDefault(m => m.ProfessionalId == professionalId);
 
         if (member is null)
@@ -91,10 +85,8 @@ public class Staff
             member.AddRole(StaffRole.Employee);
     }
 
-    public void RemoveEmployee(int actingOwnerId, int professionalId)
+    public void RemoveEmployee(int professionalId)
     {
-        EnsureOwner(actingOwnerId);
-
         var member = _members.FirstOrDefault(m => m.ProfessionalId == professionalId)
             ?? throw new DomainException("Professional is not part of this store.");
 
