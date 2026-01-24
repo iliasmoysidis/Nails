@@ -1,20 +1,19 @@
-
-using Domain.Services.Booking;
-using Application.Exceptions;
 using Application.Abstractions;
+using Application.Exceptions;
 using Application.Repositories;
+using Domain.Services.Booking;
 
-namespace Application.UseCases.Booking.Commands.CancelAppointment;
+namespace Application.UseCases.Appointment.Commands.RescheduleAppointment;
 
-public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointmentCommand>
+public sealed class RescheduleAppointmentHandler : ICommandHandler<RescheduleAppointmentCommand>
 {
-    private readonly IBookingWriteRepository _repo;
+    private readonly IAppointmentWriteRepository _repo;
     private readonly BookingService _bookingService;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _uow;
 
-    public CancelAppointmentHandler(
-        IBookingWriteRepository repo,
+    public RescheduleAppointmentHandler(
+        IAppointmentWriteRepository repo,
         BookingService bookingService,
         ICurrentUser currentUser,
         IUnitOfWork uow
@@ -27,28 +26,25 @@ public sealed class CancelAppointmentHandler : ICommandHandler<CancelAppointment
     }
 
     public async Task Handle(
-        CancelAppointmentCommand command,
+        RescheduleAppointmentCommand command,
         CancellationToken ct
     )
     {
         var appointment = await _repo.GetAppointmentAsync(
-            command.AppointmentId,
-            ct);
-
-        if (appointment is null)
-            throw new ApplicationLayerException("Appointment not found");
+            command.AppointmentId, ct)
+            ?? throw new ApplicationLayerException("Appointment not found.");
 
         var ctx = await _repo.LoadContextAsync(
             appointment.StoreId,
             appointment.ProfessionalId,
-            ct
-        );
+            ct);
 
-        _bookingService.CancelAppointment(
+        _bookingService.RescheduleAppointment(
             ctx,
             appointment,
-            agentId: _currentUser.UserId,
-            reason: command.Reason
+            _currentUser.UserId,
+            command.ProfessionalId,
+            command.NewStartAt
         );
 
         await _uow.SaveChangesAsync(ct);

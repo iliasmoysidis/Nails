@@ -2,15 +2,15 @@ using Application.Abstractions;
 using Application.DTO;
 using Application.Repositories;
 
-namespace Application.UseCases.Booking.Queries.GetProfessionalAppointments;
+namespace Application.UseCases.Appointment.Queries.GetProfessionalAppointments;
 
 public sealed class GetProfessionalAppointmentsHandler : IQueryHandler<GetProfessionalAppointmentsQuery, IReadOnlyCollection<AppointmentListItemDTO>>
 {
-    private readonly IBookingReadRepository _repo;
+    private readonly IAppointmentReadRepository _repo;
     private readonly IAuthorizationService _auth;
 
     public GetProfessionalAppointmentsHandler(
-        IBookingReadRepository repo,
+        IAppointmentReadRepository repo,
         IAuthorizationService auth
         )
     {

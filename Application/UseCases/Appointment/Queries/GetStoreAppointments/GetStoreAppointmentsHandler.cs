@@ -2,16 +2,16 @@ using Application.Abstractions;
 using Application.DTO;
 using Application.Repositories;
 
-namespace Application.UseCases.Booking.Queries.GetStoreAppointments;
+namespace Application.UseCases.Appointment.Queries.GetStoreAppointments;
 
 public sealed class GetStoreAppointmentsHandler : IQueryHandler<GetStoreAppointmentsQuery, IReadOnlyCollection<AppointmentListItemDTO>>
 {
-    private readonly IBookingReadRepository _repo;
+    private readonly IAppointmentReadRepository _repo;
     private readonly IAuthorizationService _auth;
 
 
     public GetStoreAppointmentsHandler(
-        IBookingReadRepository repo,
+        IAppointmentReadRepository repo,
         IAuthorizationService auth
         )
     {

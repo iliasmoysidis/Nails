@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Application.Repositories;
 
-public interface IBookingReadRepository
+public interface IAppointmentReadRepository
 {
     Task<Appointment?> GetAppointmentAsync(int appointmentId, CancellationToken ct);
     Task<AppointmentDetailsDTO?> GetDetailsAsync(int appointmentId, CancellationToken ct);

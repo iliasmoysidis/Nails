@@ -3,15 +3,15 @@ using Application.DTO;
 using Application.Exceptions;
 using Application.Repositories;
 
-namespace Application.UseCases.Booking.Queries.GetAppointmentDetails;
+namespace Application.UseCases.Appointment.Queries.GetAppointmentDetails;
 
 public sealed class GetAppointmentDetailsHandler : IQueryHandler<GetAppointmentDetailsQuery, AppointmentDetailsDTO?>
 {
-    private readonly IBookingReadRepository _repo;
+    private readonly IAppointmentReadRepository _repo;
     private readonly IAuthorizationService _auth;
 
     public GetAppointmentDetailsHandler(
-        IBookingReadRepository repo,
+        IAppointmentReadRepository repo,
         IAuthorizationService auth
         )
     {

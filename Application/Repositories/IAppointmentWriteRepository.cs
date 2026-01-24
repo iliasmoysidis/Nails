@@ -1,11 +1,11 @@
 using Domain.Entities;
-using Domain.Services.Booking;
+using Domain.Services.Appointment;
 
 namespace Application.Repositories;
 
-public interface IBookingWriteRepository
+public interface IAppointmentWriteRepository
 {
-    Task<BookingContext> LoadContextAsync(
+    Task<AppointmentContext> LoadContextAsync(
         int storeId,
         int professionalId,
         CancellationToken ct
