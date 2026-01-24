@@ -1,4 +1,3 @@
-using System.Runtime;
 using Domain.Exceptions;
 
 namespace Domain.ValueObjects.Finance;
