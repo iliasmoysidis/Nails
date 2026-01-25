@@ -1,5 +1,4 @@
 using Domain.ValueObjects.Calendar;
-using Domain.Exceptions;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;

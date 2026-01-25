@@ -5,10 +5,12 @@ namespace Domain.Entities;
 
 public class StoreCalendar
 {
-    public int StoreId { get; }
+    public int StoreId { get; private set; }
 
     private readonly Dictionary<DayOfWeek, WorkingDay> _workingDays = new();
     private readonly Dictionary<DateOnly, CalendarException> _exceptions = new();
+
+    private StoreCalendar() { }
 
     private StoreCalendar(int storeId)
     {
@@ -60,17 +62,20 @@ public class StoreCalendar
     {
         if (_exceptions.TryGetValue(date, out var exception))
         {
-            return exception.IsDayOff ? Array.Empty<TimeRange>() : exception.TimeRanges;
+            return exception.IsDayOff ? EmptyRanges : exception.TimeRanges;
         }
 
         if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
         {
-            return workingDay.IsDayOff ? Array.Empty<TimeRange>() : workingDay.TimeRanges;
+            return workingDay.IsDayOff ? EmptyRanges : workingDay.TimeRanges;
         }
 
-        return Array.Empty<TimeRange>();
+        return EmptyRanges;
     }
 
     public IReadOnlyCollection<CalendarException> GetExceptions()
-        => _exceptions.Values.ToList().AsReadOnly();
+        => _exceptions.Values;
+
+    private static readonly IReadOnlyCollection<TimeRange> EmptyRanges = Array.Empty<TimeRange>();
+
 }
