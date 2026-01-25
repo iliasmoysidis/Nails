@@ -55,7 +55,7 @@ public class Offering : HistoricEntity
 
     public void UpdateDetails(IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, Description? description = null)
     {
-        EnsureNotDeleted();
+        EnsureActive();
 
         var changed = false;
 
@@ -99,11 +99,5 @@ public class Offering : HistoricEntity
         if (description is null || description == Description) return false;
         Description = description;
         return true;
-    }
-
-    private void EnsureNotDeleted()
-    {
-        if (IsDeleted)
-            throw new StateException("Offering is deleted.");
     }
 }

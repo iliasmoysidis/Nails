@@ -30,4 +30,10 @@ public abstract class HistoricEntity : BaseEntity
         DeletedAt = null;
         MarkAsUpdated(clock);
     }
+
+    protected void EnsureActive()
+    {
+        if (IsDeleted)
+            throw new StateException($"{GetType().Name} is deleted.");
+    }
 }

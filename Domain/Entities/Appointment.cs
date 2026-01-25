@@ -85,7 +85,7 @@ public class Appointment : HistoricEntity
 
     public void Confirm(IClock clock)
     {
-        EnsureNotDeleted();
+        EnsureActive();
 
         if (Status != AppointmentStatus.PendingConfirmation)
             throw new StateException(
@@ -100,7 +100,7 @@ public class Appointment : HistoricEntity
 
     public void Reschedule(UtcDateTime startAt, IClock clock)
     {
-        EnsureNotDeleted();
+        EnsureActive();
         EnsureNotTerminal();
         EnsureStartIsAfterNow(startAt, clock);
 
@@ -110,7 +110,7 @@ public class Appointment : HistoricEntity
 
     public void Cancel(IClock clock, string? reason = null)
     {
-        EnsureNotDeleted();
+        EnsureActive();
         EnsureNotTerminal();
 
         if (StartAt <= clock.Now)
@@ -125,7 +125,7 @@ public class Appointment : HistoricEntity
 
     public void Complete(IClock clock)
     {
-        EnsureNotDeleted();
+        EnsureActive();
 
         if (Status != AppointmentStatus.Confirmed)
             throw new StateException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
@@ -139,7 +139,7 @@ public class Appointment : HistoricEntity
 
     public void MarkAsNoShow(IClock clock)
     {
-        EnsureNotDeleted();
+        EnsureActive();
 
         if (Status != AppointmentStatus.Confirmed)
             throw new StateException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
@@ -153,7 +153,7 @@ public class Appointment : HistoricEntity
 
     public void UpdateNotes(IClock clock, string? notes)
     {
-        EnsureNotDeleted();
+        EnsureActive();
         EnsureNotTerminal();
 
         Notes = Notes.From(notes);
@@ -162,7 +162,7 @@ public class Appointment : HistoricEntity
 
     public void AdjustPrice(Money newPrice, string reason, IClock clock)
     {
-        EnsureNotDeleted();
+        EnsureActive();
         EnsureNotTerminal();
 
         if (newPrice.Currency != Price.Currency)
@@ -191,12 +191,6 @@ public class Appointment : HistoricEntity
         => Status is AppointmentStatus.Completed
             or AppointmentStatus.Canceled
             or AppointmentStatus.NoShow;
-
-    private void EnsureNotDeleted()
-    {
-        if (IsDeleted)
-            throw new StateException("Appointment is deleted.");
-    }
 
     private void EnsureNotTerminal()
     {

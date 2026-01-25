@@ -34,7 +34,7 @@ public class User : HistoricEntity
 
     public void UpdatePersonalInfo(IClock clock, FullName? fullName = null, Phone? phone = null)
     {
-        EnsureNotDeleted();
+        EnsureActive();
 
         var changed = false;
 
@@ -57,11 +57,5 @@ public class User : HistoricEntity
         if (phone is null || phone == Phone) return false;
         Phone = phone;
         return true;
-    }
-
-    private void EnsureNotDeleted()
-    {
-        if (IsDeleted)
-            throw new StateException("User is deleted.");
     }
 }
