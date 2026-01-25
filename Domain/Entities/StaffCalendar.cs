@@ -12,6 +12,8 @@ public class StaffCalendar
     private readonly Dictionary<DayOfWeek, WorkingDay> _workingDays = new();
     private readonly Dictionary<DateOnly, CalendarException> _exceptions = new();
 
+    private StaffCalendar() { }
+
     private StaffCalendar(int storeId, int professionalId)
     {
         StoreId = storeId;
@@ -40,17 +42,18 @@ public class StaffCalendar
         _exceptions.Remove(date);
     }
 
-    public bool IsProfessionalAvailable(UtcDateTime startAt, UtcDateTime endAt)
+    public bool IsAvailable(UtcDateTime startAt, UtcDateTime endAt)
     {
-        if (endAt <= startAt) throw new DomainException("End time must be after start time.");
+        if (endAt <= startAt) return false;
+        if (endAt.Date != startAt.Date) return false;
 
         var date = startAt.Date;
-
-        if (endAt.Date != date) return false;
-
         var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
 
-        return GetWorkingTimeRanges(date).Any(r => r.Start <= range.Start && r.End >= range.End);
+        return GetWorkingTimeRanges(date)
+            .Any(r =>
+                r.Start <= range.Start &&
+                r.End >= range.End);
     }
 
     public bool TryGetWorkingDay(DayOfWeek day, out WorkingDay workingDay)
@@ -63,18 +66,18 @@ public class StaffCalendar
     {
         if (_exceptions.TryGetValue(date, out var exception))
         {
-            return exception.IsDayOff ? Array.Empty<TimeRange>() : exception.TimeRanges;
+            return exception.IsDayOff ? EmptyRanges : exception.TimeRanges;
         }
 
         if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
         {
-            return workingDay.IsDayOff ? Array.Empty<TimeRange>() : workingDay.TimeRanges;
+            return workingDay.IsDayOff ? EmptyRanges : workingDay.TimeRanges;
         }
 
-        return Array.Empty<TimeRange>();
+        return EmptyRanges;
     }
 
-    public bool ConflictsWithRecurring(WorkingDay day)
+    public bool ConflictsWithWorkingDay(WorkingDay day)
     {
         if (day.IsDayOff) return false;
 
@@ -85,7 +88,7 @@ public class StaffCalendar
         return TimeRange.AnyOverlap(mine.TimeRanges, day.TimeRanges);
     }
 
-    public bool ConflictsWithDateSpecific(CalendarException exception)
+    public bool ConflictsWithException(CalendarException exception)
     {
         if (exception.IsDayOff) return false;
 
@@ -97,5 +100,7 @@ public class StaffCalendar
     }
 
     public IReadOnlyCollection<CalendarException> GetExceptions()
-        => _exceptions.Values.ToList().AsReadOnly();
+        => _exceptions.Values;
+
+    private static readonly IReadOnlyCollection<TimeRange> EmptyRanges = Array.Empty<TimeRange>();
 }
