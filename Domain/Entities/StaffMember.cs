@@ -4,8 +4,8 @@ namespace Domain.Entities;
 
 public sealed class StaffMember
 {
-    public int StoreId { get; private set; }
-    public int ProfessionalId { get; private set; }
+    public int StoreId { get; }
+    public int ProfessionalId { get; }
 
     private HashSet<StaffRole> _roles = new();
     public IReadOnlyCollection<StaffRole> Roles => _roles;
