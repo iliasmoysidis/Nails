@@ -11,24 +11,36 @@ public class StoreCatalog
     public int StoreId { get; private set; }
 
     private readonly List<Offering> _offerings = new();
-    public IReadOnlyCollection<Offering> Offerings => _offerings.AsReadOnly();
-
-    private readonly HashSet<ServiceOffering> _serviceOfferings = new();
-    public IReadOnlyCollection<ServiceOffering> ServiceOfferings => _serviceOfferings;
+    private readonly HashSet<ProfessionalOffering> _serviceOfferings = new();
 
     private StoreCatalog() { }
 
-    public static StoreCatalog Create(int storeId)
+    private StoreCatalog(int storeId)
     {
-        return new StoreCatalog
-        {
-            StoreId = storeId
-        };
+        StoreId = storeId;
     }
 
-    public Offering AddOffering(OfferingName name, Money price, Duration duration, IClock clock, string? description = null)
+    public static StoreCatalog Create(int storeId)
     {
-        var offering = Offering.Create(StoreId, name, price, duration, clock, description);
+        return new(storeId);
+    }
+
+    public Offering AddOffering(
+        OfferingName name,
+        Money price,
+        Duration duration,
+        Description description,
+        IClock clock
+        )
+    {
+        var offering = Offering.Create(
+            StoreId,
+            name,
+            price,
+            duration,
+            description,
+            clock
+            );
 
         _offerings.Add(offering);
 
@@ -37,13 +49,37 @@ public class StoreCatalog
 
     public void RemoveOffering(int offeringId, IClock clock)
     {
-        var offering = _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
-            ?? throw new DomainException("Offering not found.");
+        var offering = GetOfferingOrThrow(offeringId);
 
         offering.SoftDelete(clock);
-
         _serviceOfferings.RemoveWhere(o => o.OfferingId == offeringId);
     }
+
+    public void AssignOffering(int professionalId, int offeringId)
+    {
+        GetOfferingOrThrow(offeringId);
+
+        var assignment = new ProfessionalOffering(professionalId, offeringId);
+
+        if (!_serviceOfferings.Add(assignment))
+        {
+            throw new DomainException("Offering is already assigned to this professional.");
+        }
+    }
+
+    public void UnassignOffering(int professionalId, int offeringId)
+    {
+        GetOfferingOrThrow(offeringId);
+
+        if (!_serviceOfferings.Remove(new ProfessionalOffering(professionalId, offeringId)))
+        {
+            throw new DomainException("Offering is not assigned to the professional.");
+        }
+    }
+
+    public Offering GetOfferingOrThrow(int offeringId)
+        => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
+            ?? throw new DomainException("Offering not found.");
 
     public Offering? GetOffering(int offeringId)
         => _offerings.FirstOrDefault(o => o.Id == offeringId && !o.IsDeleted);
@@ -51,32 +87,20 @@ public class StoreCatalog
     public bool OfferingExists(int offeringId)
         => _offerings.Any(o => o.Id == offeringId && !o.IsDeleted);
 
-    public ServiceOffering AssignOffering(int professionalId, int offeringId)
-    {
-        if (!OfferingExists(offeringId)) throw new DomainException("Offering not found.");
-
-        var assignment = new ServiceOffering(professionalId, offeringId);
-
-        if (!_serviceOfferings.Add(assignment))
-        {
-            throw new DomainException("Offering is already assigned to this professional.");
-        }
-
-        return assignment;
-    }
-
-    public void UnassignOffering(int professionalId, int offeringId)
-    {
-        var assignment = new ServiceOffering(professionalId, offeringId);
-
-        if (!_serviceOfferings.Remove(assignment))
-        {
-            throw new DomainException("Offering is not assigned to the professional.");
-        }
-    }
+    public IReadOnlyCollection<Offering> GetActiveOfferings()
+        => _offerings.Where(o => !o.IsDeleted).ToList().AsReadOnly();
 
     public bool IsOfferingProvidedByProfessional(int professionalId, int offeringId)
     {
         return _serviceOfferings.Any(so => so.ProfessionalId == professionalId && so.OfferingId == offeringId);
+    }
+
+    public IReadOnlyCollection<int> GetOfferingIdsForProfessional(int professionalId)
+    {
+        return _serviceOfferings
+            .Where(so => so.ProfessionalId == professionalId)
+            .Select(x => x.OfferingId)
+            .ToList()
+            .AsReadOnly();
     }
 }
