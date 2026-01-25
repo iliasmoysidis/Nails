@@ -33,16 +33,16 @@ public sealed record Address
         string countryCode)
     {
         if (string.IsNullOrWhiteSpace(street))
-            throw new DomainException("Street is required.");
+            throw new ValidationException("Street is required.");
 
         if (string.IsNullOrWhiteSpace(city))
-            throw new DomainException("City is required.");
+            throw new ValidationException("City is required.");
 
         if (string.IsNullOrWhiteSpace(postalCode))
-            throw new DomainException("Postal code is required.");
+            throw new ValidationException("Postal code is required.");
 
         if (string.IsNullOrWhiteSpace(countryCode))
-            throw new DomainException("Country code is required.");
+            throw new ValidationException("Country code is required.");
 
         street = street.Trim();
         city = city.Trim();
@@ -51,19 +51,19 @@ public sealed record Address
         state = state?.Trim();
 
         if (street.Length > 200)
-            throw new DomainException("Street cannot exceed 200 characters.");
+            throw new ValidationException("Street cannot exceed 200 characters.");
 
         if (city.Length > 100)
-            throw new DomainException("City cannot exceed 100 characters.");
+            throw new ValidationException("City cannot exceed 100 characters.");
 
         if (postalCode.Length > 20)
-            throw new DomainException("Postal code cannot exceed 20 characters.");
+            throw new ValidationException("Postal code cannot exceed 20 characters.");
 
         if (!Regex.IsMatch(countryCode, @"^[A-Z]{2}$"))
-            throw new DomainException("Country code must be a valid ISO-3166 alpha-2 code.");
+            throw new ValidationException("Country code must be a valid ISO-3166 alpha-2 code.");
 
         if (state != null && state.Length > 100)
-            throw new DomainException("State cannot exceed 100 characters.");
+            throw new ValidationException("State cannot exceed 100 characters.");
 
         return new Address(
             street,

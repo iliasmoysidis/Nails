@@ -14,12 +14,12 @@ public sealed record Email
     public static Email From(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException("Email cannot be empty.");
+            throw new ValidationException("Email cannot be empty.");
 
         value = value.Trim().ToLowerInvariant();
 
         if (!IsValid(value))
-            throw new DomainException("Invalid email address.");
+            throw new ValidationException("Invalid email address.");
 
         return new Email(value);
     }

@@ -14,13 +14,13 @@ public sealed record Duration
     public static Duration FromMinutes(int minutes)
     {
         if (minutes <= 0)
-            throw new DomainException("Duration must be positive.");
+            throw new ValidationException("Duration must be positive.");
 
         if (minutes % 15 != 0)
-            throw new DomainException("Duration must be in 15-minute increments.");
+            throw new ValidationException("Duration must be in 15-minute increments.");
 
         if (minutes > 8 * 60)
-            throw new DomainException("Duration cannot exceed 8 hours.");
+            throw new ValidationException("Duration cannot exceed 8 hours.");
 
         return new Duration(TimeSpan.FromMinutes(minutes));
     }
@@ -28,7 +28,7 @@ public sealed record Duration
     public static Duration FromTimeSpan(TimeSpan value)
     {
         if (value.TotalMinutes % 1 != 0)
-            throw new DomainException("Duration must be whole minutes");
+            throw new ValidationException("Duration must be whole minutes");
 
         return FromMinutes((int)value.TotalMinutes);
     }

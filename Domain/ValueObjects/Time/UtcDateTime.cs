@@ -9,7 +9,7 @@ public readonly struct UtcDateTime : IComparable<UtcDateTime>
     private UtcDateTime(DateTime value)
     {
         if (value.Kind != DateTimeKind.Utc)
-            throw new DomainException("UtcDateTime must be in UTC.");
+            throw new ValidationException("UtcDateTime must be in UTC.");
 
         Value = value;
     }

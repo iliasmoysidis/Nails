@@ -79,7 +79,7 @@ public class Offering : HistoricEntity
         if (price is null) return false;
 
         if (price.Currency != Price.Currency)
-            throw new DomainException("Cannot change offering currency.");
+            throw new InvariantException("Cannot change offering currency.");
 
         if (price == Price) return false;
 
@@ -104,6 +104,6 @@ public class Offering : HistoricEntity
     private void EnsureNotDeleted()
     {
         if (IsDeleted)
-            throw new DomainException("Offering is deleted.");
+            throw new StateException("Offering is deleted.");
     }
 }

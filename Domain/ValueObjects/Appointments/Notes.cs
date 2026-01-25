@@ -24,7 +24,7 @@ public sealed record Notes
         value = value.Trim();
 
         if (value.Length > MaxLength)
-            throw new DomainException($"Notes cannot exceed {MaxLength} characters.");
+            throw new ValidationException($"Notes cannot exceed {MaxLength} characters.");
 
         return new(value);
     }
@@ -39,7 +39,7 @@ public sealed record Notes
         var combined = string.IsNullOrEmpty(Value) ? line : $"{Value}\n{line}";
 
         if (combined.Length > MaxLength)
-            throw new DomainException($"Notes cannot exceed {MaxLength} characters.");
+            throw new ValidationException($"Notes cannot exceed {MaxLength} characters.");
 
         return new(combined);
     }

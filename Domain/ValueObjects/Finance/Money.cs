@@ -16,10 +16,10 @@ public sealed record Money
     public static Money Create(decimal amount, string currency)
     {
         if (amount < 0)
-            throw new DomainException("Money amount cannot be negative.");
+            throw new ValidationException("Money amount cannot be negative.");
 
         if (string.IsNullOrWhiteSpace(currency))
-            throw new DomainException("Currency is required.");
+            throw new ValidationException("Currency is required.");
 
         return new Money(decimal.Round(amount, 2, MidpointRounding.AwayFromZero), currency.ToUpperInvariant());
     }
@@ -40,7 +40,7 @@ public sealed record Money
         a.EnsureSameCurrency(b);
 
         if (a < b)
-            throw new DomainException("Insufficient amount.");
+            throw new InvariantException("Insufficient amount.");
 
         return Create(a.Amount - b.Amount, a.Currency);
     }
@@ -76,13 +76,13 @@ public sealed record Money
     private void EnsureSameCurrency(Money other)
     {
         if (Currency != other.Currency)
-            throw new DomainException("Cannot operate on different currencies.");
+            throw new InvariantException("Cannot operate on different currencies.");
     }
 
     private static void EnsureNotNull(Money a, Money b)
     {
         if (a is null || b is null)
-            throw new ArgumentNullException();
+            throw new ValidationException("Money operands cannot be null.");
     }
 
     public override string ToString() => $"{Amount} {Currency}";

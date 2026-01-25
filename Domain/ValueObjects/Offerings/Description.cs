@@ -24,7 +24,7 @@ public sealed record Description
         value = value.Trim();
 
         if (value.Length > MaxLength)
-            throw new DomainException($"Description cannot exceed {MaxLength} characters.");
+            throw new ValidationException($"Description cannot exceed {MaxLength} characters.");
 
         return new(value);
     }

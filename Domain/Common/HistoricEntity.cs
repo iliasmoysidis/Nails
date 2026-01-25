@@ -13,7 +13,7 @@ public abstract class HistoricEntity : BaseEntity
     {
         if (IsDeleted)
         {
-            throw new DomainException($"{GetType().Name} is already deleted.");
+            throw new StateException($"{GetType().Name} is already deleted.");
         }
 
         DeletedAt = clock.Now;
@@ -24,7 +24,7 @@ public abstract class HistoricEntity : BaseEntity
     {
         if (!IsDeleted)
         {
-            throw new DomainException($"{GetType().Name} is not deleted.");
+            throw new StateException($"{GetType().Name} is not deleted.");
         }
 
         DeletedAt = null;

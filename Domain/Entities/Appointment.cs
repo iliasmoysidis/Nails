@@ -88,11 +88,11 @@ public class Appointment : HistoricEntity
         EnsureNotDeleted();
 
         if (Status != AppointmentStatus.PendingConfirmation)
-            throw new DomainException(
+            throw new StateException(
                 $"Cannot confirm appointment. Current status is {Status}.");
 
         if (StartAt <= clock.Now)
-            throw new DomainException("Cannot confirm appointments in the past.");
+            throw new InvariantException("Cannot confirm appointments in the past.");
 
         Status = AppointmentStatus.Confirmed;
         MarkAsUpdated(clock);
@@ -114,7 +114,7 @@ public class Appointment : HistoricEntity
         EnsureNotTerminal();
 
         if (StartAt <= clock.Now)
-            throw new DomainException("Cannot cancel an ongoing appointment.");
+            throw new InvariantException("Cannot cancel an ongoing appointment.");
 
         Notes = Notes.Append("Cancellation reason", reason);
 
@@ -128,10 +128,10 @@ public class Appointment : HistoricEntity
         EnsureNotDeleted();
 
         if (Status != AppointmentStatus.Confirmed)
-            throw new DomainException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
+            throw new StateException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
 
         if (clock.Now < EndAt)
-            throw new DomainException("Cannot complete appointment before its end time.");
+            throw new InvariantException("Cannot complete appointment before its end time.");
 
         Status = AppointmentStatus.Completed;
         MarkAsUpdated(clock);
@@ -142,10 +142,10 @@ public class Appointment : HistoricEntity
         EnsureNotDeleted();
 
         if (Status != AppointmentStatus.Confirmed)
-            throw new DomainException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
+            throw new StateException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
 
         if (clock.Now < StartAt)
-            throw new DomainException("Cannot mark as no-show before appointment start time.");
+            throw new InvariantException("Cannot mark as no-show before appointment start time.");
 
         Status = AppointmentStatus.NoShow;
         MarkAsUpdated(clock);
@@ -166,7 +166,7 @@ public class Appointment : HistoricEntity
         EnsureNotTerminal();
 
         if (newPrice.Currency != Price.Currency)
-            throw new DomainException("Cannot change appointment currency.");
+            throw new InvariantException("Cannot change appointment currency.");
 
         Price = newPrice;
         Notes = Notes.Append("Price adjusted", $"{newPrice}. {reason}");
@@ -179,7 +179,7 @@ public class Appointment : HistoricEntity
         if (IsDeleted) return false;
 
         if (end <= start)
-            throw new DomainException("Invalid time range.");
+            throw new ValidationException("Invalid time range.");
 
         if (IsTerminal())
             return false;
@@ -195,20 +195,20 @@ public class Appointment : HistoricEntity
     private void EnsureNotDeleted()
     {
         if (IsDeleted)
-            throw new DomainException("Appointment is deleted.");
+            throw new StateException("Appointment is deleted.");
     }
 
     private void EnsureNotTerminal()
     {
         if (IsTerminal())
         {
-            throw new DomainException("Appointment cannot be modified.");
+            throw new StateException("Appointment cannot be modified.");
         }
     }
 
     private static void EnsureStartIsAfterNow(UtcDateTime startAt, IClock clock)
     {
         if (startAt <= clock.Now)
-            throw new DomainException("Appointment start time must be in the future.");
+            throw new ValidationException("Appointment start time must be in the future.");
     }
 }

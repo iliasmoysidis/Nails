@@ -98,6 +98,6 @@ public class Store : HistoricEntity
     private void EnsureNotDeleted()
     {
         if (IsDeleted)
-            throw new DomainException("Store is deleted.");
+            throw new StateException("Store is deleted.");
     }
 }

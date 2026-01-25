@@ -28,7 +28,7 @@ public sealed class CalendarException
         {
             if (list[i].Overlaps(list[i + 1]))
             {
-                throw new DomainException("Calendar exception time ranges cannot overlap.");
+                throw new ValidationException("Calendar exception time ranges cannot overlap.");
             }
         }
 

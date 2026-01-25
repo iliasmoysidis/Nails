@@ -21,19 +21,19 @@ public sealed record FullName
     public static FullName From(string firstName, string lastName)
     {
         if (string.IsNullOrWhiteSpace(firstName))
-            throw new DomainException($"First name cannot be empty.");
+            throw new ValidationException($"First name cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(lastName))
-            throw new DomainException($"Last name cannot be empty.");
+            throw new ValidationException($"Last name cannot be empty.");
 
         firstName = Normalize(firstName);
         lastName = Normalize(lastName);
 
         if (firstName.Length > MaxLength)
-            throw new DomainException($"First name cannot exceed {MaxLength} characters.");
+            throw new ValidationException($"First name cannot exceed {MaxLength} characters.");
 
         if (lastName.Length > MaxLength)
-            throw new DomainException($"Last name cannot exceed {MaxLength} characters.");
+            throw new ValidationException($"Last name cannot exceed {MaxLength} characters.");
 
         return new(firstName, lastName);
     }

@@ -63,7 +63,7 @@ public class StoreCatalog
 
         if (!_serviceOfferings.Add(assignment))
         {
-            throw new DomainException("Offering is already assigned to this professional.");
+            throw new InvariantException("Offering is already assigned to this professional.");
         }
     }
 
@@ -73,13 +73,13 @@ public class StoreCatalog
 
         if (!_serviceOfferings.Remove(new ProfessionalOffering(professionalId, offeringId)))
         {
-            throw new DomainException("Offering is not assigned to the professional.");
+            throw new InvariantException("Offering is not assigned to the professional.");
         }
     }
 
     public Offering GetOfferingOrThrow(int offeringId)
         => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
-            ?? throw new DomainException("Offering not found.");
+            ?? throw new NotFoundException("Offering not found.");
 
     public Offering? GetOffering(int offeringId)
         => _offerings.FirstOrDefault(o => o.Id == offeringId && !o.IsDeleted);

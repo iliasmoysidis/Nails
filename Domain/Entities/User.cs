@@ -62,6 +62,6 @@ public class User : HistoricEntity
     private void EnsureNotDeleted()
     {
         if (IsDeleted)
-            throw new DomainException("Cannot modify a deactivated user.");
+            throw new StateException("User is deleted.");
     }
 }

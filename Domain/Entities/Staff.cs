@@ -47,13 +47,13 @@ public class Staff
     public void EnsureOwner(int professionalId)
     {
         if (!IsOwner(professionalId))
-            throw new DomainException("Only an owner can perform this action.");
+            throw new ForbiddenException("Only an owner can perform this action.");
     }
 
     public void EnsureEmployee(int professionalId)
     {
         if (!IsEmployee(professionalId))
-            throw new DomainException("Professional does not work for the store.");
+            throw new ForbiddenException("Professional does not work for the store.");
     }
 
     private void EnsureNotLastOwner(StaffMember member)
@@ -63,7 +63,7 @@ public class Staff
 
         var ownerCount = _members.Count(m => m.HasRole(StaffRole.Owner));
         if (ownerCount == 1)
-            throw new DomainException("Cannot remove last owner.");
+            throw new InvariantException("Cannot remove last owner.");
     }
 
     private void AddRole(int professionalId, StaffRole role)
@@ -92,13 +92,13 @@ public class Staff
 
     private StaffMember GetMemberOrThrow(int professionalId)
         => GetMember(professionalId)
-            ?? throw new DomainException("Professional is not part of this store.");
+            ?? throw new NotFoundException("Professional is not part of this store.");
 
     private StaffMember CreateMemberWithRole(int professionalId, StaffRole role)
         => role switch
         {
             StaffRole.Owner => StaffMember.CreateOwner(StoreId, professionalId),
             StaffRole.Employee => StaffMember.CreateEmployee(StoreId, professionalId),
-            _ => throw new DomainException("Invalid staff role.")
+            _ => throw new StateException("Invalid staff role.")
         };
 }

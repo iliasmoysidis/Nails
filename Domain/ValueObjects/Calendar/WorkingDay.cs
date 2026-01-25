@@ -26,13 +26,13 @@ public sealed class WorkingDay
 
         if (!list.Any())
         {
-            throw new DomainException("Working day must contain at least one time range.");
+            throw new ValidationException("Working day must contain at least one time range.");
         }
 
         for (int i = 0; i < list.Count - 1; i++)
         {
             if (list[i].Overlaps(list[i + 1]))
-                throw new DomainException("Working time ranges cannot overlap.");
+                throw new ValidationException("Working time ranges cannot overlap.");
         }
 
         return new WorkingDay(day, list);

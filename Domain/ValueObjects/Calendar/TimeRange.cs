@@ -11,7 +11,7 @@ public sealed record TimeRange
     {
         if (start >= end)
         {
-            throw new DomainException("Start time must be before end time.");
+            throw new ValidationException("Start time must be before end time.");
         }
 
         Start = start;

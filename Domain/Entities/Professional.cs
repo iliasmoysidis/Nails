@@ -75,6 +75,6 @@ public class Professional : HistoricEntity
     private void EnsureNotDeleted()
     {
         if (IsDeleted)
-            throw new DomainException("Professional is deleted.");
+            throw new StateException("Professional is deleted.");
     }
 }
