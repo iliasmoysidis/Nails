@@ -2,7 +2,7 @@ using Domain.Enums;
 
 namespace Domain.Entities;
 
-public sealed class StaffMember
+public sealed record StaffMember
 {
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
@@ -33,4 +33,12 @@ public sealed class StaffMember
     public bool HasRole(StaffRole role) => _roles.Contains(role);
     public void AddRole(StaffRole role) => _roles.Add(role);
     public void RemoveRole(StaffRole role) => _roles.Remove(role);
+
+    public bool Equals(StaffMember? other)
+        => other is not null
+            && StoreId == other.StoreId
+            && ProfessionalId == other.ProfessionalId;
+
+    public override int GetHashCode()
+        => HashCode.Combine(StoreId, ProfessionalId);
 }
