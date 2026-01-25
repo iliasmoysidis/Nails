@@ -11,7 +11,6 @@ public class StoreCatalog
     public int StoreId { get; private set; }
 
     private readonly List<Offering> _offerings = new();
-    private readonly HashSet<ProfessionalOffering> _serviceOfferings = new();
 
     private StoreCatalog() { }
 
@@ -50,57 +49,13 @@ public class StoreCatalog
     public void RemoveOffering(int offeringId, IClock clock)
     {
         var offering = GetOfferingOrThrow(offeringId);
-
         offering.SoftDelete(clock);
-        _serviceOfferings.RemoveWhere(o => o.OfferingId == offeringId);
-    }
-
-    public void AssignOffering(int professionalId, int offeringId)
-    {
-        GetOfferingOrThrow(offeringId);
-
-        var assignment = new ProfessionalOffering(professionalId, offeringId);
-
-        if (!_serviceOfferings.Add(assignment))
-        {
-            throw new InvariantException("Offering is already assigned to this professional.");
-        }
-    }
-
-    public void UnassignOffering(int professionalId, int offeringId)
-    {
-        GetOfferingOrThrow(offeringId);
-
-        if (!_serviceOfferings.Remove(new ProfessionalOffering(professionalId, offeringId)))
-        {
-            throw new InvariantException("Offering is not assigned to the professional.");
-        }
     }
 
     public Offering GetOfferingOrThrow(int offeringId)
         => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
             ?? throw new NotFoundException("Offering not found.");
 
-    public Offering? GetOffering(int offeringId)
-        => _offerings.FirstOrDefault(o => o.Id == offeringId && !o.IsDeleted);
-
-    public bool OfferingExists(int offeringId)
-        => _offerings.Any(o => o.Id == offeringId && !o.IsDeleted);
-
     public IReadOnlyCollection<Offering> GetActiveOfferings()
         => _offerings.Where(o => !o.IsDeleted).ToList().AsReadOnly();
-
-    public bool IsOfferingProvidedByProfessional(int professionalId, int offeringId)
-    {
-        return _serviceOfferings.Any(so => so.ProfessionalId == professionalId && so.OfferingId == offeringId);
-    }
-
-    public IReadOnlyCollection<int> GetOfferingIdsForProfessional(int professionalId)
-    {
-        return _serviceOfferings
-            .Where(so => so.ProfessionalId == professionalId)
-            .Select(x => x.OfferingId)
-            .ToList()
-            .AsReadOnly();
-    }
 }
