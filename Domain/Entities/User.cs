@@ -14,37 +14,54 @@ public class User : HistoricEntity
 
     private User() { }
 
+    private User(
+        FullName fullName,
+        Email email,
+        Phone phone
+    )
+    {
+        FullName = fullName;
+        Email = email;
+        Phone = phone;
+    }
+
     public static User Create(FullName fullName, Email email, Phone phone, IClock clock)
     {
-        var user = new User
-        {
-            FullName = fullName,
-            Email = email,
-            Phone = phone
-        };
-
+        var user = new User(fullName, email, phone);
         user.MarkAsCreated(clock);
         return user;
     }
 
     public void UpdatePersonalInfo(IClock clock, FullName? fullName = null, Phone? phone = null)
     {
-        if (IsDeleted) throw new DomainException("Cannot modify a deactivated user.");
+        EnsureNotDeleted();
 
-        var hasChanges = false;
+        var changed = false;
 
-        if (fullName is not null && fullName != FullName)
-        {
-            FullName = fullName;
-            hasChanges = true;
-        }
+        changed |= TryUpdateName(fullName);
+        changed |= TryUpdatePhone(phone);
 
-        if (phone != null && phone != Phone)
-        {
-            Phone = phone;
-            hasChanges = true;
-        }
+        if (changed)
+            MarkAsUpdated(clock);
+    }
 
-        if (hasChanges) MarkAsUpdated(clock);
+    private bool TryUpdateName(FullName? fullName)
+    {
+        if (fullName is null || fullName == FullName) return false;
+        FullName = fullName;
+        return true;
+    }
+
+    private bool TryUpdatePhone(Phone? phone)
+    {
+        if (phone is null || phone == Phone) return false;
+        Phone = phone;
+        return true;
+    }
+
+    private void EnsureNotDeleted()
+    {
+        if (IsDeleted)
+            throw new DomainException("Cannot modify a deactivated user.");
     }
 }
