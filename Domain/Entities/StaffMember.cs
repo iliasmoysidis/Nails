@@ -2,7 +2,7 @@ using Domain.Enums;
 
 namespace Domain.Entities;
 
-public sealed class StaffMember
+public sealed record StaffMember
 {
     public int StoreId { get; private set; }
     public int ProfessionalId { get; private set; }
