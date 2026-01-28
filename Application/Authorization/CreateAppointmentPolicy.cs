@@ -1,10 +1,8 @@
-using System.Threading.Tasks;
 using Application.Abstractions.Policies;
 using Application.Abstractions.Repositories;
 using Application.Commands.Appointments;
 using Application.Contexts;
 using Application.Exceptions;
-using Domain.Entities;
 
 namespace Application.Authorization;
 
