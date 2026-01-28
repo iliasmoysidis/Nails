@@ -30,7 +30,6 @@ public sealed class ConfirmAppointmentPolicy : IConfirmAppointmentPolicy
         var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct);
 
         if (staff is null || !staff.IsStaff(_context.ActorId)) throw Forbidden();
-
     }
 
     private static ApplicationLayerForbiddenException Forbidden()
