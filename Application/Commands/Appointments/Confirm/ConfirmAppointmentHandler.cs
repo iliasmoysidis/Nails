@@ -26,7 +26,7 @@ public sealed class ConfirmAppointmentHandler
     public async Task Handle(ConfirmAppointmentCommand command, CancellationToken ct)
     {
         var appointment = await _repo.GetByIdAsync(command.AppointmentId, ct)
-            ?? throw new NotFoundException("Appointment not found.");
+            ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
         appointment.Confirm(_clock);
 

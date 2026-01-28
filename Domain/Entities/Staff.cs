@@ -44,6 +44,9 @@ public class Staff
     public bool IsEmployee(int professionalId)
         => GetMember(professionalId)?.HasRole(StaffRole.Employee) == true;
 
+    public bool IsStaff(int professionalId)
+        => _members.Any(m => m.ProfessionalId == professionalId);
+
     public void EnsureOwner(int professionalId)
     {
         if (!IsOwner(professionalId))

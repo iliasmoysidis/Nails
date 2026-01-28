@@ -1,4 +1,5 @@
 
+using Application.Abstractions.Policies;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Domain.Entities;
@@ -11,16 +12,19 @@ namespace Application.Commands.Appointments;
 
 public sealed class CreateAppointmentHandler
 {
+    private readonly ICreateAppointmentPolicy _policy;
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public CreateAppointmentHandler(
+        ICreateAppointmentPolicy policy,
         IAppointmentRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
+        _policy = policy;
         _repo = repo;
         _clock = clock;
         _uow = uow;
@@ -28,6 +32,8 @@ public sealed class CreateAppointmentHandler
 
     public async Task<int> Handle(CreateAppointmentCommand command, CancellationToken ct)
     {
+        await _policy.EnsureCanCreateAsync(command, ct);
+
         var appointment = Appointment.Create(
             userId: command.UserId,
             professionalId: command.ProfessionalId,
