@@ -6,20 +6,20 @@ using Application.Exceptions;
 
 namespace Application.Authorization;
 
-public sealed class ConfirmAppointmentPolicy : IConfirmAppointmentPolicy
+public sealed class MarkNoShowAppointmentPolicy : IMarkNoShowAppointmentPolicy
 {
     private readonly IRequestContext _context;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStaffRepository _staffRepo;
 
-    public ConfirmAppointmentPolicy(IAppointmentRepository appointmentRepo, IStaffRepository staffRepo, IRequestContext context)
+    public MarkNoShowAppointmentPolicy(IAppointmentRepository appointmentRepo, IStaffRepository staffRepo, IRequestContext context)
     {
         _context = context;
         _appointmentRepo = appointmentRepo;
         _staffRepo = staffRepo;
     }
 
-    public async Task EnsureCanConfirmAsync(ConfirmAppointmentCommand command, CancellationToken ct)
+    public async Task EnsureCanMarkNoShowAsync(MarkNoShowAppointmentCommand command, CancellationToken ct)
     {
         if (!_context.IsProfessional) throw Forbidden();
 
@@ -33,5 +33,5 @@ public sealed class ConfirmAppointmentPolicy : IConfirmAppointmentPolicy
     }
 
     private static ApplicationLayerForbiddenException Forbidden()
-        => new("Not allowed to confirm appointment.");
+        => new("Not allowed to mark appointment as no-show.");
 }
