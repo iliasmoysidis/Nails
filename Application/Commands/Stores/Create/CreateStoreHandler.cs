@@ -1,3 +1,4 @@
+using Application.Abstractions.Policies.Stores;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Application.Contexts;
@@ -11,6 +12,7 @@ namespace Application.Commands.Stores;
 public sealed class CreateStoreHandler
 {
     private readonly IRequestContext _context;
+    private readonly ICreateStorePolicy _policy;
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
@@ -18,6 +20,7 @@ public sealed class CreateStoreHandler
 
     public CreateStoreHandler(
         IRequestContext context,
+        ICreateStorePolicy policy,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IClock clock,
@@ -25,6 +28,7 @@ public sealed class CreateStoreHandler
     )
     {
         _context = context;
+        _policy = policy;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _clock = clock;
@@ -33,6 +37,8 @@ public sealed class CreateStoreHandler
 
     public async Task<int> Handle(CreateStoreCommand command, CancellationToken ct)
     {
+        await _policy.EnsureCanCreateAsync(ct);
+
         var store = Store.Create(
             name: StoreName.Create(command.Name),
             address: Address.From(
