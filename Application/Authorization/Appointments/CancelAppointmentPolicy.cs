@@ -1,18 +1,18 @@
-using Application.Abstractions.Policies;
+using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Commands.Appointments;
 using Application.Contexts;
 using Application.Exceptions;
 
-namespace Application.Authorization;
+namespace Application.Authorization.Appointments;
 
-public sealed class RescheduleAppointmentPolicy : IRescheduleAppointmentPolicy
+public sealed class CancelAppointmentPolicy : ICancelAppointmentPolicy
 {
     private readonly IRequestContext _context;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStaffRepository _staffRepo;
 
-    public RescheduleAppointmentPolicy(
+    public CancelAppointmentPolicy(
         IRequestContext context,
         IAppointmentRepository appointmentRepo,
         IStaffRepository staffRepo
@@ -23,7 +23,7 @@ public sealed class RescheduleAppointmentPolicy : IRescheduleAppointmentPolicy
         _staffRepo = staffRepo;
     }
 
-    public async Task EnsureCanRescheduleAsync(RescheduleAppointmentCommand command, CancellationToken ct)
+    public async Task EnsureCanCancelAsync(CancelAppointmentCommand command, CancellationToken ct)
     {
         var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw Forbidden();
@@ -51,5 +51,5 @@ public sealed class RescheduleAppointmentPolicy : IRescheduleAppointmentPolicy
     }
 
     private static ApplicationLayerForbiddenException Forbidden()
-        => new("Not allowed to reschedule appointment.");
+        => new("Not allowed to cancel appointment.");
 }

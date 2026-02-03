@@ -1,3 +1,4 @@
+using Application.Abstractions.Policies.Stores;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
@@ -9,16 +10,19 @@ namespace Application.Commands.Stores;
 
 public sealed class UpdateDetailsHandler
 {
+    private readonly IManageStorePolicy _policy;
     private readonly IStoreRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateDetailsHandler(
+        IManageStorePolicy policy,
         IStoreRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
+        _policy = policy;
         _repo = repo;
         _clock = clock;
         _uow = uow;
@@ -26,6 +30,8 @@ public sealed class UpdateDetailsHandler
 
     public async Task Handle(UpdateDetailsCommand command, CancellationToken ct)
     {
+        await _policy.EnsureCanManageAsync(command.StoreId, ct);
+
         var store = await _repo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 

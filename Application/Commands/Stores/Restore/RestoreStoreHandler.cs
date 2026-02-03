@@ -6,14 +6,14 @@ using Domain.Interfaces;
 
 namespace Application.Commands.Stores;
 
-public sealed class DeleteStoreHandler
+public sealed class RestoreStoreHandler
 {
     private readonly IManageStorePolicy _policy;
     private readonly IStoreRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
-    public DeleteStoreHandler(
+    public RestoreStoreHandler(
         IManageStorePolicy policy,
         IStoreRepository repo,
         IClock clock,
@@ -26,14 +26,14 @@ public sealed class DeleteStoreHandler
         _uow = uow;
     }
 
-    public async Task Handle(DeleteStoreCommand command, CancellationToken ct)
+    public async Task Handle(RestoreStoreCommand command, CancellationToken ct)
     {
         await _policy.EnsureCanManageAsync(command.StoreId, ct);
 
         var store = await _repo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 
-        store.SoftDelete(_clock);
+        store.Restore(_clock);
 
         await _uow.SaveChangesAsync(ct);
     }

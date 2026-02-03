@@ -1,10 +1,10 @@
-using Application.Abstractions.Policies;
+using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Commands.Appointments;
 using Application.Contexts;
 using Application.Exceptions;
 
-namespace Application.Authorization;
+namespace Application.Authorization.Appointments;
 
 public sealed class CreateAppointmentPolicy : ICreateAppointmentPolicy
 {

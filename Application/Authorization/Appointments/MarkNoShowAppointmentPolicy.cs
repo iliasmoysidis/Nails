@@ -1,32 +1,27 @@
-using Application.Abstractions.Policies;
+using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Commands.Appointments;
 using Application.Contexts;
 using Application.Exceptions;
 
-namespace Application.Authorization;
+namespace Application.Authorization.Appointments;
 
-public sealed class CompleteAppointmentPolicy : ICompleteAppointmentPolicy
+public sealed class MarkNoShowAppointmentPolicy : IMarkNoShowAppointmentPolicy
 {
     private readonly IRequestContext _context;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStaffRepository _staffRepo;
 
-    public CompleteAppointmentPolicy(
-        IRequestContext context,
-        IAppointmentRepository appointmentRepo,
-        IStaffRepository staffRepo
-    )
+    public MarkNoShowAppointmentPolicy(IAppointmentRepository appointmentRepo, IStaffRepository staffRepo, IRequestContext context)
     {
         _context = context;
         _appointmentRepo = appointmentRepo;
         _staffRepo = staffRepo;
     }
 
-    public async Task EnsureCanCompleteAsync(CompleteAppointmentCommand command, CancellationToken ct)
+    public async Task EnsureCanMarkNoShowAsync(MarkNoShowAppointmentCommand command, CancellationToken ct)
     {
-        if (!_context.IsProfessional)
-            throw Forbidden();
+        if (!_context.IsProfessional) throw Forbidden();
 
         var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw Forbidden();
@@ -34,10 +29,9 @@ public sealed class CompleteAppointmentPolicy : ICompleteAppointmentPolicy
         var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
             ?? throw Forbidden();
 
-        if (!staff.IsStaff(_context.ActorId))
-            throw Forbidden();
+        if (!staff.IsStaff(_context.ActorId)) throw Forbidden();
     }
 
     private static ApplicationLayerForbiddenException Forbidden()
-        => new("Not allowed to complete appointment.");
+        => new("Not allowed to mark appointment as no-show.");
 }

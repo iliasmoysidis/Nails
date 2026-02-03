@@ -1,4 +1,4 @@
-using Application.Abstractions.Policies;
+using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;

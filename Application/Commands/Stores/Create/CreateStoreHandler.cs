@@ -1,5 +1,6 @@
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Contexts;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
@@ -9,17 +10,23 @@ namespace Application.Commands.Stores;
 
 public sealed class CreateStoreHandler
 {
-    private readonly IStoreRepository _repo;
+    private readonly IRequestContext _context;
+    private readonly IStoreRepository _storeRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public CreateStoreHandler(
-        IStoreRepository repo,
+        IRequestContext context,
+        IStoreRepository storeRepo,
+        IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _repo = repo;
+        _context = context;
+        _storeRepo = storeRepo;
+        _staffRepo = staffRepo;
         _clock = clock;
         _uow = uow;
     }
@@ -47,7 +54,13 @@ public sealed class CreateStoreHandler
             clock: _clock
         );
 
-        await _repo.AddAsync(store, ct);
+        var staff = Staff.Create(
+            storeId: store.Id,
+            professionalId: _context.ActorId
+        );
+
+        await _storeRepo.AddAsync(store, ct);
+        await _staffRepo.AddAsync(staff, ct);
         await _uow.SaveChangesAsync(ct);
 
         return store.Id;
