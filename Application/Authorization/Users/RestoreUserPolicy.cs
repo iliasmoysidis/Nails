@@ -2,7 +2,7 @@ using Application.Abstractions.Policies.Users;
 using Application.Contexts;
 using Application.Exceptions;
 
-namespace Application.Commands.Users;
+namespace Application.Authorization.Users;
 
 public sealed class RestoreUserPolicy : IRestoreUserPolicy
 {
@@ -15,7 +15,7 @@ public sealed class RestoreUserPolicy : IRestoreUserPolicy
 
     public Task EnsureCanRestoreAsync(int userId, CancellationToken ct)
     {
-        if (!_context.IsUser || _context.ActorId == userId) throw Forbidden();
+        if (!_context.IsUser || _context.ActorId != userId) throw Forbidden();
 
         return Task.CompletedTask;
     }

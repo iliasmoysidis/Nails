@@ -39,24 +39,28 @@ public sealed class CreateStoreHandler
     {
         await _policy.EnsureCanCreateAsync(ct);
 
-        var store = Store.Create(
-            name: StoreName.Create(command.Name),
-            address: Address.From(
+        var address = Address.From(
                 street: command.Street,
                 city: command.City,
                 postalCode: command.PostalCode,
                 state: command.State,
                 countryCode: command.CountryCode
-            ),
-            taxIdNumber: TaxIdentificationNumber.From(
+            );
+        var taxIdNumber = TaxIdentificationNumber.From(
                 countryCode: command.TaxCountryCode,
                 value: command.TaxNumber
-            ),
-            email: Email.From(command.Email),
-            phone: Phone.From(
-                countryCode: command.CountryCode,
+            );
+        var phone = Phone.From(
+                countryCode: command.PhoneCountryCode,
                 nationalNumber: command.PhoneNumber
-            ),
+            );
+
+        var store = Store.Create(
+            name: StoreName.Create(command.Name),
+            address: address,
+            taxIdNumber: taxIdNumber,
+            email: Email.From(command.Email),
+            phone: phone,
             clock: _clock
         );
 

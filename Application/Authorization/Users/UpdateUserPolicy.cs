@@ -15,7 +15,7 @@ public sealed class UpdateUserPolicy : IUpdateUserPolicy
 
     public Task EnsureCanUpdateAsync(int userId, CancellationToken ct)
     {
-        if (!_context.IsUser || _context.ActorId == userId) throw Forbidden();
+        if (!_context.IsUser || _context.ActorId != userId) throw Forbidden();
 
         return Task.CompletedTask;
     }
