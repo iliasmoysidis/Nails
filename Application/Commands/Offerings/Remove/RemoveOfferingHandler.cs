@@ -3,21 +3,18 @@ using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
 using Domain.Interfaces;
-using Domain.ValueObjects.Finance;
-using Domain.ValueObjects.Offerings;
-using Domain.ValueObjects.Time;
 
 namespace Application.Commands.Offerings;
 
 public sealed class RemoveOfferingHandler
 {
-    private readonly IRemoveOfferingPolicy _policy;
+    private readonly IManageOfferingPolicy _policy;
     private readonly IStoreCatalogRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public RemoveOfferingHandler(
-        IRemoveOfferingPolicy policy,
+        IManageOfferingPolicy policy,
         IStoreCatalogRepository repo,
         IClock clock,
         IUnitOfWork uow
@@ -31,7 +28,7 @@ public sealed class RemoveOfferingHandler
 
     public async Task Handle(RemoveOfferingCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanRemoveAsync(command, ct);
+        await _policy.EnsureCanManageAsync(command.StoreId, ct);
 
         var catalog = await _repo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");

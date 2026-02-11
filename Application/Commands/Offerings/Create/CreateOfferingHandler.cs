@@ -11,13 +11,13 @@ namespace Application.Commands.Offerings;
 
 public sealed class CreateOfferingHandler
 {
-    private readonly ICreateOfferingPolicy _policy;
+    private readonly IManageOfferingPolicy _policy;
     private readonly IStoreCatalogRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public CreateOfferingHandler(
-        ICreateOfferingPolicy policy,
+        IManageOfferingPolicy policy,
         IStoreCatalogRepository repo,
         IClock clock,
         IUnitOfWork uow
@@ -31,7 +31,7 @@ public sealed class CreateOfferingHandler
 
     public async Task<int> Handle(CreateOfferingCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanCreateAsync(command, ct);
+        await _policy.EnsureCanManageAsync(command.StoreId, ct);
 
         var catalog = await _repo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");

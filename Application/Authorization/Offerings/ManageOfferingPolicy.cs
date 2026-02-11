@@ -1,28 +1,27 @@
 using Application.Abstractions.Policies.Offerings;
 using Application.Abstractions.Repositories;
-using Application.Commands.Offerings;
 using Application.Contexts;
 using Application.Exceptions;
 
 namespace Application.Authorization.Offerings;
 
-public sealed class RemoveOfferingPolicy : IRemoveOfferingPolicy
+public sealed class ManageOfferingPolicy : IManageOfferingPolicy
 {
     private readonly IRequestContext _context;
     private readonly IStaffRepository _repo;
 
-    public RemoveOfferingPolicy(IRequestContext context, IStaffRepository repo)
+    public ManageOfferingPolicy(IRequestContext context, IStaffRepository repo)
     {
         _context = context;
         _repo = repo;
     }
 
-    public async Task EnsureCanRemoveAsync(RemoveOfferingCommand command, CancellationToken ct)
+    public async Task EnsureCanManageAsync(int storeId, CancellationToken ct)
     {
         if (!_context.IsProfessional)
             throw Forbidden();
 
-        var staff = await _repo.GetByStoreId(command.StoreId, ct)
+        var staff = await _repo.GetByStoreId(storeId, ct)
             ?? throw Forbidden();
 
         if (!staff.IsOwner(_context.ActorId))
@@ -30,5 +29,5 @@ public sealed class RemoveOfferingPolicy : IRemoveOfferingPolicy
     }
 
     private static ApplicationLayerForbiddenException Forbidden()
-        => new("Only store owners can remove offerings.");
+        => new("Only store owners can create offerings.");
 }
