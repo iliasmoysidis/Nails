@@ -9,19 +9,22 @@ namespace Application.Commands.Offerings;
 public sealed class RemoveOfferingHandler
 {
     private readonly IManageOfferingPolicy _policy;
-    private readonly IStoreCatalogRepository _repo;
+    private readonly IStoreCatalogRepository _catalogRepo;
+    private readonly IProfessionalOfferingsRepository _assignmentsRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public RemoveOfferingHandler(
         IManageOfferingPolicy policy,
-        IStoreCatalogRepository repo,
+        IProfessionalOfferingsRepository assignmentsRepo,
+        IStoreCatalogRepository catalogRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
         _policy = policy;
-        _repo = repo;
+        _catalogRepo = catalogRepo;
+        _assignmentsRepo = assignmentsRepo;
         _clock = clock;
         _uow = uow;
     }
@@ -30,8 +33,13 @@ public sealed class RemoveOfferingHandler
     {
         await _policy.EnsureCanManageAsync(command.StoreId, ct);
 
-        var catalog = await _repo.GetByStoreIdAsync(command.StoreId, ct)
+        var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
+
+        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException($"Professional offerings not found for store {command.StoreId}.");
+
+        assignments.UnassignAllForOffering(command.OfferingId);
 
         catalog.RemoveOffering(command.OfferingId, _clock);
 
