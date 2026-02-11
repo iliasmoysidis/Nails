@@ -34,22 +34,18 @@ public sealed class UpdateUserProfileHandler
         var user = await _repo.GetByIdAsync(command.UserId, ct)
             ?? throw new ApplicationLayerNotFoundException("User not found.");
 
-        FullName? fullName = (command.FirstName, command.LastName) switch
-        {
-            (null, null) => null,
-            (string first, string last) => FullName.From(first, last),
-            _ => throw new ApplicationLayerValidationException("Both first and last name must be provided together.")
-        };
-
-        Phone? phone = (command.PhoneCountryCode, command.PhoneNumber) switch
-        {
-            (null, null) => null,
-            (string code, string number) => Phone.From(code, number),
-            _ => throw new ApplicationLayerValidationException("Both phone country code and number must be provided together.")
-        };
-
-        user.UpdatePersonalInfo(_clock, fullName, phone);
+        user.UpdatePersonalInfo(
+            clock: _clock,
+            fullName: ToFullName(command.FirstName, command.LastName),
+            phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
+            );
 
         await _uow.SaveChangesAsync(ct);
     }
+
+    private static FullName? ToFullName(string? firstName, string? lastName)
+        => firstName is null || lastName is null ? null : FullName.From(firstName, lastName);
+
+    private static Phone? ToPhone(string? code, string? number)
+        => code is null || number is null ? null : Phone.From(code, number);
 }
