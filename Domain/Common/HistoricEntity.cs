@@ -20,17 +20,6 @@ public abstract class HistoricEntity : BaseEntity
         MarkAsUpdated(clock);
     }
 
-    public void Restore(IClock clock)
-    {
-        if (!IsDeleted)
-        {
-            throw new StateException($"{GetType().Name} is not deleted.");
-        }
-
-        DeletedAt = null;
-        MarkAsUpdated(clock);
-    }
-
     protected void EnsureActive()
     {
         if (IsDeleted)

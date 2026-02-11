@@ -52,6 +52,14 @@ public class StoreCatalog
         offering.SoftDelete(clock);
     }
 
+    public void Clear(IClock clock)
+    {
+        foreach (var offering in _offerings.Where(o => !o.IsDeleted))
+        {
+            offering.SoftDelete(clock);
+        }
+    }
+
     public void UpdateOffering(int offeringId, IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, Description? description = null)
     {
         var offering = GetOfferingOrThrow(offeringId);
@@ -76,7 +84,7 @@ public class StoreCatalog
 
     private void EnsureNameIsUnique(OfferingName name, int offeringId)
     {
-        if (_offerings.Any(o => o.Id == offeringId && !o.IsDeleted && o.Name == name))
+        if (_offerings.Any(o => o.Id != offeringId && !o.IsDeleted && o.Name == name))
             throw new InvariantException("Offering name must be unique.");
     }
 }

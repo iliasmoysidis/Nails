@@ -35,6 +35,11 @@ public class ProfessionalOfferings
             throw new InvariantException("Offering is not assigned to the professional.");
     }
 
+    public void Clear()
+    {
+        _assignments.Clear();
+    }
+
     public void UnassignAllForOffering(int offeringId)
         => _assignments.RemoveWhere(a => a.OfferingId == offeringId);
 
