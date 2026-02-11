@@ -52,10 +52,31 @@ public class StoreCatalog
         offering.SoftDelete(clock);
     }
 
+    public void UpdateOffering(int offeringId, IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, Description? description = null)
+    {
+        var offering = GetOfferingOrThrow(offeringId);
+
+        if (name is not null)
+            EnsureNameIsUnique(name, offeringId);
+
+        offering.UpdateDetails(
+            clock: clock,
+            name: name,
+            price: price,
+            duration: duration,
+            description: description);
+    }
+
     public Offering GetOfferingOrThrow(int offeringId)
         => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
             ?? throw new NotFoundException("Offering not found.");
 
     public IReadOnlyCollection<Offering> GetActiveOfferings()
         => _offerings.Where(o => !o.IsDeleted).ToList().AsReadOnly();
+
+    private void EnsureNameIsUnique(OfferingName name, int offeringId)
+    {
+        if (_offerings.Any(o => o.Id == offeringId && !o.IsDeleted && o.Name == name))
+            throw new InvariantException("Offering name must be unique.");
+    }
 }
