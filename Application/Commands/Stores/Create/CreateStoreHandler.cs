@@ -66,7 +66,8 @@ public sealed class CreateStoreHandler
 
         var staff = Staff.Create(
             storeId: store.Id,
-            professionalId: _context.ActorId
+            professionalId: _context.ActorId,
+            clock: _clock
         );
 
         await _storeRepo.AddAsync(store, ct);
