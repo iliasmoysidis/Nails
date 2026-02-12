@@ -2,6 +2,7 @@ using Application.Abstractions.Policies.Staffs;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
+using Domain.Interfaces;
 
 namespace Application.Commands.Staffs;
 
@@ -9,16 +10,19 @@ public sealed class AddStoreOwnerHandler
 {
     private readonly IManageStaffPolicy _policy;
     private readonly IStaffRepository _repo;
+    private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public AddStoreOwnerHandler(
         IManageStaffPolicy policy,
         IStaffRepository repo,
+        IClock clock,
         IUnitOfWork uow
     )
     {
         _policy = policy;
         _repo = repo;
+        _clock = clock;
         _uow = uow;
     }
 
@@ -29,7 +33,7 @@ public sealed class AddStoreOwnerHandler
         var staff = await _repo.GetByStoreId(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        staff.AddOwner(command.ProfessionalId);
+        staff.AddOwner(command.ProfessionalId, _clock);
 
         await _uow.SaveChangesAsync(ct);
     }
