@@ -8,66 +8,88 @@ namespace Domain.Entities;
 public sealed class StaffMember
 {
     public int Id { get; private set; }
-    public int StoreId { get; }
-    public int ProfessionalId { get; }
+    public int StoreId { get; private set; }
+    public int ProfessionalId { get; private set; }
 
-    public UtcDateTime JoinedAt { get; }
+    public UtcDateTime JoinedAt { get; private set; }
     public UtcDateTime? LeftAt { get; private set; }
 
     public bool IsActive => LeftAt is null;
 
-    private HashSet<StaffRole> _roles = new();
-    public IReadOnlyCollection<StaffRole> Roles => _roles;
+    private readonly List<StaffRoleAssignment> _roleHistory = new();
+    public IReadOnlyCollection<StaffRoleAssignment> RoleHistory => _roleHistory.AsReadOnly();
 
     private StaffMember() { }
 
     private StaffMember(
         int storeId,
         int professionalId,
-        UtcDateTime joinedAt,
-        IEnumerable<StaffRole> roles
+        IClock clock
         )
     {
         StoreId = storeId;
         ProfessionalId = professionalId;
-        JoinedAt = joinedAt;
+        JoinedAt = clock.Now;
         LeftAt = null;
-        _roles = new HashSet<StaffRole>(roles);
     }
 
-    public static StaffMember JoinAsOwner(int storeId, int professionalId, IClock clock)
-        => new(storeId, professionalId, clock.Now, [StaffRole.Owner]);
+    public static StaffMember Join(int storeId, int professionalId, IEnumerable<StaffRole> roles, IClock clock)
+    {
+        var member = new StaffMember(storeId, professionalId, clock);
 
+        foreach (var role in roles)
+            member.AssignRole(role, clock);
 
-    public static StaffMember JoinAsEmployee(int storeId, int professionalId, IClock clock)
-        => new(storeId, professionalId, clock.Now, [StaffRole.Employee]);
+        return member;
+    }
 
     public void Leave(IClock clock)
     {
-        if (!IsActive)
-            throw new StateException("Staff member already left.");
+        EnsureActive();
+
+        foreach (var assignment in _roleHistory.Where(r => r.IsActive))
+            assignment.Remove(clock);
 
         LeftAt = clock.Now;
     }
 
-    public bool HasRole(StaffRole role) => _roles.Contains(role);
-    public void AddRole(StaffRole role)
-    {
-        EnsureActive();
-        _roles.Add(role);
-    }
-    public void RemoveRole(StaffRole role)
-    {
-        EnsureActive();
-        _roles.Remove(role);
-    }
+    public bool HasRole(StaffRole role)
+        => _roleHistory.Any(r => r.Role == role && r.IsActive);
+
+    public bool HadRoleAt(StaffRole role, UtcDateTime time)
+        => WasActiveAt(time) && _roleHistory.Any(r => r.Role == role && r.WasActiveAt(time));
 
     public bool WasActiveAt(UtcDateTime time)
         => JoinedAt <= time && (LeftAt is null || time < LeftAt);
 
+    internal void AssignRole(StaffRole role, IClock clock)
+    {
+        EnsureActive();
+
+        if (HasRole(role))
+            throw new InvariantException($"Role {role} already assigned.");
+
+        _roleHistory.Add(StaffRoleAssignment.Assign(role, clock));
+    }
+
+    internal void RemoveRole(StaffRole role, IClock clock)
+    {
+        EnsureActive();
+
+        var active = _roleHistory.LastOrDefault(r => r.Role == role && r.IsActive);
+
+        if (active is null)
+            throw new NotFoundException($"Role {role} not assigned.");
+
+        active.Remove(clock);
+    }
+
+    public bool HasAnyActiveRole()
+        => _roleHistory.Any(r => r.IsActive);
+
     private void EnsureActive()
     {
         if (!IsActive)
-            throw new StateException("Cannot modify roles of inactive staff member.");
+            throw new StateException("Cannot modify an inactive staff member.");
     }
 }
