@@ -32,6 +32,8 @@ public class StoreCatalog
         IClock clock
         )
     {
+        EnsureNameIsUnique(name);
+
         var offering = Offering.Create(
             StoreId,
             name,
@@ -82,9 +84,12 @@ public class StoreCatalog
     public IReadOnlyCollection<Offering> GetActiveOfferings()
         => _offerings.Where(o => !o.IsDeleted).ToList().AsReadOnly();
 
-    private void EnsureNameIsUnique(OfferingName name, int offeringId)
+    private void EnsureNameIsUnique(OfferingName name, int? offeringId = null)
     {
-        if (_offerings.Any(o => o.Id != offeringId && !o.IsDeleted && o.Name == name))
+        if (_offerings.Any(o =>
+            !o.IsDeleted &&
+            o.Name == name &&
+            (offeringId == null || o.Id != offeringId)))
             throw new InvariantException("Offering name must be unique.");
     }
 }
