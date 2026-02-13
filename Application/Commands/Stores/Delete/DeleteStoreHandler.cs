@@ -1,8 +1,6 @@
 using Application.Abstractions.Policies.Stores;
-using Application.Abstractions.Repositories;
 using Application.Abstractions.Services;
 using Application.Abstractions.UnitOfWork;
-using Application.Exceptions;
 using Domain.Interfaces;
 
 namespace Application.Commands.Stores;
@@ -16,7 +14,6 @@ public sealed class DeleteStoreHandler
     public DeleteStoreHandler(
         IManageStorePolicy policy,
         IStoreClosureService service,
-        IClock clock,
         IUnitOfWork uow
     )
     {
