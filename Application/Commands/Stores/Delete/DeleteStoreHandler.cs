@@ -14,6 +14,8 @@ public sealed class DeleteStoreHandler
     private readonly IStoreCatalogRepository _catalogRepo;
     private readonly IProfessionalOfferingsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
+    private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IAppointmentCancellationService _service;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
@@ -24,6 +26,8 @@ public sealed class DeleteStoreHandler
         IStoreCatalogRepository catalogRepo,
         IProfessionalOfferingsRepository assignmentsRepo,
         IStaffRepository staffRepo,
+        IStoreCalendarRepository storeCalendarRepo,
+        IStaffCalendarRepository staffCalendarRepo,
         IAppointmentCancellationService service,
         IClock clock,
         IUnitOfWork uow
@@ -34,6 +38,8 @@ public sealed class DeleteStoreHandler
         _catalogRepo = catalogRepo;
         _assignmentsRepo = assignmentsRepo;
         _staffRepo = staffRepo;
+        _storeCalendarRepo = storeCalendarRepo;
+        _staffCalendarRepo = staffCalendarRepo;
         _service = service;
         _clock = clock;
         _uow = uow;
@@ -59,6 +65,8 @@ public sealed class DeleteStoreHandler
         staff.Clear(_clock);
         assignments.Clear();
         catalog.Clear(_clock);
+        await _storeCalendarRepo.RemoveAsync(command.StoreId, ct);
+        await _staffCalendarRepo.RemoveAsync(command.StoreId, ct);
         store.SoftDelete(_clock);
 
         await _uow.SaveChangesAsync(ct);
