@@ -6,13 +6,13 @@ using Domain.ValueObjects.Calendar;
 
 namespace Application.Commands.StaffCalendars;
 
-public sealed class SetWorkingDayHandler
+public sealed class SetDayOffHandler
 {
     private readonly IManageStaffPolicy _policy;
     private readonly IStaffCalendarRepository _repo;
     private readonly IUnitOfWork _uow;
 
-    public SetWorkingDayHandler(
+    public SetDayOffHandler(
         IManageStaffPolicy policy,
         IStaffCalendarRepository repo,
         IUnitOfWork uow
@@ -23,18 +23,14 @@ public sealed class SetWorkingDayHandler
         _uow = uow;
     }
 
-    public async Task Handle(SetWorkingDayCommand command, CancellationToken ct)
+    public async Task Handle(SetDayOffCommand command, CancellationToken ct)
     {
         await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
 
         var calendar = await _repo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
 
-        var ranges = command.TimeRanges.Select(r => new TimeRange(r.Start, r.End));
-
-        var workingDay = WorkingDay.WithRanges(command.Day, ranges);
-
-        calendar.SetWorkingDay(workingDay);
+        calendar.SetDayOff(command.Day);
 
         await _uow.SaveChangesAsync(ct);
     }
