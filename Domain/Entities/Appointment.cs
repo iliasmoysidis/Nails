@@ -165,6 +165,22 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
+    public void Reassign(int professionalId, IClock clock)
+    {
+        EnsureActive();
+        EnsureNotTerminal();
+
+        if (StartAt <= clock.Now)
+            throw new StateException("Cannot reassign an appointment that has already started.");
+
+        if (ProfessionalId == professionalId)
+            throw new InvariantException("Appointment is already assigned to this professional.");
+
+        ProfessionalId = professionalId;
+
+        MarkAsUpdated(clock);
+    }
+
     public bool ConflictsWith(UtcDateTime start, UtcDateTime end)
     {
         if (IsDeleted) return false;
