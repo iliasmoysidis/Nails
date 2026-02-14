@@ -1,0 +1,43 @@
+using Application.Abstractions.Policies.Appointments;
+using Application.Abstractions.Repositories;
+using Application.Commands.Appointments;
+using Application.Contexts;
+using Application.Exceptions;
+
+namespace Application.Authorization.Appointments;
+
+public sealed class AdjustAppointmentPricePolicy : IAdjustAppointmentPricePolicy
+{
+    private readonly IRequestContext _context;
+    private readonly IAppointmentRepository _appointmentRepo;
+    private readonly IStaffRepository _staffRepo;
+
+    public AdjustAppointmentPricePolicy(
+        IRequestContext context,
+        IAppointmentRepository appointmentRepo,
+        IStaffRepository staffRepo
+    )
+    {
+        _context = context;
+        _appointmentRepo = appointmentRepo;
+        _staffRepo = staffRepo;
+    }
+
+    public async Task EnsureCanAdjustPriceAsync(AdjustPriceCommand command, CancellationToken ct)
+    {
+        if (!_context.IsProfessional)
+            throw Forbidden();
+
+        var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
+            ?? throw Forbidden();
+
+        var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
+            ?? throw Forbidden();
+
+        if (!staff.IsOwner(_context.ActorId))
+            throw Forbidden();
+    }
+
+    private static ApplicationLayerForbiddenException Forbidden()
+        => new("Not allowed to adjust appointment price.");
+}
