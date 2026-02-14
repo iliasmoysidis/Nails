@@ -11,6 +11,8 @@ public class StoreCatalog
     public int StoreId { get; private set; }
 
     private readonly List<Offering> _offerings = new();
+    public IEnumerable<Offering> Offerings
+        => _offerings.Where(o => !o.IsDeleted);
 
     private StoreCatalog() { }
 

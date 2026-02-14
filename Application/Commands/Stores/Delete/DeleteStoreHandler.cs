@@ -1,7 +1,6 @@
 using Application.Abstractions.Policies.Stores;
 using Application.Abstractions.Services;
 using Application.Abstractions.UnitOfWork;
-using Domain.Interfaces;
 
 namespace Application.Commands.Stores;
 
