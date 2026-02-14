@@ -151,15 +151,6 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void UpdateNotes(IClock clock, string? notes)
-    {
-        EnsureActive();
-        EnsureNotTerminal();
-
-        Notes = Notes.From(notes);
-        MarkAsUpdated(clock);
-    }
-
     public void AdjustPrice(Money newPrice, string reason, IClock clock)
     {
         EnsureActive();
