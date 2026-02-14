@@ -1,6 +1,6 @@
 namespace Application.Commands.ProfessionalOfferings;
 
-public sealed record AssignOfferingsCommand(
+public sealed record AssignCommand(
     int StoreId,
     int ProfessionalId,
     List<int> OfferingIds
