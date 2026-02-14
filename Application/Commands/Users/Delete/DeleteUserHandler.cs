@@ -8,13 +8,13 @@ namespace Application.Commands.Users;
 
 public sealed class DeleteUserHandler
 {
-    private readonly IDeleteUserPolicy _policy;
+    private readonly IManageUserPolicy _policy;
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public DeleteUserHandler(
-        IDeleteUserPolicy policy,
+        IManageUserPolicy policy,
         IUserRepository repo,
         IClock clock,
         IUnitOfWork uow
@@ -28,7 +28,7 @@ public sealed class DeleteUserHandler
 
     public async Task Handle(DeleteUserCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanDeleteAsync(command.UserId, ct);
+        await _policy.EnsureCanManageAsync(command.UserId, ct);
 
         var user = await _repo.GetByIdAsync(command.UserId, ct)
             ?? throw new ApplicationLayerNotFoundException("User not found.");

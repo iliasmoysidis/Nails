@@ -4,16 +4,16 @@ using Application.Exceptions;
 
 namespace Application.Authorization.Users;
 
-public sealed class UpdateUserPolicy : IUpdateUserPolicy
+public sealed class ManageUserPolicy : IManageUserPolicy
 {
     private readonly IRequestContext _context;
 
-    public UpdateUserPolicy(IRequestContext context)
+    public ManageUserPolicy(IRequestContext context)
     {
         _context = context;
     }
 
-    public Task EnsureCanUpdateAsync(int userId, CancellationToken ct)
+    public Task EnsureCanManageAsync(int userId, CancellationToken ct)
     {
         if (!_context.IsUser || _context.ActorId != userId) throw Forbidden();
 
@@ -21,5 +21,5 @@ public sealed class UpdateUserPolicy : IUpdateUserPolicy
     }
 
     public static ApplicationLayerForbiddenException Forbidden()
-        => new("Users can only update their own profile.");
+        => new("Users can only manage their own account.");
 }

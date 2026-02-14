@@ -9,13 +9,13 @@ namespace Application.Commands.Users;
 
 public sealed class UpdateUserProfileHandler
 {
-    private readonly IUpdateUserPolicy _policy;
+    private readonly IManageUserPolicy _policy;
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateUserProfileHandler(
-        IUpdateUserPolicy policy,
+        IManageUserPolicy policy,
         IUserRepository repo,
         IClock clock,
         IUnitOfWork uow
@@ -29,7 +29,7 @@ public sealed class UpdateUserProfileHandler
 
     public async Task Handle(UpdateUserProfileCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanUpdateAsync(command.UserId, ct);
+        await _policy.EnsureCanManageAsync(command.UserId, ct);
 
         var user = await _repo.GetByIdAsync(command.UserId, ct)
             ?? throw new ApplicationLayerNotFoundException("User not found.");
