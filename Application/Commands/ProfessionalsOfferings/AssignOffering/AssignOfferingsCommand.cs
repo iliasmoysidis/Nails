@@ -1,4 +1,4 @@
-namespace Application.Commands.Professionals;
+namespace Application.Commands.ProfessionalOfferings;
 
 public sealed record AssignOfferingsCommand(
     int StoreId,
