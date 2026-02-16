@@ -181,6 +181,16 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
+    public void UpdateNotes(string? notes, IClock clock)
+    {
+        EnsureActive();
+        EnsureNotTerminal();
+
+        Notes = Notes.From(notes);
+
+        MarkAsUpdated(clock);
+    }
+
     public bool ConflictsWith(UtcDateTime start, UtcDateTime end)
     {
         if (IsDeleted) return false;
