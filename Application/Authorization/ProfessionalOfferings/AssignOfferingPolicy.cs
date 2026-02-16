@@ -25,7 +25,7 @@ public sealed class AssignOfferingPolicy : IAssignOfferingPolicy
             throw Forbidden();
 
         var staff = await _repo.GetByStoreId(storeId, ct)
-            ?? throw Forbidden();
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId))
             throw Forbidden();

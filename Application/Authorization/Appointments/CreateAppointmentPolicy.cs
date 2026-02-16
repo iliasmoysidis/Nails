@@ -42,10 +42,8 @@ public sealed class CreateAppointmentPolicy : ICreateAppointmentPolicy
 
     private async Task EnsureProfessionalCanCreate(CreateAppointmentCommand command, CancellationToken ct)
     {
-        var staff = await _repo.GetByStoreId(command.StoreId, ct);
-
-        if (staff is null)
-            throw new ApplicationLayerForbiddenException("Not allowed to create appointments.");
+        var staff = await _repo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsStaff(_context.ActorId))
             throw new ApplicationLayerForbiddenException("Professional does not work for this store.");

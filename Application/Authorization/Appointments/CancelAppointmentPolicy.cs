@@ -26,7 +26,7 @@ public sealed class CancelAppointmentPolicy : ICancelAppointmentPolicy
     public async Task EnsureCanCancelAsync(CancelAppointmentCommand command, CancellationToken ct)
     {
         var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
-            ?? throw Forbidden();
+            ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
         if (_context.IsUser)
         {
@@ -39,7 +39,7 @@ public sealed class CancelAppointmentPolicy : ICancelAppointmentPolicy
         if (_context.IsProfessional)
         {
             var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
-            ?? throw Forbidden();
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
             if (!staff.IsStaff(_context.ActorId))
                 throw Forbidden();

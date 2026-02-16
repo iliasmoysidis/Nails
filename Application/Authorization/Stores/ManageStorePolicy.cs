@@ -20,7 +20,8 @@ public sealed class ManageStorePolicy : IManageStorePolicy
     {
         if (!_context.IsProfessional) throw Forbidden();
 
-        var staff = await _repo.GetByStoreId(storeId, ct) ?? throw Forbidden();
+        var staff = await _repo.GetByStoreId(storeId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId)) throw Forbidden();
     }

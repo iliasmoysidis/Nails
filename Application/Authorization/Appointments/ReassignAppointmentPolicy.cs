@@ -28,10 +28,10 @@ public sealed class ReassignAppointmentPolicy : IReassignAppointmentPolicy
         if (!_context.IsProfessional) throw Forbidden();
 
         var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
-            ?? throw Forbidden();
+            ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
         var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
-            ?? throw Forbidden();
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId)) throw Forbidden();
 

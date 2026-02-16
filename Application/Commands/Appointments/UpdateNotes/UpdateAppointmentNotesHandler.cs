@@ -28,7 +28,7 @@ public sealed class UpdateAppointmentNotesHandler
 
     public async Task Handle(UpdateAppointmentNotesCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanUpdateNotesAsync(command.AppointmentId, ct);
+        await _policy.EnsureCanUpdateAsync(command, ct);
 
         var appointment = await _repo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");

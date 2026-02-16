@@ -1,5 +1,6 @@
 using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
+using Application.Commands.Appointments;
 using Application.Contexts;
 using Application.Exceptions;
 
@@ -22,10 +23,10 @@ public sealed class UpdateAppointmentNotesPolicy : IUpdateAppointmentNotesPolicy
         _staffRepo = staffRepo;
     }
 
-    public async Task EnsureCanUpdateNotesAsync(int appointmentId, CancellationToken ct)
+    public async Task EnsureCanUpdateAsync(UpdateAppointmentNotesCommand command, CancellationToken ct)
     {
-        var appointment = await _appointmentRepo.GetByIdAsync(appointmentId, ct)
-            ?? throw Forbidden();
+        var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
         if (_context.IsUser)
         {
@@ -38,7 +39,7 @@ public sealed class UpdateAppointmentNotesPolicy : IUpdateAppointmentNotesPolicy
         if (_context.IsProfessional)
         {
             var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
-            ?? throw Forbidden();
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
             if (!staff.IsStaff(_context.ActorId))
                 throw Forbidden();

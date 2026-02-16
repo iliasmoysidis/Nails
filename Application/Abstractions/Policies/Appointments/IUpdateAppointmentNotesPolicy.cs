@@ -1,6 +1,8 @@
+using Application.Commands.Appointments;
+
 namespace Application.Abstractions.Policies.Appointments;
 
 public interface IUpdateAppointmentNotesPolicy
 {
-    Task EnsureCanUpdateNotesAsync(int appointmentId, CancellationToken ct);
+    Task EnsureCanUpdateAsync(UpdateAppointmentNotesCommand command, CancellationToken ct);
 }
