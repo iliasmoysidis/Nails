@@ -26,14 +26,17 @@ public sealed class RegisterUserHandler
 
     public async Task<int> Handle(RegisterUserCommand command, CancellationToken ct)
     {
-        var email = Email.From(command.Email);
-        var phone = Phone.From(
-            countryCode: command.PhoneCountryCode,
-            nationalNumber: command.PhoneNumber);
         var fullName = FullName.From(
             firstName: command.FirstName,
             lastName: command.LastName
         );
+
+        var email = Email.From(command.Email);
+
+        var phone = Phone.From(
+            countryCode: command.PhoneCountryCode,
+            nationalNumber: command.PhoneNumber);
+
 
         if (await _repo.GetByEmailAsync(email, ct) is not null)
             throw new ApplicationLayerValidationException("Email is already registered.");
