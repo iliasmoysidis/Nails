@@ -1,5 +1,6 @@
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Abstractions.Validation.Professionals;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
@@ -8,22 +9,38 @@ namespace Application.Commands.Professionals;
 
 public sealed class RegisterHandler
 {
+    private readonly IRegistrationValidator _validator;
     private readonly IProfessionalRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public RegisterHandler(
+        IRegistrationValidator validator,
         IProfessionalRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
+        _validator = validator;
         _repo = repo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task<int> Handle(RegisterCommand command, CancellationToken ct)
+    {
+        await _validator.EnsureUniqueAsync(command, ct);
+
+        var professional = CreateProfessional(command);
+
+        await _repo.AddAsync(professional, ct);
+
+        await _uow.SaveChangesAsync(ct);
+
+        return professional.Id;
+    }
+
+    private Professional CreateProfessional(RegisterCommand command)
     {
         var fullName = FullName.From(
             firstName: command.FirstName,
@@ -50,10 +67,6 @@ public sealed class RegisterHandler
             clock: _clock
         );
 
-        await _repo.AddAsync(professional, ct);
-
-        await _uow.SaveChangesAsync(ct);
-
-        return professional.Id;
+        return professional;
     }
 }

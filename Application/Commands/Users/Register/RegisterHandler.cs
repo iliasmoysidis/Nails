@@ -1,6 +1,6 @@
-using Application.Abstractions.Policies.Users;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Abstractions.Validation.Users;
 using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -8,23 +8,39 @@ using Domain.ValueObjects.Identity;
 
 namespace Application.Commands.Users;
 
-public sealed class RegisterUserHandler
+public sealed class RegisterHandler
 {
+    private readonly IRegistrationValidator _validator;
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
-    public RegisterUserHandler(
+    public RegisterHandler(
+        IRegistrationValidator validator,
         IUserRepository repo,
         IClock clock,
         IUnitOfWork uow)
     {
+        _validator = validator;
         _repo = repo;
         _clock = clock;
         _uow = uow;
     }
 
-    public async Task<int> Handle(RegisterUserCommand command, CancellationToken ct)
+    public async Task<int> Handle(RegisterCommand command, CancellationToken ct)
+    {
+        await _validator.EnsureUniqueAsync(command, ct);
+
+        var user = CreateUser(command);
+
+        await _repo.AddAsync(user, ct);
+
+        await _uow.SaveChangesAsync(ct);
+
+        return user.Id;
+    }
+
+    private User CreateUser(RegisterCommand command)
     {
         var fullName = FullName.From(
             firstName: command.FirstName,
@@ -37,12 +53,6 @@ public sealed class RegisterUserHandler
             countryCode: command.PhoneCountryCode,
             nationalNumber: command.PhoneNumber);
 
-
-        if (await _repo.GetByEmailAsync(email, ct) is not null)
-            throw new ApplicationLayerValidationException("Email is already registered.");
-        if (await _repo.GetByPhoneAsync(phone, ct) is not null)
-            throw new ApplicationLayerValidationException("Phone is already registered.");
-
         var user = User.Create(
             fullName: fullName,
             email: email,
@@ -50,9 +60,6 @@ public sealed class RegisterUserHandler
             clock: _clock
         );
 
-        await _repo.AddAsync(user, ct);
-        await _uow.SaveChangesAsync(ct);
-
-        return user.Id;
+        return user;
     }
 }

@@ -1,6 +1,6 @@
 namespace Application.Commands.Users;
 
-public sealed record RegisterUserCommand(
+public sealed record RegisterCommand(
     string FirstName,
     string LastName,
     string Email,
