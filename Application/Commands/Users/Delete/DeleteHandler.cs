@@ -6,14 +6,14 @@ using Domain.Interfaces;
 
 namespace Application.Commands.Users;
 
-public sealed class DeleteUserHandler
+public sealed class DeleteHandler
 {
     private readonly IManageUserPolicy _policy;
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
-    public DeleteUserHandler(
+    public DeleteHandler(
         IManageUserPolicy policy,
         IUserRepository repo,
         IClock clock,
@@ -26,7 +26,7 @@ public sealed class DeleteUserHandler
         _uow = uow;
     }
 
-    public async Task Handle(DeleteUserCommand command, CancellationToken ct)
+    public async Task Handle(DeleteCommand command, CancellationToken ct)
     {
         await _policy.EnsureCanManageAsync(command.UserId, ct);
 
