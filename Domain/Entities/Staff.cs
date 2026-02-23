@@ -107,18 +107,6 @@ public class Staff
             member.Leave(clock);
     }
 
-    public void EnsureOwner(int professionalId)
-    {
-        if (!IsOwner(professionalId))
-            throw new ForbiddenException("Only an owner can perform this action.");
-    }
-
-    public void EnsureEmployee(int professionalId)
-    {
-        if (!IsEmployee(professionalId))
-            throw new ForbiddenException("Only an employee can perform this action.");
-    }
-
     private void AddOrAssignRole(int professionalId, StaffRole role, IClock clock)
     {
         var member = GetActiveMember(professionalId);
