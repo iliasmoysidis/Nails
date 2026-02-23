@@ -4,7 +4,6 @@ using Application.Commands.Appointments;
 using Application.Exceptions;
 using Domain.Exceptions;
 using Domain.Services;
-using Domain.ValueObjects.Time;
 
 namespace Application.Validation.Appointments;
 
@@ -28,7 +27,7 @@ public sealed class ReassignValidator : IReassignValidator
         _appointmentRepo = appointmentRepo;
     }
 
-    public async Task EnsureAvailableAsync(ReassignAppointmentCommand command, CancellationToken ct)
+    public async Task EnsureAvailableAsync(ReassignCommand command, CancellationToken ct)
     {
         var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");

@@ -28,7 +28,7 @@ public sealed class ScheduleValidator : IScheduleValidator
         _appointmentRepo = appointmentRepo;
     }
 
-    public async Task EnsureAvailableAsync(CreateAppointmentCommand command, CancellationToken ct)
+    public async Task EnsureAvailableAsync(ScheduleCommand command, CancellationToken ct)
     {
         var startAt = UtcDateTime.FromUtc(command.StartAt);
         var duration = Duration.FromMinutes(command.Duration);

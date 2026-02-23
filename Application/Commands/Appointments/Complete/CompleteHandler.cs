@@ -1,21 +1,21 @@
+
 using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
 using Domain.Interfaces;
-using Domain.ValueObjects.Finance;
 
 namespace Application.Commands.Appointments;
 
-public sealed class AdjustPriceHandler
+public sealed class CompleteHandler
 {
-    private readonly IAdjustPricePolicy _policy;
+    private readonly ICompletePolicy _policy;
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
-    public AdjustPriceHandler(
-        IAdjustPricePolicy policy,
+    public CompleteHandler(
+        ICompletePolicy policy,
         IAppointmentRepository repo,
         IClock clock,
         IUnitOfWork uow
@@ -27,21 +27,14 @@ public sealed class AdjustPriceHandler
         _uow = uow;
     }
 
-    public async Task Handle(AdjustPriceCommand command, CancellationToken ct)
+    public async Task Handle(CompleteCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanAdjustPriceAsync(command, ct);
+        await _policy.EnsureCanCompleteAsync(command, ct);
 
         var appointment = await _repo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
-        appointment.AdjustPrice(
-            newPrice: Money.Create(
-                amount: command.Money.Amount,
-                currency: command.Money.Currency
-                ),
-            reason: command.Reason,
-            clock: _clock
-        );
+        appointment.Complete(_clock);
 
         await _uow.SaveChangesAsync(ct);
     }

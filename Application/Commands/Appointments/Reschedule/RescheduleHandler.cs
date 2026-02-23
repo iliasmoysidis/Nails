@@ -1,47 +1,48 @@
 using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Abstractions.Validation.Appointments;
 using Application.Exceptions;
 using Domain.Interfaces;
-using Domain.ValueObjects.Finance;
+using Domain.ValueObjects.Time;
 
 namespace Application.Commands.Appointments;
 
-public sealed class AdjustPriceHandler
+public sealed class RescheduleHandler
 {
-    private readonly IAdjustPricePolicy _policy;
+    private readonly IRescheduleValidator _validator;
+    private readonly IReschedulePolicy _policy;
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
-    public AdjustPriceHandler(
-        IAdjustPricePolicy policy,
+    public RescheduleHandler(
+        IRescheduleValidator validator,
+        IReschedulePolicy policy,
         IAppointmentRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
+        _validator = validator;
         _policy = policy;
         _repo = repo;
         _clock = clock;
         _uow = uow;
     }
 
-    public async Task Handle(AdjustPriceCommand command, CancellationToken ct)
+    public async Task Handle(RescheduleCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanAdjustPriceAsync(command, ct);
+        await _validator.EnsureAvailableAsync(command, ct);
+
+        await _policy.EnsureCanRescheduleAsync(command, ct);
 
         var appointment = await _repo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
-        appointment.AdjustPrice(
-            newPrice: Money.Create(
-                amount: command.Money.Amount,
-                currency: command.Money.Currency
-                ),
-            reason: command.Reason,
-            clock: _clock
-        );
+        var newStartAt = UtcDateTime.FromUtc(command.NewStartAt);
+
+        appointment.Reschedule(newStartAt, _clock);
 
         await _uow.SaveChangesAsync(ct);
     }

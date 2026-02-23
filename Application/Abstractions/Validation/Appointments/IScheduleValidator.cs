@@ -4,5 +4,5 @@ namespace Application.Abstractions.Validation.Appointments;
 
 public interface IScheduleValidator
 {
-    Task EnsureAvailableAsync(CreateAppointmentCommand command, CancellationToken ct);
+    Task EnsureAvailableAsync(ScheduleCommand command, CancellationToken ct);
 }

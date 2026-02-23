@@ -28,7 +28,7 @@ public sealed class RescheduleValidator : IRescheduleValidator
         _appointmentRepo = appointmentRepo;
     }
 
-    public async Task EnsureAvailableAsync(RescheduleAppointmentCommand command, CancellationToken ct)
+    public async Task EnsureAvailableAsync(RescheduleCommand command, CancellationToken ct)
     {
         var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");

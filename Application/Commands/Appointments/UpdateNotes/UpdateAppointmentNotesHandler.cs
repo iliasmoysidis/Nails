@@ -8,13 +8,13 @@ namespace Application.Commands.Appointments;
 
 public sealed class UpdateAppointmentNotesHandler
 {
-    private readonly IUpdateAppointmentNotesPolicy _policy;
+    private readonly IUpdateNotesPolicy _policy;
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateAppointmentNotesHandler(
-        IUpdateAppointmentNotesPolicy policy,
+        IUpdateNotesPolicy policy,
         IAppointmentRepository repo,
         IClock clock,
         IUnitOfWork uow

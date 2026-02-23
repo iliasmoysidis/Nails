@@ -4,5 +4,5 @@ namespace Application.Abstractions.Validation.Appointments;
 
 public interface IReassignValidator
 {
-    Task EnsureAvailableAsync(ReassignAppointmentCommand command, CancellationToken ct);
+    Task EnsureAvailableAsync(ReassignCommand command, CancellationToken ct);
 }
