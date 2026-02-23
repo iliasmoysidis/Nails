@@ -58,7 +58,7 @@ public class StoreCalendar
         return ranges.Any(r => r.Start <= range.Start && r.End >= range.End);
     }
 
-    public bool IsWhithinWeeklyStoreHours(DayOfWeek day, TimeRange range)
+    public bool IsWithinWeeklyStoreHours(DayOfWeek day, TimeRange range)
     {
         if (!_workingDays.TryGetValue(day, out var workingDay))
             return false;
