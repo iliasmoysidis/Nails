@@ -1,8 +1,8 @@
 
 using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
-using Application.Abstractions.Services;
 using Application.Abstractions.UnitOfWork;
+using Application.Abstractions.Validation.Appointments;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Appointments;
@@ -13,21 +13,21 @@ namespace Application.Commands.Appointments;
 
 public sealed class CreateAppointmentHandler
 {
-    private readonly IAppointmentAvailabilityService _availability;
+    private readonly IScheduleValidator _validator;
     private readonly ICreateAppointmentPolicy _policy;
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public CreateAppointmentHandler(
-        IAppointmentAvailabilityService availability,
+        IScheduleValidator validator,
         ICreateAppointmentPolicy policy,
         IAppointmentRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _availability = availability;
+        _validator = validator;
         _policy = policy;
         _repo = repo;
         _clock = clock;
@@ -36,18 +36,13 @@ public sealed class CreateAppointmentHandler
 
     public async Task<int> Handle(CreateAppointmentCommand command, CancellationToken ct)
     {
+        await _validator.EnsureAvailableAsync(command, ct);
+
+        await _policy.EnsureCanCreateAsync(command, ct);
+
         var startAt = UtcDateTime.FromUtc(command.StartAt);
         var duration = Duration.FromMinutes(command.Duration);
         var endAt = startAt.Add(duration.Value);
-
-        await _policy.EnsureCanCreateAsync(command, ct);
-        await _availability.EnsureAvailableAsync(
-            storeId: command.StoreId,
-            professionalId: command.ProfessionalId,
-            startAt: startAt,
-            endAt: endAt,
-            ignoreAppointmentId: null,
-            ct: ct);
 
         var appointment = Appointment.Create(
             userId: command.UserId,
