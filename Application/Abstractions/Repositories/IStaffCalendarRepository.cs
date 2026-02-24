@@ -6,5 +6,7 @@ public interface IStaffCalendarRepository
 {
     Task<StaffCalendar?> GetAsync(int storeId, int professionalId, CancellationToken ct);
 
+    Task RemoveProfessionalAsync(int storeId, int professionalId, CancellationToken ct);
+
     Task RemoveAsync(int storeId, CancellationToken ct);
 }
