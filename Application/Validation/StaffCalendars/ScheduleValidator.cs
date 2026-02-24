@@ -3,18 +3,18 @@ using Application.Abstractions.Validation.StaffCalendars;
 using Application.Commands.StaffCalendars;
 using Application.Exceptions;
 using Domain.Exceptions;
-using Domain.Services;
+using Domain.Interfaces;
 using Domain.ValueObjects.Calendar;
 
 namespace Application.Validation.StaffCalendars;
 
 public sealed class ScheduleValidator : IScheduleValidator
 {
-    private readonly SchedulingService _service;
+    private readonly ISchedulingService _service;
     private readonly IStoreCalendarRepository _repo;
 
     public ScheduleValidator(
-        SchedulingService service,
+        ISchedulingService service,
         IStoreCalendarRepository repo
     )
     {

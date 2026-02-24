@@ -1,10 +1,11 @@
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Interfaces;
 using Domain.ValueObjects.Calendar;
 
 namespace Domain.Services;
 
-public sealed class SchedulingService
+public sealed class SchedulingService : ISchedulingService
 {
     public void EnsureWorkingDayFitsStoreHours(
         StoreCalendar calendar,
