@@ -55,6 +55,12 @@ public class StaffCalendar
                 r.End >= range.End);
     }
 
+    public void Clear()
+    {
+        _workingDays.Clear();
+        _exceptions.Clear();
+    }
+
     public bool TryGetWorkingDay(DayOfWeek day, out WorkingDay workingDay)
         => _workingDays.TryGetValue(day, out workingDay!);
 

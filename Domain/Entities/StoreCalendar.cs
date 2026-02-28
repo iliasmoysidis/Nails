@@ -52,6 +52,12 @@ public class StoreCalendar
         return GetWorkingTimeRanges(date).Any();
     }
 
+    public void Clear()
+    {
+        _workingDays.Clear();
+        _exceptions.Clear();
+    }
+
     public bool IsWithinStoreHours(DateOnly date, TimeRange range)
     {
         var ranges = GetWorkingTimeRanges(date);
