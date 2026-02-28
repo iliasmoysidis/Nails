@@ -8,8 +8,8 @@ public sealed class StoreClosureService : IStoreClosureService
     public void CloseStore(
         Store store,
         Staff staff,
-        StoreCatalog catalog,
-        ProfessionalOfferings assignments,
+        StoreCatalog? catalog,
+        ProfessionalOfferings? assignments,
         StoreCalendar? storeCalendar,
         IReadOnlyCollection<StaffCalendar> staffCalendars,
         IReadOnlyCollection<Appointment> upcomingAppointments,
@@ -22,8 +22,8 @@ public sealed class StoreClosureService : IStoreClosureService
         }
 
         staff.Clear(clock);
-        catalog.Clear(clock);
-        assignments.Clear();
+        catalog?.Clear(clock);
+        assignments?.Clear();
         storeCalendar?.Clear();
 
         foreach (var staffCalendar in staffCalendars)

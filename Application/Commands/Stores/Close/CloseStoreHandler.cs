@@ -6,7 +6,7 @@ using Domain.Interfaces;
 
 namespace Application.Commands.Stores;
 
-public sealed class CloseHandler
+public sealed class CloseStoreHandler
 {
     private readonly IManageStorePolicy _policy;
     private readonly IStoreClosureService _service;
@@ -21,7 +21,7 @@ public sealed class CloseHandler
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
-    public CloseHandler(
+    public CloseStoreHandler(
         IManageStorePolicy policy,
         IStoreClosureService service,
         IStoreRepository storeRepo,
@@ -48,7 +48,7 @@ public sealed class CloseHandler
         _uow = uow;
     }
 
-    public async Task Handle(CloseCommand command, CancellationToken ct)
+    public async Task Handle(CloseStoreCommand command, CancellationToken ct)
     {
         await _policy.EnsureCanManageAsync(command.StoreId, ct);
 
@@ -58,11 +58,9 @@ public sealed class CloseHandler
         var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Catalog not found.");
+        var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct);
 
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Assignments not found.");
+        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
 
         var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct);
 
