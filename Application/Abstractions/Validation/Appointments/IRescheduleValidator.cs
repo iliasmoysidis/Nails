@@ -1,8 +1,15 @@
-using Application.Commands.Appointments;
+using Domain.Entities;
+using Domain.ValueObjects.Time;
 
 namespace Application.Abstractions.Validation.Appointments;
 
 public interface IRescheduleValidator
 {
-    Task EnsureAvailableAsync(RescheduleCommand command, CancellationToken ct);
+    void EnsureAvailable(
+        StoreCalendar storeCalendar,
+        StaffCalendar staffCalendar,
+        Appointment appointment,
+        IReadOnlyCollection<Appointment> appointments,
+        UtcDateTime newStartAt
+    );
 }

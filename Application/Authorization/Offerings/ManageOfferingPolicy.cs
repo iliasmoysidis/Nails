@@ -1,28 +1,23 @@
 using Application.Abstractions.Policies.Offerings;
-using Application.Abstractions.Repositories;
 using Application.Contexts;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Authorization.Offerings;
 
 public sealed class ManageOfferingPolicy : IManageOfferingPolicy
 {
     private readonly IRequestContext _context;
-    private readonly IStaffRepository _repo;
 
-    public ManageOfferingPolicy(IRequestContext context, IStaffRepository repo)
+    public ManageOfferingPolicy(IRequestContext context)
     {
         _context = context;
-        _repo = repo;
     }
 
-    public async Task EnsureCanManageAsync(int storeId, CancellationToken ct)
+    public void EnsureCanManage(Staff staff)
     {
         if (!_context.IsProfessional)
             throw Forbidden();
-
-        var staff = await _repo.GetByStoreId(storeId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId))
             throw Forbidden();

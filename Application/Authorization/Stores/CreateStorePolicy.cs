@@ -13,11 +13,9 @@ public sealed class CreateStorePolicy : ICreateStorePolicy
         _context = context;
     }
 
-    public Task EnsureCanCreateAsync(CancellationToken ct)
+    public void EnsureCanCreate()
     {
         if (!_context.IsProfessional) throw Forbidden();
-
-        return Task.CompletedTask;
     }
 
     public static ApplicationLayerForbiddenException Forbidden()

@@ -1,5 +1,4 @@
 using Domain.Entities;
-using Domain.Exceptions;
 using Domain.Interfaces;
 
 namespace Domain.Services;
@@ -13,8 +12,10 @@ public sealed class ProfessionalExitService : IProfessionalExitService
         int professionalId,
         IClock clock)
     {
-        if (upcomingAppointments.Any())
-            throw new InvariantException("Cannot leave store with upcoming appointments.");
+        foreach (var appointment in upcomingAppointments)
+        {
+            appointment.Cancel(clock, "Professional left the store.");
+        }
 
         assignments?.UnassignAllForProfessional(professionalId);
 

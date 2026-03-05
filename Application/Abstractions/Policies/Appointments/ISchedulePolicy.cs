@@ -2,7 +2,7 @@ using Domain.Entities;
 
 namespace Application.Abstractions.Policies.Appointments;
 
-public interface IConfirmPolicy
+public interface ISchedulePolicy
 {
-    void EnsureCanConfirm(Staff staff);
+    void EnsureCanCreate(Appointment appointment);
 }

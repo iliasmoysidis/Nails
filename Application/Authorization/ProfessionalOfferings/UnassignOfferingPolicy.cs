@@ -1,31 +1,25 @@
 using Application.Abstractions.Policies.ProfessionalOfferings;
-using Application.Abstractions.Repositories;
 using Application.Contexts;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Authorization.ProfessionalOfferings;
 
 public sealed class UnassignOfferingPolicy : IUnassignOfferingPolicy
 {
     IRequestContext _context;
-    IStaffRepository _repo;
 
     public UnassignOfferingPolicy(
-        IRequestContext context,
-        IStaffRepository repo
+        IRequestContext context
     )
     {
         _context = context;
-        _repo = repo;
     }
 
-    public async Task EnsureCanUnassignOfferingAsync(int storeId, int professionalId, CancellationToken ct)
+    public void EnsureCanUnassignOffering(int professionalId, Staff staff)
     {
         if (!_context.IsProfessional)
             throw Forbidden();
-
-        var staff = await _repo.GetByStoreId(storeId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId) && _context.ActorId != professionalId)
             throw Forbidden();

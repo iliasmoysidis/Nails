@@ -28,7 +28,7 @@ public sealed class DeleteHandler
 
     public async Task Handle(DeleteCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageAsync(command.ProfessionalId, ct);
+        _policy.EnsureCanManage(command.ProfessionalId);
 
         var professional = await _repo.GetByIdAsync(command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional not found.");

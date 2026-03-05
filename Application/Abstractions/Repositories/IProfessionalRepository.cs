@@ -7,11 +7,7 @@ public interface IProfessionalRepository
 {
     Task<Professional?> GetByIdAsync(int professionalId, CancellationToken ct);
 
-    Task<Professional?> GetByEmailAsync(Email email, CancellationToken ct);
-
-    Task<Professional?> GetByPhoneAsync(Phone phone, CancellationToken ct);
-
-    Task<Professional?> GetByTaxIdAsync(TaxIdentificationNumber taxId, CancellationToken ct);
+    Task<bool> ExistsAsync(Email email, Phone phone, TaxIdentificationNumber taxIdNumber, CancellationToken ct);
 
     Task AddAsync(Professional professional, CancellationToken ct);
 }

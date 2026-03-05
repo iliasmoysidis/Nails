@@ -8,25 +8,31 @@ namespace Application.Commands.StoreCalendars;
 public sealed class RemoveExceptionHandler
 {
     private readonly IManageStorePolicy _policy;
-    private readonly IStoreCalendarRepository _repo;
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
     public RemoveExceptionHandler(
         IManageStorePolicy policy,
-        IStoreCalendarRepository repo,
+        IStoreCalendarRepository storeCalendarRepo,
+        IStaffRepository staffRepo,
         IUnitOfWork uow
     )
     {
         _policy = policy;
-        _repo = repo;
+        _storeCalendarRepo = storeCalendarRepo;
+        _staffRepo = staffRepo;
         _uow = uow;
     }
 
     public async Task Handle(RemoveExceptionCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageAsync(command.StoreId, ct);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var calendar = await _repo.GetByStoreIdAsync(command.StoreId, ct)
+        _policy.EnsureCanManage(staff);
+
+        var calendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found");
 
         calendar.RemoveException(command.Date);

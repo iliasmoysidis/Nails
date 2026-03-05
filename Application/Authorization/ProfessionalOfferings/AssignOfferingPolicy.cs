@@ -1,31 +1,25 @@
 using Application.Abstractions.Policies.ProfessionalOfferings;
-using Application.Abstractions.Repositories;
 using Application.Contexts;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Authorization.ProfessionalOfferings;
 
 public sealed class AssignOfferingPolicy : IAssignOfferingPolicy
 {
     IRequestContext _context;
-    IStaffRepository _repo;
 
     public AssignOfferingPolicy(
-        IRequestContext context,
-        IStaffRepository repo
+        IRequestContext context
     )
     {
         _context = context;
-        _repo = repo;
     }
 
-    public async Task EnsureCanAssignOfferingAsync(int storeId, CancellationToken ct)
+    public void EnsureCanAssignOffering(Staff staff)
     {
         if (!_context.IsProfessional)
             throw Forbidden();
-
-        var staff = await _repo.GetByStoreId(storeId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId))
             throw Forbidden();

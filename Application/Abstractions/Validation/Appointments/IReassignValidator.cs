@@ -1,8 +1,13 @@
-using Application.Commands.Appointments;
+using Domain.Entities;
 
 namespace Application.Abstractions.Validation.Appointments;
 
 public interface IReassignValidator
 {
-    Task EnsureAvailableAsync(ReassignCommand command, CancellationToken ct);
+    void EnsureAvailable(
+        Appointment appointment,
+        IReadOnlyCollection<Appointment> appointments,
+        StoreCalendar storeCalendar,
+        StaffCalendar staffCalendar
+    );
 }

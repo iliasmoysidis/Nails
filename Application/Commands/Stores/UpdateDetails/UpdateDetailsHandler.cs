@@ -11,28 +11,34 @@ namespace Application.Commands.Stores;
 public sealed class UpdateDetailsHandler
 {
     private readonly IManageStorePolicy _policy;
-    private readonly IStoreRepository _repo;
+    private readonly IStoreRepository _storeRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateDetailsHandler(
         IManageStorePolicy policy,
-        IStoreRepository repo,
+        IStoreRepository storeRepo,
+        IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
         _policy = policy;
-        _repo = repo;
+        _storeRepo = storeRepo;
+        _staffRepo = staffRepo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task Handle(UpdateDetailsCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageAsync(command.StoreId, ct);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var store = await _repo.GetByStoreIdAsync(command.StoreId, ct)
+        _policy.EnsureCanManage(staff);
+
+        var store = await _storeRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 
         store.UpdateDetails(

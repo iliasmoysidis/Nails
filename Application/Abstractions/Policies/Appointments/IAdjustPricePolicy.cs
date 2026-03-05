@@ -1,8 +1,8 @@
-using Application.Commands.Appointments;
+using Domain.Entities;
 
 namespace Application.Abstractions.Policies.Appointments;
 
 public interface IAdjustPricePolicy
 {
-    Task EnsureCanAdjustPriceAsync(AdjustPriceCommand command, CancellationToken ct);
+    void EnsureCanAdjustPrice(Staff staff);
 }

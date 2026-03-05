@@ -31,10 +31,10 @@ public sealed class RemoveStoreEmployeeHandler
 
     public async Task Handle(RemoveStoreEmployeeCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
-
         var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        _policy.EnsureCanManageStaff(staff);
 
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Professional offerings not found for store {command.StoreId}.");

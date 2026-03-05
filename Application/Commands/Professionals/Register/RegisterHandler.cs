@@ -1,6 +1,6 @@
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
-using Application.Abstractions.Validation.Professionals;
+using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
@@ -9,38 +9,22 @@ namespace Application.Commands.Professionals;
 
 public sealed class RegisterHandler
 {
-    private readonly IRegistrationValidator _validator;
     private readonly IProfessionalRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public RegisterHandler(
-        IRegistrationValidator validator,
         IProfessionalRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _validator = validator;
         _repo = repo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task<int> Handle(RegisterCommand command, CancellationToken ct)
-    {
-        await _validator.EnsureUniqueAsync(command, ct);
-
-        var professional = CreateProfessional(command);
-
-        await _repo.AddAsync(professional, ct);
-
-        await _uow.SaveChangesAsync(ct);
-
-        return professional.Id;
-    }
-
-    private Professional CreateProfessional(RegisterCommand command)
     {
         var fullName = FullName.From(
             firstName: command.FirstName,
@@ -59,6 +43,10 @@ public sealed class RegisterHandler
             value: command.TaxIdNumber
         );
 
+
+        if (await _repo.ExistsAsync(email, phone, taxIdNumber, ct))
+            throw new ApplicationLayerValidationException("A professional with the same email, phone, or tax id already exists.");
+
         var professional = Professional.Create(
             fullName: fullName,
             email: email,
@@ -67,6 +55,9 @@ public sealed class RegisterHandler
             clock: _clock
         );
 
-        return professional;
+        await _repo.AddAsync(professional, ct);
+        await _uow.SaveChangesAsync(ct);
+
+        return professional.Id;
     }
 }

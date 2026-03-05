@@ -11,36 +11,48 @@ public sealed class SetWorkingDayHandler
 {
     private readonly IScheduleValidator _validator;
     private readonly IManageStaffPolicy _policy;
-    private readonly IStaffCalendarRepository _repo;
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
+    private readonly IStaffCalendarRepository _staffCalendarRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
     public SetWorkingDayHandler(
         IScheduleValidator validator,
         IManageStaffPolicy policy,
-        IStaffCalendarRepository repo,
+        IStoreCalendarRepository storeCalendarRepo,
+        IStaffCalendarRepository staffCalendarRepo,
+        IStaffRepository staffRepo,
         IUnitOfWork uow
     )
     {
         _validator = validator;
         _policy = policy;
-        _repo = repo;
+        _storeCalendarRepo = storeCalendarRepo;
+        _staffCalendarRepo = staffCalendarRepo;
+        _staffRepo = staffRepo;
         _uow = uow;
     }
 
     public async Task Handle(SetWorkingDayCommand command, CancellationToken ct)
     {
-        await _validator.EnsureFitsStoreHours(command, ct);
-
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
-
-        var calendar = await _repo.GetAsync(command.StoreId, command.ProfessionalId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
-
         var ranges = command.TimeRanges.Select(r => new TimeRange(r.Start, r.End));
 
         var workingDay = WorkingDay.WithRanges(command.Day, ranges);
 
-        calendar.SetWorkingDay(workingDay);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
+
+        _validator.EnsureWorkingDayFitsStoreHours(storeCalendar, workingDay);
+
+        _policy.EnsureCanManageStaff(staff);
+
+        var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
+
+        staffCalendar.SetWorkingDay(workingDay);
 
         await _uow.SaveChangesAsync(ct);
     }

@@ -1,8 +1,9 @@
 using Application.Commands.Appointments;
+using Domain.Entities;
 
 namespace Application.Abstractions.Policies.Appointments;
 
 public interface IReassignPolicy
 {
-    Task EnsureCanReassignAsync(ReassignCommand command, CancellationToken ct);
+    void EnsureCanReassign(Staff staff, int professionalId);
 }

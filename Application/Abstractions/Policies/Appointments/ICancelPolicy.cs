@@ -1,8 +1,8 @@
-using Application.Commands.Appointments;
+using Domain.Entities;
 
 namespace Application.Abstractions.Policies.Appointments;
 
 public interface ICancelPolicy
 {
-    Task EnsureCanCancelAsync(CancelCommand command, CancellationToken ct);
+    void EnsureCanCancel(Appointment appointment, Staff? staff);
 }

@@ -45,7 +45,10 @@ public sealed class LeaveStoreHandler
 
     public async Task Handle(LeaveStoreCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanLeaveAsync(command.StoreId, ct);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        _policy.EnsureCanLeave(staff);
 
         var upcoming = await _appointmentRepo.GetUpcomingByStoreIdAndProfessionalId(
             storeId: command.StoreId,
@@ -54,9 +57,6 @@ public sealed class LeaveStoreHandler
         );
 
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
-
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         try
         {

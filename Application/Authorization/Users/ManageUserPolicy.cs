@@ -13,11 +13,9 @@ public sealed class ManageUserPolicy : IManageUserPolicy
         _context = context;
     }
 
-    public Task EnsureCanManageAsync(int userId, CancellationToken ct)
+    public void EnsureCanManage(int userId)
     {
         if (!_context.IsUser || _context.ActorId != userId) throw Forbidden();
-
-        return Task.CompletedTask;
     }
 
     public static ApplicationLayerForbiddenException Forbidden()

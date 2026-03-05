@@ -1,33 +1,23 @@
 using Application.Abstractions.Policies.Appointments;
-using Application.Abstractions.Repositories;
-using Application.Commands.Appointments;
 using Application.Contexts;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Authorization.Appointments;
 
 public sealed class CancelPolicy : ICancelPolicy
 {
     private readonly IRequestContext _context;
-    private readonly IAppointmentRepository _appointmentRepo;
-    private readonly IStaffRepository _staffRepo;
 
     public CancelPolicy(
-        IRequestContext context,
-        IAppointmentRepository appointmentRepo,
-        IStaffRepository staffRepo
+        IRequestContext context
     )
     {
         _context = context;
-        _appointmentRepo = appointmentRepo;
-        _staffRepo = staffRepo;
     }
 
-    public async Task EnsureCanCancelAsync(CancelCommand command, CancellationToken ct)
+    public void EnsureCanCancel(Appointment appointment, Staff? staff)
     {
-        var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
-
         if (_context.IsUser)
         {
             if (_context.ActorId != appointment.UserId)
@@ -38,10 +28,7 @@ public sealed class CancelPolicy : ICancelPolicy
 
         if (_context.IsProfessional)
         {
-            var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-            if (!staff.IsStaff(_context.ActorId))
+            if (staff is null || !staff.IsStaff(_context.ActorId))
                 throw Forbidden();
 
             return;

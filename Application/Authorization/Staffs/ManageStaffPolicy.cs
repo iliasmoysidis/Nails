@@ -1,30 +1,24 @@
 using Application.Abstractions.Policies.Staffs;
-using Application.Abstractions.Repositories;
 using Application.Contexts;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Authorization;
 
 public sealed class ManageStaffPolicy : IManageStaffPolicy
 {
     private readonly IRequestContext _context;
-    private readonly IStaffRepository _repo;
 
     public ManageStaffPolicy(
-        IRequestContext context,
-        IStaffRepository repo
+        IRequestContext context
     )
     {
         _context = context;
-        _repo = repo;
     }
 
-    public async Task EnsureCanManageStaffAsync(int storeId, CancellationToken ct)
+    public void EnsureCanManageStaff(Staff staff)
     {
         if (!_context.IsProfessional) throw Forbidden();
-
-        var staff = await _repo.GetByStoreId(storeId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         if (!staff.IsOwner(_context.ActorId)) throw Forbidden();
     }

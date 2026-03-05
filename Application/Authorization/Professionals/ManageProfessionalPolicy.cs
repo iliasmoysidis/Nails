@@ -13,11 +13,9 @@ public sealed class ManageProfessionalPolicy : IManageProfessionalPolicy
         _context = context;
     }
 
-    public Task EnsureCanManageAsync(int professionalId, CancellationToken ct)
+    public void EnsureCanManage(int professionalId)
     {
         if (!_context.IsProfessional || _context.ActorId != professionalId) throw Forbidden();
-
-        return Task.CompletedTask;
     }
 
     public static ApplicationLayerForbiddenException Forbidden()

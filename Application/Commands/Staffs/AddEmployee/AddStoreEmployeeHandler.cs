@@ -28,10 +28,10 @@ public sealed class AddStoreEmployeeHandler
 
     public async Task Handle(AddStoreEmployeeCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
-
         var staff = await _repo.GetByStoreId(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        _policy.EnsureCanManageStaff(staff);
 
         staff.AddEmployee(command.ProfessionalId, _clock);
 

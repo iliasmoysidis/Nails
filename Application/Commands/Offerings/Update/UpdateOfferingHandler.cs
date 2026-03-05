@@ -12,28 +12,34 @@ namespace Application.Commands.Offerings;
 public sealed class UpdateOfferingHandler
 {
     private readonly IManageOfferingPolicy _policy;
-    private readonly IStoreCatalogRepository _repo;
+    private readonly IStoreCatalogRepository _storeCatalogRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateOfferingHandler(
         IManageOfferingPolicy policy,
-        IStoreCatalogRepository repo,
+        IStoreCatalogRepository storeCatalogRepo,
+        IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
         _policy = policy;
-        _repo = repo;
+        _storeCatalogRepo = storeCatalogRepo;
+        _staffRepo = staffRepo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task Handle(UpdateOfferingCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageAsync(command.StoreId, ct);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var catalog = await _repo.GetByStoreIdAsync(command.StoreId, ct)
+        _policy.EnsureCanManage(staff);
+
+        var catalog = await _storeCatalogRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
 
         var offering = catalog.GetOfferingOrThrow(command.OfferingId);

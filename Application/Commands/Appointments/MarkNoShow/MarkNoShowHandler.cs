@@ -9,29 +9,35 @@ namespace Application.Commands.Appointments;
 public sealed class MarkNoShowHandler
 {
     private readonly IMarkNoShowPolicy _policy;
-    private readonly IAppointmentRepository _repo;
+    private readonly IAppointmentRepository _appointmentRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public MarkNoShowHandler(
         IMarkNoShowPolicy policy,
-        IAppointmentRepository repo,
+        IAppointmentRepository appointmentRepo,
+        IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
         _policy = policy;
-        _repo = repo;
+        _appointmentRepo = appointmentRepo;
+        _staffRepo = staffRepo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task Handle(MarkNoShowCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanMarkNoShowAsync(command, ct);
-
-        var appointment = await _repo.GetByIdAsync(command.AppointmentId, ct)
+        var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
+
+        var staff = await _staffRepo.GetByStoreId(appointment.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found");
+
+        _policy.EnsureCanMarkNoShow(staff);
 
         appointment.MarkAsNoShow(_clock);
 

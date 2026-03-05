@@ -37,7 +37,7 @@ public sealed class CreateStoreHandler
 
     public async Task<int> Handle(CreateStoreCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanCreateAsync(ct);
+        _policy.EnsureCanCreate();
 
         var address = Address.From(
                 street: command.Street,

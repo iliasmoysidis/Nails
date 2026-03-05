@@ -11,36 +11,48 @@ public sealed class AddSpecialAvailabilityHandler
 {
     private readonly IScheduleValidator _validator;
     private readonly IManageStaffPolicy _policy;
-    private readonly IStaffCalendarRepository _repo;
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
+    private readonly IStaffCalendarRepository _staffCalendarRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
     public AddSpecialAvailabilityHandler(
         IScheduleValidator validator,
         IManageStaffPolicy policy,
-        IStaffCalendarRepository repo,
+        IStoreCalendarRepository storeCalendarRepo,
+        IStaffCalendarRepository staffCalendarRepo,
+        IStaffRepository staffRepo,
         IUnitOfWork uow
     )
     {
         _validator = validator;
         _policy = policy;
-        _repo = repo;
+        _storeCalendarRepo = storeCalendarRepo;
+        _staffCalendarRepo = staffCalendarRepo;
+        _staffRepo = staffRepo;
         _uow = uow;
     }
 
     public async Task Handle(AddSpecialAvailabilityCommand command, CancellationToken ct)
     {
-        await _validator.EnsureExceptionFitsStoreHours(command, ct);
+        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
 
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
-
-        var calendar = await _repo.GetAsync(command.StoreId, command.ProfessionalId, ct)
+        var stafCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
+
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         var ranges = command.TimeRanges.Select(r => new TimeRange(r.Start, r.End));
 
         var exception = CalendarException.PartialDay(command.Date, ranges);
 
-        calendar.AddException(exception);
+        _validator.EnsureExceptionFitsStoreHours(storeCalendar, exception);
+
+        _policy.EnsureCanManageStaff(staff);
+
+        stafCalendar.AddException(exception);
 
         await _uow.SaveChangesAsync(ct);
     }

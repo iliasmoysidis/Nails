@@ -1,6 +1,8 @@
+using Domain.Entities;
+
 namespace Application.Abstractions.Policies.Offerings;
 
 public interface IManageOfferingPolicy
 {
-    Task EnsureCanManageAsync(int storeId, CancellationToken ct);
+    void EnsureCanManage(Staff staff);
 }

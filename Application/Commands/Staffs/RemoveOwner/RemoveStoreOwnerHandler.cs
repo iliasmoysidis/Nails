@@ -29,10 +29,10 @@ public sealed class RemoveStoreOwnerHandler
 
     public async Task Handle(RemoveStoreOwnerCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
-
         var staff = await _repo.GetByStoreId(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        _policy.EnsureCanManageStaff(staff);
 
         staff.RemoveOwner(command.ProfessionalId, _clock);
 

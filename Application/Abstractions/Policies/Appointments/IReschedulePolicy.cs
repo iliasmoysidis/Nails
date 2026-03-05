@@ -1,8 +1,8 @@
-using Application.Commands.Appointments;
+using Domain.Entities;
 
 namespace Application.Abstractions.Policies.Appointments;
 
 public interface IReschedulePolicy
 {
-    Task EnsureCanRescheduleAsync(RescheduleCommand command, CancellationToken ct);
+    void EnsureCanReschedule(Appointment appointment, Staff staff);
 }

@@ -50,13 +50,13 @@ public sealed class CloseStoreHandler
 
     public async Task Handle(CloseStoreCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageAsync(command.StoreId, ct);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        _policy.EnsureCanManage(staff);
 
         var store = await _storeRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
-
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct);
 

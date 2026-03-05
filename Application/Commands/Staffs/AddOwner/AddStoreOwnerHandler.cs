@@ -28,10 +28,10 @@ public sealed class AddStoreOwnerHandler
 
     public async Task Handle(AddStoreOwnerCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
-
         var staff = await _repo.GetByStoreId(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        _policy.EnsureCanManageStaff(staff);
 
         staff.AddOwner(command.ProfessionalId, _clock);
 

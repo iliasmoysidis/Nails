@@ -9,25 +9,31 @@ namespace Application.Commands.StaffCalendars;
 public sealed class AddVacationHandler
 {
     private readonly IManageStaffPolicy _policy;
-    private readonly IStaffCalendarRepository _repo;
+    private readonly IStaffCalendarRepository _staffCalendarRepo;
+    private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
     public AddVacationHandler(
         IManageStaffPolicy policy,
-        IStaffCalendarRepository repo,
+        IStaffCalendarRepository staffCalendarRepo,
+        IStaffRepository staffRepo,
         IUnitOfWork uow
     )
     {
         _policy = policy;
-        _repo = repo;
+        _staffCalendarRepo = staffCalendarRepo;
+        _staffRepo = staffRepo;
         _uow = uow;
     }
 
     public async Task Handle(AddVacationCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageStaffAsync(command.StoreId, ct);
+        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var calendar = await _repo.GetAsync(command.StoreId, command.ProfessionalId, ct)
+        _policy.EnsureCanManageStaff(staff);
+
+        var calendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
 
         var holiday = CalendarException.DayOff(command.Date);
