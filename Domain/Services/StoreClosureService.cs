@@ -18,6 +18,8 @@ public sealed class StoreClosureService : IStoreClosureService
     {
         foreach (var appointment in upcomingAppointments)
         {
+            if (appointment.IsTerminal) continue;
+
             appointment.Cancel(clock, "Store has been closed.");
         }
 

@@ -55,6 +55,5 @@ public class ProfessionalOfferings
         => _assignments
             .Where(a => a.ProfessionalId == professionalId)
             .Select(a => a.OfferingId)
-            .ToList()
-            .AsReadOnly();
+            .ToArray();
 }

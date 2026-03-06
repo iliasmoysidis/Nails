@@ -24,13 +24,14 @@ public sealed class AppointmentAvailabilityService
         if (!staffCalendar.IsAvailable(startAt, endAt))
             throw new InvariantException("Professional is not available during the selected time");
 
-        var conflict = appointments.Any(a =>
-            !a.IsDeleted &&
-            a.Id != ignoreAppointmentId &&
-            a.ConflictsWith(startAt, endAt)
-        );
+        foreach (var appointment in appointments)
+        {
+            if (appointment.IsDeleted) continue;
 
-        if (conflict)
-            throw new InvariantException("Professional already has an appointment during this time.");
+            if (appointment.Id == ignoreAppointmentId) continue;
+
+            if (appointment.ConflictsWith(startAt, endAt))
+                throw new InvariantException("Professional already has an appointment during this time.");
+        }
     }
 }

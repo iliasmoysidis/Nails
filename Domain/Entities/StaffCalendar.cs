@@ -105,7 +105,7 @@ public class StaffCalendar
     }
 
     public IReadOnlyCollection<CalendarException> GetExceptions()
-        => _exceptions.Values;
+        => _exceptions.Values.ToArray();
 
     private static readonly IReadOnlyCollection<TimeRange> EmptyRanges = Array.Empty<TimeRange>();
 }

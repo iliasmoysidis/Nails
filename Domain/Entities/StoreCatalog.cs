@@ -11,8 +11,8 @@ public class StoreCatalog
     public int StoreId { get; private set; }
 
     private readonly List<Offering> _offerings = new();
-    public IEnumerable<Offering> Offerings
-        => _offerings.Where(o => !o.IsDeleted);
+    public IReadOnlyCollection<Offering> Offerings
+        => _offerings.Where(o => !o.IsDeleted).ToArray();
 
     private StoreCatalog() { }
 
@@ -82,9 +82,6 @@ public class StoreCatalog
     public Offering GetOfferingOrThrow(int offeringId)
         => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
             ?? throw new NotFoundException("Offering not found.");
-
-    public IReadOnlyCollection<Offering> GetActiveOfferings()
-        => _offerings.Where(o => !o.IsDeleted).ToList().AsReadOnly();
 
     private void EnsureNameIsUnique(OfferingName name, int? offeringId = null)
     {

@@ -14,6 +14,8 @@ public sealed class ProfessionalExitService : IProfessionalExitService
     {
         foreach (var appointment in upcomingAppointments)
         {
+            if (appointment.IsTerminal) continue;
+
             appointment.Cancel(clock, "Professional left the store.");
         }
 

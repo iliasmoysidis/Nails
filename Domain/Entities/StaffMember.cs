@@ -17,7 +17,7 @@ public sealed class StaffMember
     public bool IsActive => LeftAt is null;
 
     private readonly List<StaffRoleAssignment> _roleHistory = new();
-    public IReadOnlyCollection<StaffRoleAssignment> RoleHistory => _roleHistory.AsReadOnly();
+    public IReadOnlyCollection<StaffRoleAssignment> RoleHistory => _roleHistory.ToArray();
 
     private StaffMember() { }
 

@@ -2,7 +2,7 @@ using Domain.Exceptions;
 
 namespace Domain.ValueObjects.Time;
 
-public readonly struct UtcDateTime : IComparable<UtcDateTime>
+public readonly struct UtcDateTime : IComparable<UtcDateTime>, IEquatable<UtcDateTime>
 {
     public DateTime Value { get; }
 
@@ -24,6 +24,12 @@ public readonly struct UtcDateTime : IComparable<UtcDateTime>
 
     public UtcDateTime Add(TimeSpan duration)
         => FromUtc(Value.Add(duration));
+
+    public UtcDateTime AddMinutes(int minutes)
+        => FromUtc(Value.AddMinutes(minutes));
+
+    public UtcDateTime AddHours(int hours)
+        => FromUtc(Value.AddHours(hours));
 
     public DateOnly Date => DateOnly.FromDateTime(Value);
 
@@ -49,6 +55,15 @@ public readonly struct UtcDateTime : IComparable<UtcDateTime>
         => a.Value == b.Value;
     public static bool operator !=(UtcDateTime a, UtcDateTime b)
         => a.Value != b.Value;
+
+    public bool IsBefore(UtcDateTime other)
+        => Value < other.Value;
+
+    public bool IsAfter(UtcDateTime other)
+        => Value > other.Value;
+
+    public bool Equals(UtcDateTime other)
+        => Value == other.Value;
 
     public override bool Equals(object? obj)
         => obj is UtcDateTime other && Value == other.Value;

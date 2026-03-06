@@ -32,6 +32,7 @@ public class Appointment : HistoricEntity
     public bool IsUpcoming(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt > now;
     public bool IsPast(UtcDateTime now) => EndAt < now;
     public bool IsInProgress(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt <= now && EndAt > now;
+    public bool IsTerminal => Status is AppointmentStatus.Completed or AppointmentStatus.Canceled or AppointmentStatus.NoShow;
 
     private Appointment(
         int userId,
@@ -100,8 +101,7 @@ public class Appointment : HistoricEntity
 
     public void Reschedule(UtcDateTime startAt, IClock clock)
     {
-        EnsureActive();
-        EnsureNotTerminal();
+        EnsureMutable();
         EnsureStartIsAfterNow(startAt, clock);
 
         StartAt = startAt;
@@ -110,8 +110,7 @@ public class Appointment : HistoricEntity
 
     public void Cancel(IClock clock, string? reason = null)
     {
-        EnsureActive();
-        EnsureNotTerminal();
+        EnsureMutable();
 
         if (StartAt <= clock.Now)
             throw new InvariantException("Cannot cancel an ongoing appointment.");
@@ -153,8 +152,7 @@ public class Appointment : HistoricEntity
 
     public void AdjustPrice(Money newPrice, string reason, IClock clock)
     {
-        EnsureActive();
-        EnsureNotTerminal();
+        EnsureMutable();
 
         if (newPrice.Currency != Price.Currency)
             throw new InvariantException("Cannot change appointment currency.");
@@ -167,8 +165,7 @@ public class Appointment : HistoricEntity
 
     public void Reassign(int professionalId, IClock clock)
     {
-        EnsureActive();
-        EnsureNotTerminal();
+        EnsureMutable();
 
         if (StartAt <= clock.Now)
             throw new StateException("Cannot reassign an appointment that has already started.");
@@ -183,8 +180,7 @@ public class Appointment : HistoricEntity
 
     public void UpdateNotes(string? notes, IClock clock)
     {
-        EnsureActive();
-        EnsureNotTerminal();
+        EnsureMutable();
 
         Notes = Notes.From(notes);
 
@@ -198,20 +194,17 @@ public class Appointment : HistoricEntity
         if (end <= start)
             throw new ValidationException("Invalid time range.");
 
-        if (IsTerminal())
+        if (IsTerminal)
             return false;
 
         return start < EndAt && end > StartAt;
     }
 
-    private bool IsTerminal()
-        => Status is AppointmentStatus.Completed
-            or AppointmentStatus.Canceled
-            or AppointmentStatus.NoShow;
-
-    private void EnsureNotTerminal()
+    private void EnsureMutable()
     {
-        if (IsTerminal())
+        EnsureActive();
+
+        if (IsTerminal)
         {
             throw new StateException("Appointment cannot be modified.");
         }

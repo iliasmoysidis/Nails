@@ -10,8 +10,8 @@ public class Staff
     public int StoreId { get; private set; }
 
     private readonly List<StaffMember> _members = new();
-    public IEnumerable<StaffMember> Members
-        => _members.Where(m => m.IsActive);
+    public IReadOnlyCollection<StaffMember> Members
+        => _members.Where(m => m.IsActive).ToArray();
 
     private Staff() { }
 
