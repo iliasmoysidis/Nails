@@ -6,9 +6,6 @@ using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Appointments;
-using Domain.ValueObjects.Finance;
-using Domain.ValueObjects.Time;
-using Microsoft.VisualBasic;
 
 namespace Application.Commands.Appointments;
 
@@ -66,7 +63,7 @@ public sealed class ScheduleHandler
 
         var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
         var duration = offering.Duration;
-        var startAt = UtcDateTime.FromUtc(command.StartAt);
+        var startAt = command.StartAt;
         var endAt = startAt.Add(duration.Value);
 
         _val.EnsureAppointmentAvailable(

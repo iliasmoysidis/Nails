@@ -8,14 +8,14 @@ public sealed record Address
     public string Street { get; }
     public string City { get; }
     public string PostalCode { get; }
-    public string? State { get; }
+    public string State { get; }
     public string CountryCode { get; }
 
     private Address(
         string street,
         string city,
         string postalCode,
-        string? state,
+        string state,
         string countryCode)
     {
         Street = street;
@@ -29,7 +29,7 @@ public sealed record Address
         string street,
         string city,
         string postalCode,
-        string? state,
+        string state,
         string countryCode)
     {
         if (string.IsNullOrWhiteSpace(street))
@@ -41,6 +41,9 @@ public sealed record Address
         if (string.IsNullOrWhiteSpace(postalCode))
             throw new ValidationException("Postal code is required.");
 
+        if (string.IsNullOrWhiteSpace(street))
+            throw new ValidationException("State is required.");
+
         if (string.IsNullOrWhiteSpace(countryCode))
             throw new ValidationException("Country code is required.");
 
@@ -48,7 +51,7 @@ public sealed record Address
         city = city.Trim();
         postalCode = postalCode.Trim();
         countryCode = countryCode.Trim().ToUpperInvariant();
-        state = state?.Trim();
+        state = state.Trim();
 
         if (street.Length > 200)
             throw new ValidationException("Street cannot exceed 200 characters.");
@@ -62,7 +65,7 @@ public sealed record Address
         if (!Regex.IsMatch(countryCode, @"^[A-Z]{2}$"))
             throw new ValidationException("Country code must be a valid ISO-3166 alpha-2 code.");
 
-        if (state != null && state.Length > 100)
+        if (state.Length > 100)
             throw new ValidationException("State cannot exceed 100 characters.");
 
         return new Address(

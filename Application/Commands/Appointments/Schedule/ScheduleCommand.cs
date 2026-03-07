@@ -1,3 +1,5 @@
+using Domain.ValueObjects.Time;
+
 namespace Application.Commands.Appointments;
 
 public sealed record ScheduleCommand(
@@ -5,7 +7,7 @@ public sealed record ScheduleCommand(
     int ProfessionalId,
     int OfferingId,
     int StoreId,
-    DateTime StartAt,
+    UtcDateTime StartAt,
     string? Notes
 );
 
