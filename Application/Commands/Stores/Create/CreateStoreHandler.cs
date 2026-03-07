@@ -60,15 +60,15 @@ public sealed class CreateStoreHandler
             phone: phone,
             clock: _clock
         );
+        await _storeRepo.AddAsync(store, ct);
 
         var staff = Staff.Create(
             storeId: store.Id,
             professionalId: command.professionalId,
             clock: _clock
         );
-
-        await _storeRepo.AddAsync(store, ct);
         await _staffRepo.AddAsync(staff, ct);
+
         await _uow.SaveChangesAsync(ct);
 
         return store.Id;
