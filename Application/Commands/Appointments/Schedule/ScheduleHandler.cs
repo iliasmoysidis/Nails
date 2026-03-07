@@ -8,6 +8,7 @@ using Domain.Interfaces;
 using Domain.ValueObjects.Appointments;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Time;
+using Microsoft.VisualBasic;
 
 namespace Application.Commands.Appointments;
 
@@ -18,6 +19,8 @@ public sealed class ScheduleHandler
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
+    private readonly IStoreCatalogRepository _storeCatalogRepo;
+    private readonly IProfessionalOfferingsRepository _professionalOfferingRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
@@ -27,6 +30,8 @@ public sealed class ScheduleHandler
         IAppointmentRepository appointmentRepo,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
+        IStoreCatalogRepository storeCatalogRepo,
+        IProfessionalOfferingsRepository professionalOfferingsRepo,
         IClock clock,
         IUnitOfWork uow
     )
@@ -36,15 +41,19 @@ public sealed class ScheduleHandler
         _appointmentRepo = appointmentRepo;
         _storeCalendarRepo = storeCalendarRepo;
         _staffCalendarRepo = staffCalendarRepo;
+        _storeCatalogRepo = storeCatalogRepo;
+        _professionalOfferingRepo = professionalOfferingsRepo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task<int> Handle(ScheduleCommand command, CancellationToken ct)
     {
-        var duration = Duration.FromMinutes(command.Duration);
-        var startAt = UtcDateTime.FromUtc(command.StartAt);
-        var endAt = startAt.Add(duration.Value);
+        var storeCatalog = await _storeCatalogRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
+
+        var offering = storeCatalog.GetOffering(command.OfferingId)
+            ?? throw new ApplicationLayerNotFoundException("Offering not found.");
 
         var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
@@ -52,7 +61,13 @@ public sealed class ScheduleHandler
         var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional calendar not found.");
 
+        var assignments = await _professionalOfferingRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional offerings not found.");
+
         var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
+        var duration = offering.Duration;
+        var startAt = UtcDateTime.FromUtc(command.StartAt);
+        var endAt = startAt.Add(duration.Value);
 
         _val.EnsureAppointmentAvailable(
             storeCalendar,
@@ -60,6 +75,11 @@ public sealed class ScheduleHandler
             appointments,
             startAt,
             endAt
+        );
+        _val.EnsureProfessionalOffering(
+            assignments,
+            command.ProfessionalId,
+            command.OfferingId
         );
 
         _auth.EnsureUser();
@@ -72,7 +92,7 @@ public sealed class ScheduleHandler
             storeId: command.StoreId,
             startAt: startAt,
             duration: duration,
-            price: Money.Create(command.Price, command.Currency),
+            price: offering.Price,
             notes: Notes.From(command.Notes),
             clock: _clock
         );

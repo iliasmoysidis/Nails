@@ -83,6 +83,9 @@ public class StoreCatalog
         => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
             ?? throw new NotFoundException("Offering not found.");
 
+    public Offering? GetOffering(int offeringId)
+        => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted);
+
     private void EnsureNameIsUnique(OfferingName name, int? offeringId = null)
     {
         if (_offerings.Any(o =>

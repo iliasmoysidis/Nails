@@ -6,9 +6,6 @@ public sealed record ScheduleCommand(
     int OfferingId,
     int StoreId,
     DateTime StartAt,
-    int Duration,
-    decimal Price,
-    string Currency,
     string? Notes
 );
 
