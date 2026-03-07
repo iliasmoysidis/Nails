@@ -62,6 +62,8 @@ public sealed class CreateStoreHandler
         );
         await _storeRepo.AddAsync(store, ct);
 
+        await _uow.SaveChangesAsync(ct);
+
         var staff = Staff.Create(
             storeId: store.Id,
             professionalId: command.professionalId,
