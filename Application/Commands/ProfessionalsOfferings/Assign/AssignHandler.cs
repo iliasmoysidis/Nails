@@ -1,25 +1,25 @@
-using Application.Abstractions.Policies.ProfessionalOfferings;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Guards;
 using Application.Exceptions;
 
 namespace Application.Commands.ProfessionalOfferings;
 
 public sealed class AssignHandler
 {
-    private readonly IAssignOfferingPolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IProfessionalOfferingsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
     public AssignHandler(
-        IAssignOfferingPolicy policy,
+        AuthorizationGuard auth,
         IProfessionalOfferingsRepository assignmentsRepo,
         IStaffRepository staffRepo,
         IUnitOfWork uow
     )
     {
-        _policy = policy;
+        _auth = auth;
         _assignmentsRepo = assignmentsRepo;
         _staffRepo = staffRepo;
         _uow = uow;
@@ -27,10 +27,10 @@ public sealed class AssignHandler
 
     public async Task Handle(AssignCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _policy.EnsureCanAssignOffering(staff);
+        _auth.EnsureOwner(staff);
 
         var professionalOfferings = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional offerings not found.");

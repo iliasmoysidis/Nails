@@ -1,6 +1,7 @@
 namespace Application.Commands.Stores;
 
 public sealed record CreateStoreCommand(
+    int professionalId,
     string Name,
     string Street,
     string City,

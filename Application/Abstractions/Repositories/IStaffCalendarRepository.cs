@@ -6,7 +6,7 @@ public interface IStaffCalendarRepository
 {
     Task<StaffCalendar?> GetAsync(int storeId, int professionalId, CancellationToken ct);
 
-    Task<IReadOnlyCollection<StaffCalendar>> GetByStoreId(int storeId, CancellationToken ct);
+    Task<IReadOnlyCollection<StaffCalendar>> GetByStoreIdAsync(int storeId, CancellationToken ct);
 
     Task RemoveProfessionalAsync(int storeId, int professionalId, CancellationToken ct);
 

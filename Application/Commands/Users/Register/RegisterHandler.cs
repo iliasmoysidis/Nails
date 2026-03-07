@@ -51,27 +51,4 @@ public sealed class RegisterHandler
 
         return user.Id;
     }
-
-    private User CreateUser(RegisterCommand command)
-    {
-        var fullName = FullName.From(
-            firstName: command.FirstName,
-            lastName: command.LastName
-        );
-
-        var email = Email.From(command.Email);
-
-        var phone = Phone.From(
-            countryCode: command.PhoneCountryCode,
-            nationalNumber: command.PhoneNumber);
-
-        var user = User.Create(
-            fullName: fullName,
-            email: email,
-            phone: phone,
-            clock: _clock
-        );
-
-        return user;
-    }
 }

@@ -1,6 +1,6 @@
-using Application.Abstractions.Policies.Professionals;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
@@ -9,19 +9,19 @@ namespace Application.Commands.Professionals;
 
 public sealed class UpdateProfileHandler
 {
-    private readonly IManageProfessionalPolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IProfessionalRepository _repo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateProfileHandler(
-        IManageProfessionalPolicy policy,
+        AuthorizationGuard auth,
         IProfessionalRepository repo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _policy = policy;
+        _auth = auth;
         _repo = repo;
         _clock = clock;
         _uow = uow;
@@ -29,7 +29,8 @@ public sealed class UpdateProfileHandler
 
     public async Task Handle(UpdateProfileCommand command, CancellationToken ct)
     {
-        await _policy.EnsureCanManageAsync(command.ProfessionalId, ct);
+        _auth.EnsureProfessional();
+        _auth.EnsureSelf(command.ProfessionalId);
 
         var professional = await _repo.GetByIdAsync(command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional not found.");

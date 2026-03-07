@@ -1,7 +1,6 @@
-using Application.Abstractions.Policies.Professionals;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
-using Application.Contexts;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.Exceptions;
 using Domain.Interfaces;
@@ -10,8 +9,7 @@ namespace Application.Commands.Professionals;
 
 public sealed class LeaveStoreHandler
 {
-    private readonly IRequestContext _context;
-    private readonly ILeaveStorePolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IProfessionalExitService _service;
     private readonly IStaffRepository _staffRepo;
     private readonly IProfessionalOfferingsRepository _assignmentsRepo;
@@ -21,8 +19,7 @@ public sealed class LeaveStoreHandler
     private readonly IUnitOfWork _uow;
 
     public LeaveStoreHandler(
-        IRequestContext context,
-        ILeaveStorePolicy policy,
+        AuthorizationGuard auth,
         IProfessionalExitService service,
         IStaffRepository staffRepo,
         IProfessionalOfferingsRepository assignmentsRepo,
@@ -32,8 +29,7 @@ public sealed class LeaveStoreHandler
         IUnitOfWork uow
     )
     {
-        _context = context;
-        _policy = policy;
+        _auth = auth;
         _service = service;
         _staffRepo = staffRepo;
         _assignmentsRepo = assignmentsRepo;
@@ -45,14 +41,16 @@ public sealed class LeaveStoreHandler
 
     public async Task Handle(LeaveStoreCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _policy.EnsureCanLeave(staff);
+        _auth.EnsureProfessional();
+        _auth.EnsureSelf(command.ProfessionalId);
+        _auth.EnsureStaffMember(staff);
 
         var upcoming = await _appointmentRepo.GetUpcomingByStoreIdAndProfessionalId(
             storeId: command.StoreId,
-            professionalId: _context.ActorId,
+            professionalId: command.ProfessionalId,
             ct: ct
         );
 
@@ -64,7 +62,7 @@ public sealed class LeaveStoreHandler
                 staff,
                 assignments,
                 upcoming,
-                _context.ActorId,
+                command.ProfessionalId,
                 _clock
             );
         }
@@ -73,7 +71,7 @@ public sealed class LeaveStoreHandler
             throw new ApplicationLayerValidationException(ex.Message);
         }
 
-        await _calendarRepo.RemoveProfessionalAsync(command.StoreId, _context.ActorId, ct);
+        await _calendarRepo.RemoveProfessionalAsync(command.StoreId, command.ProfessionalId, ct);
 
         await _uow.SaveChangesAsync(ct);
     }

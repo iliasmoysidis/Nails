@@ -1,6 +1,6 @@
-using Application.Abstractions.Policies.Stores;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
@@ -10,21 +10,21 @@ namespace Application.Commands.Stores;
 
 public sealed class UpdateDetailsHandler
 {
-    private readonly IManageStorePolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateDetailsHandler(
-        IManageStorePolicy policy,
+        AuthorizationGuard auth,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _policy = policy;
+        _auth = auth;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _clock = clock;
@@ -33,36 +33,54 @@ public sealed class UpdateDetailsHandler
 
     public async Task Handle(UpdateDetailsCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _policy.EnsureCanManage(staff);
+        _auth.EnsureOwner(staff);
 
         var store = await _storeRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 
         store.UpdateDetails(
             clock: _clock,
-            name: command.Name is null
-                ? null
-                : StoreName.Create(command.Name),
-            address: command.Street is null
-                ? null
-                : Address.From(
-                    street: command.Street,
-                    city: command.City!,
-                    postalCode: command.PostalCode!,
-                    state: command.State!,
-                    countryCode: command.CountryCode!
+            name: ToName(command.Name),
+            address: ToAddress(
+                command.Street,
+                command.City,
+                command.PostalCode,
+                command.State,
+                command.CountryCode
                 ),
-            phone: command.PhoneCountryCode is null
-                ? null
-                : Phone.From(
-                    countryCode: command.PhoneCountryCode,
-                    nationalNumber: command.PhoneNumber!
-                )
+            phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
         );
 
         await _uow.SaveChangesAsync(ct);
     }
+
+    private static StoreName? ToName(string? name)
+        => name is null ? null : StoreName.Create(name);
+
+    private static Address? ToAddress(
+        string? street,
+        string? city,
+        string? postalCode,
+        string? state,
+        string? countryCode
+    )
+        => (street is null ||
+            city is null ||
+            postalCode is null ||
+            state is null ||
+            countryCode is null)
+            ? null
+            : Address.From(
+                    street: street,
+                    city: city,
+                    postalCode: postalCode,
+                    state: state,
+                    countryCode: countryCode
+            );
+
+    private static Phone? ToPhone(string? code, string? number)
+        => code is null || number is null ? null : Phone.From(code, number);
 }

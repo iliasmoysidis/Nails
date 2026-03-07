@@ -1,8 +1,7 @@
 
-using Application.Abstractions.Policies.Appointments;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
-using Application.Abstractions.Validation.Appointments;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -14,8 +13,8 @@ namespace Application.Commands.Appointments;
 
 public sealed class ScheduleHandler
 {
-    private readonly IScheduleValidator _validator;
-    private readonly ISchedulePolicy _policy;
+    private readonly ValidationGuard _val;
+    private readonly AuthorizationGuard _auth;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
@@ -23,18 +22,17 @@ public sealed class ScheduleHandler
     private readonly IUnitOfWork _uow;
 
     public ScheduleHandler(
-        IScheduleValidator validator,
-        ISchedulePolicy policy,
+        ValidationGuard val,
+        AuthorizationGuard auth,
         IAppointmentRepository appointmentRepo,
-        IStaffRepository staffRepo,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _validator = validator;
-        _policy = policy;
+        _val = val;
+        _auth = auth;
         _appointmentRepo = appointmentRepo;
         _storeCalendarRepo = storeCalendarRepo;
         _staffCalendarRepo = staffCalendarRepo;
@@ -48,6 +46,25 @@ public sealed class ScheduleHandler
         var startAt = UtcDateTime.FromUtc(command.StartAt);
         var endAt = startAt.Add(duration.Value);
 
+        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
+
+        var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional calendar not found.");
+
+        var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
+
+        _val.EnsureAppointmentAvailable(
+            storeCalendar,
+            staffCalendar,
+            appointments,
+            startAt,
+            endAt
+        );
+
+        _auth.EnsureUser();
+        _auth.EnsureSelf(command.UserId);
+
         var appointment = Appointment.Create(
             userId: command.UserId,
             professionalId: command.ProfessionalId,
@@ -59,24 +76,6 @@ public sealed class ScheduleHandler
             notes: Notes.From(command.Notes),
             clock: _clock
         );
-
-        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
-
-        var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Professional calendar not found.");
-
-        var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
-
-        _validator.EnsureAvailable(
-            storeCalendar,
-            staffCalendar,
-            appointments,
-            startAt,
-            endAt
-        );
-
-        _policy.EnsureCanCreate(appointment);
 
         await _appointmentRepo.AddAsync(appointment, ct);
 

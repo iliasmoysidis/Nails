@@ -1,6 +1,6 @@
-using Application.Abstractions.Policies.Staffs;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.ValueObjects.Calendar;
 
@@ -8,19 +8,19 @@ namespace Application.Commands.StaffCalendars;
 
 public sealed class AddVacationHandler
 {
-    private readonly IManageStaffPolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
     public AddVacationHandler(
-        IManageStaffPolicy policy,
+        AuthorizationGuard auth,
         IStaffCalendarRepository staffCalendarRepo,
         IStaffRepository staffRepo,
         IUnitOfWork uow
     )
     {
-        _policy = policy;
+        _auth = auth;
         _staffCalendarRepo = staffCalendarRepo;
         _staffRepo = staffRepo;
         _uow = uow;
@@ -28,10 +28,10 @@ public sealed class AddVacationHandler
 
     public async Task Handle(AddVacationCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _policy.EnsureCanManageStaff(staff);
+        _auth.EnsureOwner(staff);
 
         var calendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");

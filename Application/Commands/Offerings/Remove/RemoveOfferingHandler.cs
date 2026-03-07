@@ -1,6 +1,6 @@
-using Application.Abstractions.Policies.Offerings;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
 
@@ -8,7 +8,7 @@ namespace Application.Commands.Offerings;
 
 public sealed class RemoveOfferingHandler
 {
-    private readonly IManageOfferingPolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IStoreCatalogRepository _catalogRepo;
     private readonly IProfessionalOfferingsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
@@ -16,7 +16,7 @@ public sealed class RemoveOfferingHandler
     private readonly IUnitOfWork _uow;
 
     public RemoveOfferingHandler(
-        IManageOfferingPolicy policy,
+        AuthorizationGuard auth,
         IProfessionalOfferingsRepository assignmentsRepo,
         IStoreCatalogRepository catalogRepo,
         IStaffRepository staffRepo,
@@ -24,7 +24,7 @@ public sealed class RemoveOfferingHandler
         IUnitOfWork uow
     )
     {
-        _policy = policy;
+        _auth = auth;
         _catalogRepo = catalogRepo;
         _assignmentsRepo = assignmentsRepo;
         _staffRepo = staffRepo;
@@ -34,10 +34,10 @@ public sealed class RemoveOfferingHandler
 
     public async Task Handle(RemoveOfferingCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not foud.");
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _policy.EnsureCanManage(staff);
+        _auth.EnsureOwner(staff);
 
         var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");

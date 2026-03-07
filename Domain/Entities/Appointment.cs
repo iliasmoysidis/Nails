@@ -99,15 +99,6 @@ public class Appointment : HistoricEntity
         MarkAsUpdated(clock);
     }
 
-    public void Reschedule(UtcDateTime startAt, IClock clock)
-    {
-        EnsureMutable();
-        EnsureStartIsAfterNow(startAt, clock);
-
-        StartAt = startAt;
-        MarkAsUpdated(clock);
-    }
-
     public void Cancel(IClock clock, string? reason = null)
     {
         EnsureMutable();
@@ -159,30 +150,6 @@ public class Appointment : HistoricEntity
 
         Price = newPrice;
         Notes = Notes.Append("Price adjusted", $"{newPrice}. {reason}");
-
-        MarkAsUpdated(clock);
-    }
-
-    public void Reassign(int professionalId, IClock clock)
-    {
-        EnsureMutable();
-
-        if (StartAt <= clock.Now)
-            throw new StateException("Cannot reassign an appointment that has already started.");
-
-        if (ProfessionalId == professionalId)
-            throw new InvariantException("Appointment is already assigned to this professional.");
-
-        ProfessionalId = professionalId;
-
-        MarkAsUpdated(clock);
-    }
-
-    public void UpdateNotes(string? notes, IClock clock)
-    {
-        EnsureMutable();
-
-        Notes = Notes.From(notes);
 
         MarkAsUpdated(clock);
     }

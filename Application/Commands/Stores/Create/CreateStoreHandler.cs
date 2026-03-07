@@ -1,7 +1,6 @@
-using Application.Abstractions.Policies.Stores;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
-using Application.Contexts;
+using Application.Guards;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
@@ -11,24 +10,21 @@ namespace Application.Commands.Stores;
 
 public sealed class CreateStoreHandler
 {
-    private readonly IRequestContext _context;
-    private readonly ICreateStorePolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public CreateStoreHandler(
-        IRequestContext context,
-        ICreateStorePolicy policy,
+        AuthorizationGuard auth,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _context = context;
-        _policy = policy;
+        _auth = auth;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _clock = clock;
@@ -37,7 +33,8 @@ public sealed class CreateStoreHandler
 
     public async Task<int> Handle(CreateStoreCommand command, CancellationToken ct)
     {
-        _policy.EnsureCanCreate();
+        _auth.EnsureProfessional();
+        _auth.EnsureSelf(command.professionalId);
 
         var address = Address.From(
                 street: command.Street,
@@ -66,7 +63,7 @@ public sealed class CreateStoreHandler
 
         var staff = Staff.Create(
             storeId: store.Id,
-            professionalId: _context.ActorId,
+            professionalId: command.professionalId,
             clock: _clock
         );
 

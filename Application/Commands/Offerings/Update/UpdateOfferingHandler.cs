@@ -1,6 +1,6 @@
-using Application.Abstractions.Policies.Offerings;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.UnitOfWork;
+using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
@@ -11,21 +11,21 @@ namespace Application.Commands.Offerings;
 
 public sealed class UpdateOfferingHandler
 {
-    private readonly IManageOfferingPolicy _policy;
+    private readonly AuthorizationGuard _auth;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public UpdateOfferingHandler(
-        IManageOfferingPolicy policy,
+        AuthorizationGuard auth,
         IStoreCatalogRepository storeCatalogRepo,
         IStaffRepository staffRepo,
         IClock clock,
         IUnitOfWork uow
     )
     {
-        _policy = policy;
+        _auth = auth;
         _storeCatalogRepo = storeCatalogRepo;
         _staffRepo = staffRepo;
         _clock = clock;
@@ -34,10 +34,10 @@ public sealed class UpdateOfferingHandler
 
     public async Task Handle(UpdateOfferingCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreId(command.StoreId, ct)
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _policy.EnsureCanManage(staff);
+        _auth.EnsureOwner(staff);
 
         var catalog = await _storeCatalogRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
