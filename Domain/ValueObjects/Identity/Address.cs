@@ -41,7 +41,7 @@ public sealed record Address
         if (string.IsNullOrWhiteSpace(postalCode))
             throw new ValidationException("Postal code is required.");
 
-        if (string.IsNullOrWhiteSpace(street))
+        if (string.IsNullOrWhiteSpace(state))
             throw new ValidationException("State is required.");
 
         if (string.IsNullOrWhiteSpace(countryCode))

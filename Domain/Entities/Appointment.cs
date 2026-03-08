@@ -87,10 +87,7 @@ public class Appointment : HistoricEntity
     public void Confirm(IClock clock)
     {
         EnsureActive();
-
-        if (Status != AppointmentStatus.PendingConfirmation)
-            throw new StateException(
-                $"Cannot confirm appointment. Current status is {Status}.");
+        EnsureStatus(AppointmentStatus.PendingConfirmation);
 
         if (StartAt <= clock.Now)
             throw new InvariantException("Cannot confirm appointments in the past.");
@@ -116,9 +113,7 @@ public class Appointment : HistoricEntity
     public void Complete(IClock clock)
     {
         EnsureActive();
-
-        if (Status != AppointmentStatus.Confirmed)
-            throw new StateException($"Cannot complete appointment. Current status is {Status}. Only confirmed appointments can be completed.");
+        EnsureStatus(AppointmentStatus.Confirmed);
 
         if (clock.Now < EndAt)
             throw new InvariantException("Cannot complete appointment before its end time.");
@@ -130,9 +125,7 @@ public class Appointment : HistoricEntity
     public void MarkAsNoShow(IClock clock)
     {
         EnsureActive();
-
-        if (Status != AppointmentStatus.Confirmed)
-            throw new StateException($"Cannot mark as no-show. Current status is {Status}. Only confirmed appointments can be marked as no-show.");
+        EnsureStatus(AppointmentStatus.Confirmed);
 
         if (clock.Now < StartAt)
             throw new InvariantException("Cannot mark as no-show before appointment start time.");
@@ -181,5 +174,11 @@ public class Appointment : HistoricEntity
     {
         if (startAt <= clock.Now)
             throw new ValidationException("Appointment start time must be in the future.");
+    }
+
+    private void EnsureStatus(AppointmentStatus expected)
+    {
+        if (Status != expected)
+            throw new StateException($"Invalid transition from {Status}.");
     }
 }
