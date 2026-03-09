@@ -68,7 +68,7 @@ public sealed class ValidationGuard
         }
     }
 
-    public void EnsureProfessionalOffering(ProfessionalOfferings professionalOfferings, int professionalId, int offeringId)
+    public void EnsureProfessionalOffersService(ProfessionalOfferings professionalOfferings, int professionalId, int offeringId)
     {
         if (!professionalOfferings.IsAssigned(professionalId, offeringId))
             throw new ApplicationLayerValidationException("Professional does not offer this service.");

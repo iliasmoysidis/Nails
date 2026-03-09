@@ -1,0 +1,9 @@
+using Application.DTO.Finance;
+
+namespace Application.Commands.Appointments;
+
+public sealed record AdjustAppointmentPriceCommand(
+    int AppointmentId,
+    MoneyDTO Money,
+    string Reason
+);
