@@ -80,9 +80,15 @@ public sealed class ValidationGuard
             throw new ApplicationLayerValidationException("Professional does not work for the store.");
     }
 
-    public void EnsureStoreOffering(StoreCatalog catalog, int offeringId)
+    public void EnsureStoreOffersService(StoreCatalog catalog, int offeringId)
     {
-        if (catalog.GetOffering(offeringId) is null)
-            throw new ApplicationLayerValidationException("Store does not offer this service.");
+        try
+        {
+            catalog.GetOffering(offeringId);
+        }
+        catch (DomainException ex)
+        {
+            throw new ApplicationLayerValidationException(ex.Message);
+        }
     }
 }

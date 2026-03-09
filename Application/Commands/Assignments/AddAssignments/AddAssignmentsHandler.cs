@@ -42,7 +42,7 @@ public sealed class AddAssignmentsHandler
         _val.EnsureProfessionalWorksForStore(staff, command.ProfessionalId);
         foreach (var offeringId in command.OfferingIds)
         {
-            _val.EnsureStoreOffering(catalog, offeringId);
+            _val.EnsureStoreOffersService(catalog, offeringId);
         }
 
         _auth.EnsureOwner(staff);
