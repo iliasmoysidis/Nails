@@ -39,7 +39,7 @@ public sealed class UpdateOfferingHandler
 
         _auth.EnsureOwner(staff);
 
-        var catalog = await _storeCatalogRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var catalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
 
         var offering = catalog.GetOfferingOrThrow(command.OfferingId);

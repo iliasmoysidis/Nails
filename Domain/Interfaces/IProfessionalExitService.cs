@@ -6,7 +6,7 @@ public interface IProfessionalExitService
 {
     void LeaveStore(
         Staff staff,
-        ProfessionalOfferings? assignments,
+        Assignments? assignments,
         IReadOnlyCollection<Appointment> upcomingAppointments,
         int professionalId,
         IClock clock

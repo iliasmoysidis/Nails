@@ -4,5 +4,5 @@ namespace Application.Abstractions.Repositories;
 
 public interface IStoreCatalogRepository
 {
-    Task<StoreCatalog?> GetByStoreIdAsync(int storeId, CancellationToken ct);
+    Task<StoreCatalog?> GetByIdAsync(int storeId, CancellationToken ct);
 }

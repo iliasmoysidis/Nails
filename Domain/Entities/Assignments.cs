@@ -3,33 +3,33 @@ using Domain.ValueObjects.Offerings;
 
 namespace Domain.Entities;
 
-public class ProfessionalOfferings
+public class Assignments
 {
     public int StoreId { get; }
 
-    private readonly HashSet<ProfessionalOffering> _assignments = new();
+    private readonly HashSet<Assignment> _assignments = new();
 
-    private ProfessionalOfferings() { }
+    private Assignments() { }
 
-    private ProfessionalOfferings(int storeId)
+    private Assignments(int storeId)
     {
         StoreId = storeId;
     }
 
-    public static ProfessionalOfferings Create(int storeId)
+    public static Assignments Create(int storeId)
         => new(storeId);
 
-    public void Assign(int professionalId, int offeringId)
+    public void Add(int professionalId, int offeringId)
     {
-        var assignment = new ProfessionalOffering(professionalId, offeringId);
+        var assignment = new Assignment(professionalId, offeringId);
 
         if (!_assignments.Add(assignment))
             throw new InvariantException("Offering is already assigned to this professional.");
     }
 
-    public void Unassign(int professionalId, int offeringId)
+    public void Remove(int professionalId, int offeringId)
     {
-        var assignment = new ProfessionalOffering(professionalId, offeringId);
+        var assignment = new Assignment(professionalId, offeringId);
 
         if (!_assignments.Remove(assignment))
             throw new InvariantException("Offering is not assigned to the professional.");
@@ -40,10 +40,10 @@ public class ProfessionalOfferings
         _assignments.Clear();
     }
 
-    public void UnassignAllForOffering(int offeringId)
+    public void RemoveOfferingAssignments(int offeringId)
         => _assignments.RemoveWhere(a => a.OfferingId == offeringId);
 
-    public void UnassignAllForProfessional(int professionalId)
+    public void RemoveProfessionalAssignments(int professionalId)
         => _assignments.RemoveWhere(a => a.ProfessionalId == professionalId);
 
     public bool IsAssigned(int professionalId, int offeringId)

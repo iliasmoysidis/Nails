@@ -12,7 +12,7 @@ public sealed class LeaveProfessionalStoreHandler
     private readonly AuthorizationGuard _auth;
     private readonly IProfessionalExitService _service;
     private readonly IStaffRepository _staffRepo;
-    private readonly IProfessionalOfferingsRepository _assignmentsRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStaffCalendarRepository _calendarRepo;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IClock _clock;
@@ -22,7 +22,7 @@ public sealed class LeaveProfessionalStoreHandler
         AuthorizationGuard auth,
         IProfessionalExitService service,
         IStaffRepository staffRepo,
-        IProfessionalOfferingsRepository assignmentsRepo,
+        IAssignmentsRepository assignmentsRepo,
         IStaffCalendarRepository calendarRepo,
         IAppointmentRepository appointmentRepo,
         IClock clock,

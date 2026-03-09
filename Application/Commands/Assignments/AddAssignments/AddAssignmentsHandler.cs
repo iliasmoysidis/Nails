@@ -3,18 +3,18 @@ using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 
-namespace Application.Commands.ProfessionalOfferings;
+namespace Application.Commands.Assignments;
 
-public sealed class AssignProfessionalOfferingsHandler
+public sealed class AddAssignmentsHandler
 {
     private readonly AuthorizationGuard _auth;
-    private readonly IProfessionalOfferingsRepository _assignmentsRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
-    public AssignProfessionalOfferingsHandler(
+    public AddAssignmentsHandler(
         AuthorizationGuard auth,
-        IProfessionalOfferingsRepository assignmentsRepo,
+        IAssignmentsRepository assignmentsRepo,
         IStaffRepository staffRepo,
         IUnitOfWork uow
     )
@@ -25,19 +25,19 @@ public sealed class AssignProfessionalOfferingsHandler
         _uow = uow;
     }
 
-    public async Task Handle(AssignProfessionalOfferingsCommand command, CancellationToken ct)
+    public async Task Handle(AddAssignmentsCommand command, CancellationToken ct)
     {
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         _auth.EnsureOwner(staff);
 
-        var professionalOfferings = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional offerings not found.");
 
         foreach (var offeringId in command.OfferingIds)
         {
-            professionalOfferings.Assign(command.ProfessionalId, offeringId);
+            assignments.Add(command.ProfessionalId, offeringId);
         }
 
         await _uow.SaveChangesAsync(ct);

@@ -13,7 +13,7 @@ public sealed class CloseStoreHandler
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCatalogRepository _catalogRepo;
-    private readonly IProfessionalOfferingsRepository _assignmentsRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IAppointmentRepository _appointmentRepo;
@@ -27,7 +27,7 @@ public sealed class CloseStoreHandler
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IStoreCatalogRepository catalogRepo,
-        IProfessionalOfferingsRepository assignmentsRepo,
+        IAssignmentsRepository assignmentsRepo,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
         IAppointmentRepository appointmentRepo,
@@ -55,14 +55,14 @@ public sealed class CloseStoreHandler
 
         _auth.EnsureOwner(staff);
 
-        var store = await _storeRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 
-        var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct);
+        var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct);
 
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
 
-        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct);
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct);
 
         var staffCalendars =
             await _staffCalendarRepo.GetByStoreIdAsync(command.StoreId, ct);

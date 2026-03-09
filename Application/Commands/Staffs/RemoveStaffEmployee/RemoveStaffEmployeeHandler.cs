@@ -10,14 +10,14 @@ public sealed class RemoveStaffEmployeeHandler
 {
     private readonly AuthorizationGuard _auth;
     private readonly IStaffRepository _staffRepo;
-    private readonly IProfessionalOfferingsRepository _assignmentsRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public RemoveStaffEmployeeHandler(
         AuthorizationGuard auth,
         IStaffRepository staffRepo,
-        IProfessionalOfferingsRepository assignmentsRepo,
+        IAssignmentsRepository assignmentsRepo,
         IClock clock,
         IUnitOfWork uow
     )
@@ -39,7 +39,7 @@ public sealed class RemoveStaffEmployeeHandler
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Professional offerings not found for store {command.StoreId}.");
 
-        assignments.UnassignAllForProfessional(command.ProfessionalId);
+        assignments.RemoveProfessionalAssignments(command.ProfessionalId);
 
         staff.RemoveEmployee(command.ProfessionalId, _clock);
 

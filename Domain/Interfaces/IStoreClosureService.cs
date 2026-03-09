@@ -8,7 +8,7 @@ public interface IStoreClosureService
         Store store,
         Staff staff,
         StoreCatalog? catalog,
-        ProfessionalOfferings? assignments,
+        Assignments? assignments,
         StoreCalendar? storeCalendar,
         IReadOnlyCollection<StaffCalendar> staffCalendars,
         IReadOnlyCollection<Appointment> upcomingAppointments,

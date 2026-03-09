@@ -3,18 +3,18 @@ using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 
-namespace Application.Commands.ProfessionalOfferings;
+namespace Application.Commands.Assignments;
 
-public sealed class UnassignProfessionalOfferingsHandler
+public sealed class RemoveAssignmentsHandler
 {
     private readonly AuthorizationGuard _auth;
-    private readonly IProfessionalOfferingsRepository _professionalRepo;
+    private readonly IAssignmentsRepository _professionalRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IUnitOfWork _uow;
 
-    public UnassignProfessionalOfferingsHandler(
+    public RemoveAssignmentsHandler(
         AuthorizationGuard auth,
-        IProfessionalOfferingsRepository professionalRepo,
+        IAssignmentsRepository professionalRepo,
         IStaffRepository staffRepo,
         IUnitOfWork uow
     )
@@ -25,19 +25,19 @@ public sealed class UnassignProfessionalOfferingsHandler
         _uow = uow;
     }
 
-    public async Task Handle(UnassignProfessionalOfferingsCommand command, CancellationToken ct)
+    public async Task Handle(RemoveAssignmentsCommand command, CancellationToken ct)
     {
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
         _auth.EnsureOwner(staff);
 
-        var professionalOfferings = await _professionalRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _professionalRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional offerings not found.");
 
         foreach (var offeringId in command.OfferingIds)
         {
-            professionalOfferings.Unassign(command.ProfessionalId, offeringId);
+            assignments.Remove(command.ProfessionalId, offeringId);
         }
 
         await _uow.SaveChangesAsync(ct);

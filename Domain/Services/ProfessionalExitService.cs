@@ -7,7 +7,7 @@ public sealed class ProfessionalExitService : IProfessionalExitService
 {
     public void LeaveStore(
         Staff staff,
-        ProfessionalOfferings? assignments,
+        Assignments? assignments,
         IReadOnlyCollection<Appointment> upcomingAppointments,
         int professionalId,
         IClock clock)
@@ -19,7 +19,7 @@ public sealed class ProfessionalExitService : IProfessionalExitService
             appointment.Cancel(clock, "Professional left the store.");
         }
 
-        assignments?.UnassignAllForProfessional(professionalId);
+        assignments?.RemoveProfessionalAssignments(professionalId);
 
         staff.RemoveFromStaff(professionalId, clock);
     }

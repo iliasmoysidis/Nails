@@ -38,7 +38,7 @@ public sealed class UpdateStoreHandler
 
         _auth.EnsureOwner(staff);
 
-        var store = await _storeRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 
         store.UpdateDetails(

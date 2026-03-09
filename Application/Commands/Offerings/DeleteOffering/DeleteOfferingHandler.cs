@@ -10,14 +10,14 @@ public sealed class DeleteOfferingHandler
 {
     private readonly AuthorizationGuard _auth;
     private readonly IStoreCatalogRepository _catalogRepo;
-    private readonly IProfessionalOfferingsRepository _assignmentsRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
     public DeleteOfferingHandler(
         AuthorizationGuard auth,
-        IProfessionalOfferingsRepository assignmentsRepo,
+        IAssignmentsRepository assignmentsRepo,
         IStoreCatalogRepository catalogRepo,
         IStaffRepository staffRepo,
         IClock clock,
@@ -39,13 +39,13 @@ public sealed class DeleteOfferingHandler
 
         _auth.EnsureOwner(staff);
 
-        var catalog = await _catalogRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
 
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Professional offerings not found for store {command.StoreId}.");
 
-        assignments.UnassignAllForOffering(command.OfferingId);
+        assignments.RemoveOfferingAssignments(command.OfferingId);
 
         catalog.RemoveOffering(command.OfferingId, _clock);
 

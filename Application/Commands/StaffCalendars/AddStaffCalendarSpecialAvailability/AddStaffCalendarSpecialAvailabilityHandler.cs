@@ -34,7 +34,7 @@ public sealed class AddStaffCalendarSpecialAvailabilityHandler
 
     public async Task Handle(AddStaffCalendarSpecialAvailabilityCommand command, CancellationToken ct)
     {
-        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
 
         var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)

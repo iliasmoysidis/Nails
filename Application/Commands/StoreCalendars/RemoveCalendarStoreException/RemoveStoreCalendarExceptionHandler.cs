@@ -32,7 +32,7 @@ public sealed class RemoveStoreCalendarExceptionHandler
 
         _auth.EnsureOwner(staff);
 
-        var calendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var calendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found");
 
         calendar.RemoveException(command.Date);

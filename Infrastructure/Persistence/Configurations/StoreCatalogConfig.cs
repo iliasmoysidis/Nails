@@ -24,7 +24,7 @@ public sealed class StoreCatalogConfig : IEntityTypeConfiguration<StoreCatalog>
         builder.Navigation("_offerings")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.OwnsMany<ProfessionalOffering>("_serviceOfferings", so =>
+        builder.OwnsMany<Assignment>("_serviceOfferings", so =>
         {
             so.ToTable("service_offerings");
 
@@ -35,8 +35,8 @@ public sealed class StoreCatalogConfig : IEntityTypeConfiguration<StoreCatalog>
 
             so.HasKey(
                 "StoreId",
-                nameof(ProfessionalOffering.ProfessionalId),
-                nameof(ProfessionalOffering.OfferingId)
+                nameof(Assignment.ProfessionalId),
+                nameof(Assignment.OfferingId)
             );
 
             so.Property(x => x.ProfessionalId)

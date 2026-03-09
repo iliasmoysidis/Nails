@@ -17,7 +17,7 @@ public sealed class CreateAppointmentHandler
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
-    private readonly IProfessionalOfferingsRepository _professionalOfferingRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
@@ -28,7 +28,7 @@ public sealed class CreateAppointmentHandler
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
         IStoreCatalogRepository storeCatalogRepo,
-        IProfessionalOfferingsRepository professionalOfferingsRepo,
+        IAssignmentsRepository assignmentsRepo,
         IClock clock,
         IUnitOfWork uow
     )
@@ -39,26 +39,26 @@ public sealed class CreateAppointmentHandler
         _storeCalendarRepo = storeCalendarRepo;
         _staffCalendarRepo = staffCalendarRepo;
         _storeCatalogRepo = storeCatalogRepo;
-        _professionalOfferingRepo = professionalOfferingsRepo;
+        _assignmentsRepo = assignmentsRepo;
         _clock = clock;
         _uow = uow;
     }
 
     public async Task<int> Handle(CreateAppointmentCommand command, CancellationToken ct)
     {
-        var storeCatalog = await _storeCatalogRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var storeCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
 
         var offering = storeCatalog.GetOffering(command.OfferingId)
             ?? throw new ApplicationLayerNotFoundException("Offering not found.");
 
-        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
 
         var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional calendar not found.");
 
-        var assignments = await _professionalOfferingRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional offerings not found.");
 
         var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);

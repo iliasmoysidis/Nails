@@ -41,7 +41,7 @@ public sealed class SetStaffCalendarWorkingDayHandler
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var storeCalendar = await _storeCalendarRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
 
         _val.EnsureWorkingDayFitsStoreHours(storeCalendar, workingDay);
