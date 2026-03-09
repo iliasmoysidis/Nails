@@ -1,4 +1,5 @@
 using Application.Contexts;
+using Application.DTO.Appointment;
 using Application.Exceptions;
 using Domain.Entities;
 
@@ -51,10 +52,24 @@ public sealed class AuthorizationGuard
         if (_context.IsUser && ActorId == appointment.UserId)
             return;
 
-        if (_context.IsProfessional && staff.IsStaff(ActorId))
+        if (_context.IsProfessional && staff.IsOwner(ActorId))
             return;
 
         throw Forbidden("Not allowed to modify appointment.");
+    }
+
+    public void EnsureCanViewAppointment(AppointmentDetailsDTO appointment, Staff staff)
+    {
+        if (_context.IsUser && ActorId == appointment.UserId)
+            return;
+
+        if (_context.IsProfessional && staff.IsOwner(ActorId))
+            return;
+
+        if (_context.IsProfessional && ActorId == appointment.ProfessionalId)
+            return;
+
+        throw Forbidden("Not allowed to view appointment.");
     }
 
     private static ApplicationLayerForbiddenException Forbidden(string message)

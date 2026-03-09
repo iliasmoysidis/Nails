@@ -18,6 +18,7 @@ public sealed class CreateAppointmentHandler
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly IOfferingRepository _offeringRepo;
     private readonly IClock _clock;
     private readonly IUnitOfWork _uow;
 
@@ -29,6 +30,7 @@ public sealed class CreateAppointmentHandler
         IStaffCalendarRepository staffCalendarRepo,
         IStoreCatalogRepository storeCatalogRepo,
         IAssignmentsRepository assignmentsRepo,
+        IOfferingRepository offeringRepo,
         IClock clock,
         IUnitOfWork uow
     )
@@ -40,6 +42,7 @@ public sealed class CreateAppointmentHandler
         _staffCalendarRepo = staffCalendarRepo;
         _storeCatalogRepo = storeCatalogRepo;
         _assignmentsRepo = assignmentsRepo;
+        _offeringRepo = offeringRepo;
         _clock = clock;
         _uow = uow;
     }
@@ -49,7 +52,7 @@ public sealed class CreateAppointmentHandler
         var storeCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
 
-        var offering = storeCatalog.GetOffering(command.OfferingId)
+        var offering = await _offeringRepo.GetByIdAsync(command.OfferingId, ct)
             ?? throw new ApplicationLayerNotFoundException("Offering not found.");
 
         var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
@@ -73,6 +76,7 @@ public sealed class CreateAppointmentHandler
             startAt,
             endAt
         );
+        _val.EnsureStoreOffersService(storeCatalog, command.OfferingId);
         _val.EnsureProfessionalOffersService(
             assignments,
             command.ProfessionalId,
