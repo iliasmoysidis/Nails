@@ -73,4 +73,16 @@ public sealed class ValidationGuard
         if (!assignments.IsAssigned(professionalId, offeringId))
             throw new ApplicationLayerValidationException("Professional does not offer this service.");
     }
+
+    public void EnsureProfessionalWorksForStore(Staff staff, int professionalId)
+    {
+        if (!staff.IsEmployee(professionalId))
+            throw new ApplicationLayerValidationException("Professional does not work for the store.");
+    }
+
+    public void EnsureStoreOffering(StoreCatalog catalog, int offeringId)
+    {
+        if (catalog.GetOffering(offeringId) is null)
+            throw new ApplicationLayerValidationException("Store does not offer this service.");
+    }
 }

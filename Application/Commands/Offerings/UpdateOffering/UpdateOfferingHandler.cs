@@ -11,6 +11,7 @@ namespace Application.Commands.Offerings;
 
 public sealed class UpdateOfferingHandler
 {
+    private readonly ValidationGuard _val;
     private readonly AuthorizationGuard _auth;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IStaffRepository _staffRepo;
@@ -18,6 +19,7 @@ public sealed class UpdateOfferingHandler
     private readonly IUnitOfWork _uow;
 
     public UpdateOfferingHandler(
+        ValidationGuard val,
         AuthorizationGuard auth,
         IStoreCatalogRepository storeCatalogRepo,
         IStaffRepository staffRepo,
@@ -25,6 +27,7 @@ public sealed class UpdateOfferingHandler
         IUnitOfWork uow
     )
     {
+        _val = val;
         _auth = auth;
         _storeCatalogRepo = storeCatalogRepo;
         _staffRepo = staffRepo;
@@ -37,12 +40,13 @@ public sealed class UpdateOfferingHandler
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        _auth.EnsureOwner(staff);
-
         var catalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
 
-        var offering = catalog.GetOfferingOrThrow(command.OfferingId);
+        _val.EnsureStoreOffering(catalog, command.OfferingId);
+        _auth.EnsureOwner(staff);
+
+        var offering = catalog.GetOffering(command.OfferingId);
 
         catalog.UpdateOffering(
             offeringId: command.OfferingId,

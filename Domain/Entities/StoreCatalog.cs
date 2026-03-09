@@ -52,7 +52,8 @@ public class StoreCatalog
 
     public void RemoveOffering(int offeringId, IClock clock)
     {
-        var offering = GetOfferingOrThrow(offeringId);
+        var offering = GetOffering(offeringId);
+
         offering.SoftDelete(clock);
     }
 
@@ -66,7 +67,7 @@ public class StoreCatalog
 
     public void UpdateOffering(int offeringId, IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, Description? description = null)
     {
-        var offering = GetOfferingOrThrow(offeringId);
+        var offering = GetOffering(offeringId);
 
         if (name is not null)
             EnsureNameIsUnique(name, offeringId);
@@ -79,12 +80,11 @@ public class StoreCatalog
             description: description);
     }
 
-    public Offering GetOfferingOrThrow(int offeringId)
-        => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted)
+    public Offering GetOffering(int offeringId)
+    {
+        return _offerings.FirstOrDefault(o => o.Id == offeringId && !o.IsDeleted)
             ?? throw new NotFoundException("Offering not found.");
-
-    public Offering? GetOffering(int offeringId)
-        => _offerings.FirstOrDefault(s => s.Id == offeringId && !s.IsDeleted);
+    }
 
     private void EnsureNameIsUnique(OfferingName name, int? offeringId = null)
     {
