@@ -72,6 +72,17 @@ public sealed class AuthorizationGuard
         throw Forbidden("Not allowed to view appointment.");
     }
 
+    public void EnsureCanViewStoreProfessionalCalendar(int professionalId, Staff staff)
+    {
+        if (staff.IsOwner(ActorId))
+            return;
+
+        if (ActorId == professionalId)
+            return;
+
+        throw Forbidden("Not allowed to view professional calendar.");
+    }
+
     private static ApplicationLayerForbiddenException Forbidden(string message)
         => new(message);
 }
