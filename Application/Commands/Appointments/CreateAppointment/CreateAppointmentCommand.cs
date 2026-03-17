@@ -1,4 +1,5 @@
 using Domain.ValueObjects.Time;
+using MediatR;
 
 namespace Application.Commands.Appointments;
 
@@ -9,5 +10,5 @@ public sealed record CreateAppointmentCommand(
     int StoreId,
     UtcDateTime StartAt,
     string? Notes
-);
+) : IRequest<int>;
 
