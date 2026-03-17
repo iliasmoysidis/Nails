@@ -1,9 +1,10 @@
-using Application.DTO.Finance;
+using MediatR;
 
 namespace Application.Commands.Appointments;
 
 public sealed record AdjustAppointmentPriceCommand(
     int AppointmentId,
-    MoneyDTO Money,
+    decimal Amount,
+    string Currency,
     string Reason
-);
+) : IRequest;

@@ -1,6 +1,5 @@
 
 using Application.Abstractions.Repositories;
-using Application.Guards;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Appointments;
