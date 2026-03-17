@@ -1,42 +1,30 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Staffs;
 
 public sealed class RemoveStaffEmployeeHandler
+    : IRequestHandler<RemoveStaffEmployeeCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStaffRepository _staffRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly RemoveStaffEmployeeContext _ctx;
     private readonly IClock _clock;
 
     public RemoveStaffEmployeeHandler(
-        AuthorizationGuard auth,
-        IStaffRepository staffRepo,
-        IAssignmentsRepository assignmentsRepo,
-        IClock clock
-    )
+        RemoveStaffEmployeeContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _staffRepo = staffRepo;
-        _assignmentsRepo = assignmentsRepo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(RemoveStaffEmployeeCommand command, CancellationToken ct)
+    public Task Handle(
+        RemoveStaffEmployeeCommand command,
+        CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+        _ctx.Assignments.RemoveProfessionalAssignments(command.ProfessionalId);
 
-        _auth.EnsureOwner(staff);
+        _ctx.Staff.RemoveEmployee(command.ProfessionalId, _clock);
 
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException($"Professional offerings not found for store {command.StoreId}.");
-
-        assignments.RemoveProfessionalAssignments(command.ProfessionalId);
-
-        staff.RemoveEmployee(command.ProfessionalId, _clock);
+        return Task.CompletedTask;
     }
 }

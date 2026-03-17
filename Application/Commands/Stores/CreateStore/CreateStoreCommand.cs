@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Stores;
 
 public sealed record CreateStoreCommand(
@@ -8,9 +10,9 @@ public sealed record CreateStoreCommand(
     string PostalCode,
     string State,
     string CountryCode,
-    string TaxCountryCode,
-    string TaxNumber,
     string Email,
     string PhoneCountryCode,
-    string PhoneNumber
-);
+    string PhoneNumber,
+    string TaxCountryCode,
+    string TaxNumber
+) : IRequest<int>;

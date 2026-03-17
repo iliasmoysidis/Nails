@@ -1,36 +1,26 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Users;
 
 public sealed class DeleteUserHandler
+    : IRequestHandler<DeleteUserCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IUserRepository _repo;
+    private readonly DeleteUserContext _ctx;
     private readonly IClock _clock;
 
-
     public DeleteUserHandler(
-        AuthorizationGuard auth,
-        IUserRepository repo,
-        IClock clock
-    )
+        DeleteUserContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _repo = repo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(DeleteUserCommand command, CancellationToken ct)
+    public Task Handle(DeleteUserCommand command, CancellationToken ct)
     {
-        _auth.EnsureUser();
-        _auth.EnsureSelf(command.UserId);
+        _ctx.User.SoftDelete(_clock);
 
-        var user = await _repo.GetByIdAsync(command.UserId, ct)
-            ?? throw new ApplicationLayerNotFoundException("User not found.");
-
-        user.SoftDelete(_clock);
+        return Task.CompletedTask;
     }
 }

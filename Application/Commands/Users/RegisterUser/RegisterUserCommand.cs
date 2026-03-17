@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Users;
 
 public sealed record RegisterUserCommand(
@@ -6,4 +8,4 @@ public sealed record RegisterUserCommand(
     string Email,
     string PhoneCountryCode,
     string PhoneNumber
-);
+) : IRequest<int>;

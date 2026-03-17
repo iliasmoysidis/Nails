@@ -1,78 +1,42 @@
 using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Stores;
 
 public sealed class CloseStoreHandler
+    : IRequestHandler<CloseStoreCommand>
 {
-    private readonly AuthorizationGuard _auth;
+    private readonly CloseStoreContext _ctx;
     private readonly IStoreClosureService _service;
-    private readonly IStoreRepository _storeRepo;
-    private readonly IStaffRepository _staffRepo;
-    private readonly IStoreCatalogRepository _catalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
-    private readonly IAppointmentRepository _appointmentRepo;
     private readonly IClock _clock;
 
     public CloseStoreHandler(
-        AuthorizationGuard auth,
+        CloseStoreContext ctx,
         IStoreClosureService service,
-        IStoreRepository storeRepo,
-        IStaffRepository staffRepo,
-        IStoreCatalogRepository catalogRepo,
-        IAssignmentsRepository assignmentsRepo,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
-        IAppointmentRepository appointmentRepo,
-        IClock clock
-    )
+        IClock clock)
     {
-        _auth = auth;
+        _ctx = ctx;
         _service = service;
-        _storeRepo = storeRepo;
-        _staffRepo = staffRepo;
-        _catalogRepo = catalogRepo;
-        _assignmentsRepo = assignmentsRepo;
         _storeCalendarRepo = storeCalendarRepo;
         _staffCalendarRepo = staffCalendarRepo;
-        _appointmentRepo = appointmentRepo;
         _clock = clock;
     }
 
     public async Task Handle(CloseStoreCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureOwner(staff);
-
-        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store not found.");
-
-        var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct);
-
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
-
-        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct);
-
-        var staffCalendars =
-            await _staffCalendarRepo.GetByStoreIdAsync(command.StoreId, ct);
-
-        var upcoming =
-            await _appointmentRepo.GetUpcomingByStoreIdAsync(command.StoreId, ct);
-
         _service.CloseStore(
-            store,
-            staff,
-            catalog,
-            assignments,
-            storeCalendar,
-            staffCalendars,
-            upcoming,
+            _ctx.Store,
+            _ctx.Staff,
+            _ctx.Catalog,
+            _ctx.Assignments,
+            _ctx.StoreCalendar,
+            _ctx.StaffCalendars,
+            _ctx.UpcomingAppointments,
             _clock
         );
 

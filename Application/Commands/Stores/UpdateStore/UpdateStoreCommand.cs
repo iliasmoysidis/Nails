@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Stores;
 
 public sealed record UpdateStoreCommand(
@@ -10,4 +12,4 @@ public sealed record UpdateStoreCommand(
     string? CountryCode,
     string? PhoneCountryCode,
     string? PhoneNumber
-);
+) : IRequest;

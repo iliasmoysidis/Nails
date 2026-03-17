@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Professionals;
 
 public sealed record RegisterProfessionalCommand(
@@ -8,4 +10,4 @@ public sealed record RegisterProfessionalCommand(
     string PhoneNumber,
     string TaxCountryCode,
     string TaxIdNumber
-);
+) : IRequest<int>;

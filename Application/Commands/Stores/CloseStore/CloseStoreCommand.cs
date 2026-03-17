@@ -1,3 +1,7 @@
+using MediatR;
+
 namespace Application.Commands.Stores;
 
-public sealed record CloseStoreCommand(int StoreId);
+public sealed record CloseStoreCommand(
+    int StoreId
+) : IRequest;

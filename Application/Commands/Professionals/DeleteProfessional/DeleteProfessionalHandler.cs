@@ -2,34 +2,28 @@ using Application.Abstractions.Repositories;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Professionals;
 
 public sealed class DeleteProfessionalHandler
+    : IRequestHandler<DeleteProfessionalCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IProfessionalRepository _repo;
+    private readonly DeleteProfessionalContext _ctx;
     private readonly IClock _clock;
 
     public DeleteProfessionalHandler(
-        AuthorizationGuard auth,
-        IProfessionalRepository repo,
-        IClock clock
-    )
+        DeleteProfessionalContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _repo = repo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(DeleteProfessionalCommand command, CancellationToken ct)
+    public Task Handle(DeleteProfessionalCommand command, CancellationToken ct)
     {
-        _auth.EnsureProfessional();
-        _auth.EnsureSelf(command.ProfessionalId);
+        _ctx.Professional.SoftDelete(_clock);
 
-        var professional = await _repo.GetByIdAsync(command.ProfessionalId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Professional not found.");
-
-        professional.SoftDelete(_clock);
+        return Task.CompletedTask;
     }
 }

@@ -1,57 +1,39 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
+using MediatR;
 
 namespace Application.Commands.Offerings;
 
 public sealed class UpdateOfferingHandler
+    : IRequestHandler<UpdateOfferingCommand>
 {
-    private readonly ValidationGuard _val;
-    private readonly AuthorizationGuard _auth;
-    private readonly IStoreCatalogRepository _storeCatalogRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly UpdateOfferingContext _ctx;
     private readonly IClock _clock;
 
     public UpdateOfferingHandler(
-        ValidationGuard val,
-        AuthorizationGuard auth,
-        IStoreCatalogRepository storeCatalogRepo,
-        IStaffRepository staffRepo,
-        IClock clock
-    )
+        UpdateOfferingContext ctx,
+        IClock clock)
     {
-        _val = val;
-        _auth = auth;
-        _storeCatalogRepo = storeCatalogRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(UpdateOfferingCommand command, CancellationToken ct)
+    public Task Handle(UpdateOfferingCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+        var offering = _ctx.Catalog.GetOffering(command.OfferingId);
 
-        var catalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
-
-        _val.EnsureStoreOffersService(catalog, command.OfferingId);
-        _auth.EnsureOwner(staff);
-
-        var offering = catalog.GetOffering(command.OfferingId);
-
-        catalog.UpdateOffering(
+        _ctx.Catalog.UpdateOffering(
             offeringId: command.OfferingId,
             clock: _clock,
             name: ToName(command.Name),
             price: ToPrice(command.Price, offering.Price.Currency),
             duration: ToDuration(command.DurationMinutes),
             description: ToDescription(command.Description)
-            );
+        );
+
+        return Task.CompletedTask;
     }
 
     private static OfferingName? ToName(string? value)

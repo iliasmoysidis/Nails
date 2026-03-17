@@ -1,46 +1,41 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
+using MediatR;
 
 namespace Application.Commands.Users;
 
 public sealed class UpdateUserHandler
+    : IRequestHandler<UpdateUserCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IUserRepository _repo;
+    private readonly UpdateUserContext _ctx;
     private readonly IClock _clock;
 
     public UpdateUserHandler(
-        AuthorizationGuard auth,
-        IUserRepository repo,
-        IClock clock
-    )
+        UpdateUserContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _repo = repo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(UpdateUserCommand command, CancellationToken ct)
+    public Task Handle(UpdateUserCommand command, CancellationToken ct)
     {
-        _auth.EnsureUser();
-        _auth.EnsureSelf(command.UserId);
-
-        var user = await _repo.GetByIdAsync(command.UserId, ct)
-            ?? throw new ApplicationLayerNotFoundException("User not found.");
-
-        user.UpdatePersonalInfo(
+        _ctx.User.UpdatePersonalInfo(
             clock: _clock,
             fullName: ToFullName(command.FirstName, command.LastName),
             phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
         );
+
+        return Task.CompletedTask;
     }
 
     private static FullName? ToFullName(string? firstName, string? lastName)
-        => firstName is null || lastName is null ? null : FullName.From(firstName, lastName);
+        => firstName is null || lastName is null
+            ? null
+            : FullName.From(firstName, lastName);
 
     private static Phone? ToPhone(string? code, string? number)
-        => code is null || number is null ? null : Phone.From(code, number);
+        => code is null || number is null
+            ? null
+            : Phone.From(code, number);
 }

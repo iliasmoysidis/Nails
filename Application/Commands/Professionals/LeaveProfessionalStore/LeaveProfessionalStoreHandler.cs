@@ -1,64 +1,41 @@
 using Application.Abstractions.Repositories;
-using Application.Guards;
 using Application.Exceptions;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Professionals;
 
 public sealed class LeaveProfessionalStoreHandler
+    : IRequestHandler<LeaveProfessionalStoreCommand>
 {
-    private readonly AuthorizationGuard _auth;
+    private readonly LeaveProfessionalStoreContext _ctx;
     private readonly IProfessionalExitService _service;
-    private readonly IStaffRepository _staffRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStaffCalendarRepository _calendarRepo;
-    private readonly IAppointmentRepository _appointmentRepo;
     private readonly IClock _clock;
 
     public LeaveProfessionalStoreHandler(
-        AuthorizationGuard auth,
+        LeaveProfessionalStoreContext ctx,
         IProfessionalExitService service,
-        IStaffRepository staffRepo,
-        IAssignmentsRepository assignmentsRepo,
         IStaffCalendarRepository calendarRepo,
-        IAppointmentRepository appointmentRepo,
-        IClock clock
-    )
+        IClock clock)
     {
-        _auth = auth;
+        _ctx = ctx;
         _service = service;
-        _staffRepo = staffRepo;
-        _assignmentsRepo = assignmentsRepo;
         _calendarRepo = calendarRepo;
-        _appointmentRepo = appointmentRepo;
         _clock = clock;
-
     }
 
-    public async Task Handle(LeaveProfessionalStoreCommand command, CancellationToken ct)
+    public async Task Handle(
+        LeaveProfessionalStoreCommand command,
+        CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureProfessional();
-        _auth.EnsureSelf(command.ProfessionalId);
-        _auth.EnsureStaffMember(staff);
-
-        var upcoming = await _appointmentRepo.GetUpcomingByStoreIdAndProfessionalId(
-            storeId: command.StoreId,
-            professionalId: command.ProfessionalId,
-            ct: ct
-        );
-
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
-
         try
         {
             _service.LeaveStore(
-                staff,
-                assignments,
-                upcoming,
+                _ctx.Staff,
+                _ctx.Assignments,
+                _ctx.UpcomingAppointments,
                 command.ProfessionalId,
                 _clock
             );
@@ -68,6 +45,10 @@ public sealed class LeaveProfessionalStoreHandler
             throw new ApplicationLayerValidationException(ex.Message);
         }
 
-        await _calendarRepo.RemoveProfessionalAsync(command.StoreId, command.ProfessionalId, ct);
+        await _calendarRepo.RemoveProfessionalAsync(
+            command.StoreId,
+            command.ProfessionalId,
+            ct
+        );
     }
 }

@@ -1,43 +1,31 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.ValueObjects.Calendar;
+using MediatR;
 
 namespace Application.Commands.StoreCalendars;
 
 public sealed class AddStoreCalendarSpecialHoursHandler
+    : IRequestHandler<AddStoreCalendarSpecialHoursCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStoreCalendarRepository _storeCalendarRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly AddStoreCalendarSpecialHoursContext _ctx;
 
     public AddStoreCalendarSpecialHoursHandler(
-        AuthorizationGuard auth,
-        IStoreCalendarRepository storeCalendarRepo,
-        IStaffRepository staffRepo
-    )
+        AddStoreCalendarSpecialHoursContext ctx)
     {
-        _auth = auth;
-        _storeCalendarRepo = storeCalendarRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
     }
 
-    public async Task Handle(AddStoreCalendarSpecialHoursCommand command, CancellationToken ct)
+    public Task Handle(
+        AddStoreCalendarSpecialHoursCommand command,
+        CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureOwner(staff);
-
-        var calendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store calendar not found");
-
         var ranges = command.TimeRanges
             .Select(r => new TimeRange(r.Start, r.End))
             .ToList();
 
         var exception = CalendarException.PartialDay(command.Date, ranges);
 
-        calendar.AddException(exception);
+        _ctx.StoreCalendar.AddException(exception);
+
+        return Task.CompletedTask;
     }
 }

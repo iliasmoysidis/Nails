@@ -1,61 +1,60 @@
 using Application.Abstractions.Repositories;
-using Application.Guards;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
 using Domain.ValueObjects.Store;
+using MediatR;
 
 namespace Application.Commands.Stores;
 
 public sealed class CreateStoreHandler
+    : IRequestHandler<CreateStoreCommand, int>
 {
-    private readonly AuthorizationGuard _auth;
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
 
     public CreateStoreHandler(
-        AuthorizationGuard auth,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
-        IClock clock
-    )
+        IClock clock)
     {
-        _auth = auth;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _clock = clock;
     }
 
-    public async Task<int> Handle(CreateStoreCommand command, CancellationToken ct)
+    public async Task<int> Handle(
+        CreateStoreCommand command,
+        CancellationToken ct)
     {
-        _auth.EnsureProfessional();
-        _auth.EnsureSelf(command.ProfessionalId);
-
         var address = Address.From(
-                street: command.Street,
-                city: command.City,
-                postalCode: command.PostalCode,
-                state: command.State,
-                countryCode: command.CountryCode
-            );
-        var taxIdNumber = TaxIdentificationNumber.From(
-                countryCode: command.TaxCountryCode,
-                value: command.TaxNumber
-            );
+            command.Street,
+            command.City,
+            command.PostalCode,
+            command.State,
+            command.CountryCode
+        );
+
+        var taxId = TaxIdentificationNumber.From(
+            command.TaxCountryCode,
+            command.TaxNumber
+        );
+
         var phone = Phone.From(
-                countryCode: command.PhoneCountryCode,
-                nationalNumber: command.PhoneNumber
-            );
+            command.PhoneCountryCode,
+            command.PhoneNumber
+        );
 
         var store = Store.Create(
             name: StoreName.Create(command.Name),
             address: address,
-            taxIdNumber: taxIdNumber,
+            taxIdNumber: taxId,
             email: Email.From(command.Email),
             phone: phone,
             clock: _clock
         );
+
         await _storeRepo.AddAsync(store, ct);
 
         var staff = Staff.Create(
@@ -63,6 +62,7 @@ public sealed class CreateStoreHandler
             professionalId: command.ProfessionalId,
             clock: _clock
         );
+
         await _staffRepo.AddAsync(staff, ct);
 
         return store.Id;

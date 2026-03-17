@@ -1,46 +1,41 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
+using MediatR;
 
 namespace Application.Commands.Professionals;
 
 public sealed class UpdateProfessionalHandler
+    : IRequestHandler<UpdateProfessionalCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IProfessionalRepository _repo;
+    private readonly UpdateProfessionalContext _ctx;
     private readonly IClock _clock;
 
     public UpdateProfessionalHandler(
-        AuthorizationGuard auth,
-        IProfessionalRepository repo,
-        IClock clock
-    )
+        UpdateProfessionalContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _repo = repo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(UpdateProfessionalCommand command, CancellationToken ct)
+    public Task Handle(UpdateProfessionalCommand command, CancellationToken ct)
     {
-        _auth.EnsureProfessional();
-        _auth.EnsureSelf(command.ProfessionalId);
-
-        var professional = await _repo.GetByIdAsync(command.ProfessionalId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Professional not found.");
-
-        professional.UpdatePersonalInfo(
+        _ctx.Professional.UpdatePersonalInfo(
             clock: _clock,
             fullName: ToFullName(command.FirstName, command.LastName),
             phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
         );
+
+        return Task.CompletedTask;
     }
 
     private static FullName? ToFullName(string? firstName, string? lastName)
-        => firstName is null || lastName is null ? null : FullName.From(firstName, lastName);
+        => firstName is null || lastName is null
+            ? null
+            : FullName.From(firstName, lastName);
 
     private static Phone? ToPhone(string? code, string? number)
-        => code is null || number is null ? null : Phone.From(code, number);
+        => code is null || number is null
+            ? null
+            : Phone.From(code, number);
 }

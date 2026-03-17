@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Offerings;
 
 public sealed record UpdateOfferingCommand(
@@ -7,4 +9,4 @@ public sealed record UpdateOfferingCommand(
     decimal? Price,
     int? DurationMinutes,
     string? Description
-    );
+) : IRequest;

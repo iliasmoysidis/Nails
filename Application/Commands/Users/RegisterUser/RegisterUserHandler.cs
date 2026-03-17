@@ -3,10 +3,12 @@ using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
+using MediatR;
 
 namespace Application.Commands.Users;
 
 public sealed class RegisterUserHandler
+    : IRequestHandler<RegisterUserCommand, int>
 {
     private readonly IUserRepository _repo;
     private readonly IClock _clock;

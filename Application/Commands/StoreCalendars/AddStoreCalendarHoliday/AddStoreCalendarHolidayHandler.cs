@@ -1,39 +1,27 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.ValueObjects.Calendar;
+using MediatR;
 
 namespace Application.Commands.StoreCalendars;
 
 public sealed class AddStoreCalendarHolidayHandler
+    : IRequestHandler<AddStoreCalendarHolidayCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStoreCalendarRepository _storeCalendarRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly AddStoreCalendarHolidayContext _ctx;
 
     public AddStoreCalendarHolidayHandler(
-        AuthorizationGuard auth,
-        IStoreCalendarRepository storeCalendarRepo,
-        IStaffRepository staffRepo
-    )
+        AddStoreCalendarHolidayContext ctx)
     {
-        _auth = auth;
-        _storeCalendarRepo = storeCalendarRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
     }
 
-    public async Task Handle(AddStoreCalendarHolidayCommand command, CancellationToken ct)
+    public Task Handle(
+        AddStoreCalendarHolidayCommand command,
+        CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureOwner(staff);
-
-        var calendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store calendar not found");
-
         var holiday = CalendarException.DayOff(command.Date);
 
-        calendar.AddException(holiday);
+        _ctx.StoreCalendar.AddException(holiday);
+
+        return Task.CompletedTask;
     }
 }

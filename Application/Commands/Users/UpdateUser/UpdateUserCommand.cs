@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Users;
 
 public sealed record UpdateUserCommand(
@@ -6,4 +8,4 @@ public sealed record UpdateUserCommand(
     string? LastName,
     string? PhoneCountryCode,
     string? PhoneNumber
-);
+) : IRequest;

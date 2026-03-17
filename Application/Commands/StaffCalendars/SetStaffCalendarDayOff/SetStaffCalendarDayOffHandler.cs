@@ -1,36 +1,24 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
+using MediatR;
 
 namespace Application.Commands.StaffCalendars;
 
 public sealed class SetStaffCalendarDayOffHandler
+    : IRequestHandler<SetStaffCalendarDayOffCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStaffCalendarRepository _staffCalendarRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly SetStaffCalendarDayOffContext _ctx;
 
     public SetStaffCalendarDayOffHandler(
-        AuthorizationGuard auth,
-        IStaffCalendarRepository staffCalendarRepo,
-        IStaffRepository staffRepo
-    )
+        SetStaffCalendarDayOffContext ctx)
     {
-        _auth = auth;
-        _staffCalendarRepo = staffCalendarRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
     }
 
-    public async Task Handle(SetStaffCalendarDayOffCommand command, CancellationToken ct)
+    public Task Handle(
+        SetStaffCalendarDayOffCommand command,
+        CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+        _ctx.StaffCalendar.SetDayOff(command.Day);
 
-        _auth.EnsureOwner(staff);
-
-        var calendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
-
-        calendar.SetDayOff(command.Day);
+        return Task.CompletedTask;
     }
 }

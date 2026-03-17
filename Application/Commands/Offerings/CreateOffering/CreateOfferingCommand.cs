@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Offerings;
 
 public sealed record CreateOfferingCommand(
@@ -7,4 +9,4 @@ public sealed record CreateOfferingCommand(
     string Currency,
     int DurationMinutes,
     string? Description
-);
+) : IRequest<int>;

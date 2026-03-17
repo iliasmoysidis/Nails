@@ -1,35 +1,28 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Staffs;
 
 public sealed class RemoveStaffOwnerHandler
+    : IRequestHandler<RemoveStaffOwnerCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStaffRepository _repo;
+    private readonly RemoveStaffOwnerContext _ctx;
     private readonly IClock _clock;
 
-
     public RemoveStaffOwnerHandler(
-        AuthorizationGuard auth,
-        IStaffRepository repo,
-        IClock clock
-    )
+        RemoveStaffOwnerContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _repo = repo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(RemoveStaffOwnerCommand command, CancellationToken ct)
+    public Task Handle(
+        RemoveStaffOwnerCommand command,
+        CancellationToken ct)
     {
-        var staff = await _repo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+        _ctx.Staff.RemoveOwner(command.ProfessionalId, _clock);
 
-        _auth.EnsureOwner(staff);
-
-        staff.RemoveOwner(command.ProfessionalId, _clock);
+        return Task.CompletedTask;
     }
 }

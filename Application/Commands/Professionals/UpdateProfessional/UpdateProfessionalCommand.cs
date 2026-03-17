@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Commands.Professionals;
 
 public sealed record UpdateProfessionalCommand(
@@ -6,4 +8,4 @@ public sealed record UpdateProfessionalCommand(
     string? LastName,
     string? PhoneCountryCode,
     string? PhoneNumber
-);
+) : IRequest;

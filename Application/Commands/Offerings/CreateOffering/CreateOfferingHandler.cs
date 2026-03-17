@@ -1,52 +1,35 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
+using MediatR;
 
 namespace Application.Commands.Offerings;
 
 public sealed class CreateOfferingHandler
+    : IRequestHandler<CreateOfferingCommand, int>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStoreCatalogRepository _storeCatalogRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly CreateOfferingContext _ctx;
     private readonly IClock _clock;
 
-
     public CreateOfferingHandler(
-        AuthorizationGuard auth,
-        IStoreCatalogRepository storeCatalogRepo,
-        IStaffRepository staffRepo,
-        IClock clock
-    )
+        CreateOfferingContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _storeCatalogRepo = storeCatalogRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task<int> Handle(CreateOfferingCommand command, CancellationToken ct)
+    public Task<int> Handle(CreateOfferingCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureOwner(staff);
-
-        var catalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store catalog not found for store.");
-
-        var offering = catalog.AddOffering(
+        var offering = _ctx.Catalog.AddOffering(
             name: OfferingName.Create(command.Name),
-            price: Money.Create(amount: command.Price, currency: command.Currency),
+            price: Money.Create(command.Price, command.Currency),
             duration: Duration.FromMinutes(command.DurationMinutes),
             description: Description.From(command.Description),
             clock: _clock
         );
 
-        return offering.Id;
+        return Task.FromResult(offering.Id);
     }
 }

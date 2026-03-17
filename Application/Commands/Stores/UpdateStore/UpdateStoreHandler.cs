@@ -1,43 +1,27 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
 using Domain.ValueObjects.Store;
+using MediatR;
 
 namespace Application.Commands.Stores;
 
 public sealed class UpdateStoreHandler
+    : IRequestHandler<UpdateStoreCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStoreRepository _storeRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly UpdateStoreContext _ctx;
     private readonly IClock _clock;
 
     public UpdateStoreHandler(
-        AuthorizationGuard auth,
-        IStoreRepository storeRepo,
-        IStaffRepository staffRepo,
-        IClock clock
-    )
+        UpdateStoreContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _storeRepo = storeRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(UpdateStoreCommand command, CancellationToken ct)
+    public Task Handle(UpdateStoreCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureOwner(staff);
-
-        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store not found.");
-
-        store.UpdateDetails(
+        _ctx.Store.UpdateDetails(
             clock: _clock,
             name: ToName(command.Name),
             address: ToAddress(
@@ -45,10 +29,11 @@ public sealed class UpdateStoreHandler
                 command.City,
                 command.PostalCode,
                 command.State,
-                command.CountryCode
-                ),
+                command.CountryCode),
             phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
         );
+
+        return Task.CompletedTask;
     }
 
     private static StoreName? ToName(string? name)
@@ -59,22 +44,23 @@ public sealed class UpdateStoreHandler
         string? city,
         string? postalCode,
         string? state,
-        string? countryCode
-    )
-        => (street is null ||
-            city is null ||
-            postalCode is null ||
-            state is null ||
-            countryCode is null)
+        string? countryCode)
+        => street is null ||
+           city is null ||
+           postalCode is null ||
+           state is null ||
+           countryCode is null
             ? null
             : Address.From(
-                    street: street,
-                    city: city,
-                    postalCode: postalCode,
-                    state: state,
-                    countryCode: countryCode
+                street,
+                city,
+                postalCode,
+                state,
+                countryCode
             );
 
     private static Phone? ToPhone(string? code, string? number)
-        => code is null || number is null ? null : Phone.From(code, number);
+        => code is null || number is null
+            ? null
+            : Phone.From(code, number);
 }

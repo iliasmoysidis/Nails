@@ -1,3 +1,8 @@
+using MediatR;
+
 namespace Application.Commands.StoreCalendars;
 
-public sealed record AddStoreCalendarHolidayCommand(int StoreId, DateOnly Date);
+public sealed record AddStoreCalendarHolidayCommand(
+    int StoreId,
+    DateOnly Date
+) : IRequest;

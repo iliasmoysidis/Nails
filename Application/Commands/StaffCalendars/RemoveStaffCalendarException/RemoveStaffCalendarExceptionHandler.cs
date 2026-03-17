@@ -1,36 +1,24 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
+using MediatR;
 
 namespace Application.Commands.StaffCalendars;
 
 public sealed class RemoveStaffCalendarExceptionHandler
+    : IRequestHandler<RemoveStaffCalendarExceptionCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStaffCalendarRepository _staffCalendarRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly RemoveStaffCalendarExceptionContext _ctx;
 
     public RemoveStaffCalendarExceptionHandler(
-        AuthorizationGuard auth,
-        IStaffCalendarRepository staffCalendarRepo,
-        IStaffRepository staffRepo
-    )
+        RemoveStaffCalendarExceptionContext ctx)
     {
-        _auth = auth;
-        _staffCalendarRepo = staffCalendarRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
     }
 
-    public async Task Handle(RemoveStaffCalendarExceptionCommand command, CancellationToken ct)
+    public Task Handle(
+        RemoveStaffCalendarExceptionCommand command,
+        CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+        _ctx.StaffCalendar.RemoveException(command.Date);
 
-        _auth.EnsureOwner(staff);
-
-        var calendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
-
-        calendar.RemoveException(command.Date);
+        return Task.CompletedTask;
     }
 }

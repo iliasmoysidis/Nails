@@ -1,34 +1,28 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Staffs;
 
 public sealed class AddStaffEmployeeHandler
+    : IRequestHandler<AddStaffEmployeeCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStaffRepository _repo;
+    private readonly AddStaffEmployeeContext _ctx;
     private readonly IClock _clock;
 
     public AddStaffEmployeeHandler(
-        AuthorizationGuard auth,
-        IStaffRepository repo,
-        IClock clock
-    )
+        AddStaffEmployeeContext ctx,
+        IClock clock)
     {
-        _auth = auth;
-        _repo = repo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(AddStaffEmployeeCommand command, CancellationToken ct)
+    public Task Handle(
+        AddStaffEmployeeCommand command,
+        CancellationToken ct)
     {
-        var staff = await _repo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+        _ctx.Staff.AddEmployee(command.ProfessionalId, _clock);
 
-        _auth.EnsureOwner(staff);
-
-        staff.AddEmployee(command.ProfessionalId, _clock);
+        return Task.CompletedTask;
     }
 }
