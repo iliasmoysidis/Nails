@@ -1,40 +1,27 @@
-using Application.Abstractions.Repositories;
-using Application.Guards;
-using Application.Exceptions;
 using Domain.Interfaces;
+using MediatR;
 
 namespace Application.Commands.Appointments;
 
 public sealed class CancelAppointmentHandler
+    : IRequestHandler<CancelAppointmentCommand>
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IAppointmentRepository _appointmentRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly CancelAppointmentContext _ctx;
     private readonly IClock _clock;
 
     public CancelAppointmentHandler(
-        AuthorizationGuard auth,
-        IAppointmentRepository appointmentRepo,
-        IStaffRepository staffRepo,
+        CancelAppointmentContext ctx,
         IClock clock
     )
     {
-        _auth = auth;
-        _appointmentRepo = appointmentRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
         _clock = clock;
     }
 
-    public async Task Handle(CancelAppointmentCommand command, CancellationToken ct)
+    public Task Handle(CancelAppointmentCommand command, CancellationToken ct)
     {
-        var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
+        _ctx.Appointment.Cancel(_clock, command.Reason);
 
-        var staff = await _staffRepo.GetByStoreIdAsync(appointment.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureCanModifyAppointment(appointment, staff);
-
-        appointment.Cancel(_clock, command.Reason);
+        return Task.CompletedTask;
     }
 }
