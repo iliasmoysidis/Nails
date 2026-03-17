@@ -3,13 +3,13 @@ using Application.Exceptions;
 
 namespace Application.Commands.Appointments;
 
-public sealed class AdjustAppointmentPriceLoader
-    : IRequestContextLoader<AdjustAppointmentPriceCommand, AdjustAppointmentPriceContext>
+public sealed class ConfirmAppointmentLoader
+    : IRequestContextLoader<ConfirmAppointmentCommand, ConfirmAppointmentContext>
 {
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStaffRepository _staffRepo;
 
-    public AdjustAppointmentPriceLoader(
+    public ConfirmAppointmentLoader(
         IAppointmentRepository appointmentRepo,
         IStaffRepository staffRepo
     )
@@ -19,8 +19,8 @@ public sealed class AdjustAppointmentPriceLoader
     }
 
     public async Task PopulateAsync(
-        AdjustAppointmentPriceCommand command,
-        AdjustAppointmentPriceContext ctx,
+        ConfirmAppointmentCommand command,
+        ConfirmAppointmentContext ctx,
         CancellationToken ct
     )
     {

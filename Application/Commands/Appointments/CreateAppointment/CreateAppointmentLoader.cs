@@ -34,21 +34,28 @@ public sealed class CreateAppointmentLoader
         CreateAppointmentContext ctx,
         CancellationToken ct)
     {
-        ctx.StoreCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
+        var storeCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
+    ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
 
-        ctx.Offering = await _offeringRepo.GetByIdAsync(command.OfferingId, ct)
+        var offering = await _offeringRepo.GetByIdAsync(command.OfferingId, ct)
             ?? throw new ApplicationLayerNotFoundException("Offering not found");
 
-        ctx.StoreCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found");
 
-        ctx.StaffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
+        var staffCalendar = await _staffCalendarRepo.GetAsync(command.StoreId, command.ProfessionalId, ct)
             ?? throw new ApplicationLayerNotFoundException("Professional calendar not found");
 
-        ctx.Assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found");
 
-        ctx.Appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
+        var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
+
+        ctx.StoreCatalog = storeCatalog;
+        ctx.Offering = offering;
+        ctx.StoreCalendar = storeCalendar;
+        ctx.StaffCalendar = staffCalendar;
+        ctx.Assignments = assignments;
+        ctx.Appointments = appointments;
     }
 }

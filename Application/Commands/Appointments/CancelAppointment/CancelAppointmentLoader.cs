@@ -24,10 +24,13 @@ public sealed class CancelAppointmentLoader
         CancellationToken ct
     )
     {
-        ctx.Appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
+        var appointment = await _appointmentRepo.GetByIdAsync(command.AppointmentId, ct)
             ?? throw new ApplicationLayerNotFoundException("Appointment not found.");
 
-        ctx.Staff = await _staffRepo.GetByStoreIdAsync(ctx.Appointment.StoreId, ct)
+        var staff = await _staffRepo.GetByStoreIdAsync(appointment.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        ctx.Appointment = appointment;
+        ctx.Staff = staff;
     }
 }
