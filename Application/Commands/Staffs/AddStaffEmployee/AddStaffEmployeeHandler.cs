@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -11,19 +10,16 @@ public sealed class AddStaffEmployeeHandler
     private readonly AuthorizationGuard _auth;
     private readonly IStaffRepository _repo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public AddStaffEmployeeHandler(
         AuthorizationGuard auth,
         IStaffRepository repo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _repo = repo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(AddStaffEmployeeCommand command, CancellationToken ct)
@@ -34,7 +30,5 @@ public sealed class AddStaffEmployeeHandler
         _auth.EnsureOwner(staff);
 
         staff.AddEmployee(command.ProfessionalId, _clock);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

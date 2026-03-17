@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -17,9 +16,7 @@ public sealed class CloseStoreHandler
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IAppointmentRepository _appointmentRepo;
-
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public CloseStoreHandler(
         AuthorizationGuard auth,
@@ -31,8 +28,7 @@ public sealed class CloseStoreHandler
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
         IAppointmentRepository appointmentRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
@@ -45,7 +41,6 @@ public sealed class CloseStoreHandler
         _staffCalendarRepo = staffCalendarRepo;
         _appointmentRepo = appointmentRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(CloseStoreCommand command, CancellationToken ct)
@@ -83,8 +78,5 @@ public sealed class CloseStoreHandler
 
         await _storeCalendarRepo.RemoveAsync(command.StoreId, ct);
         await _staffCalendarRepo.RemoveAsync(command.StoreId, ct);
-
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

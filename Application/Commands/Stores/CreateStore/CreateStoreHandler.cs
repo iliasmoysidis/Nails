@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -14,21 +13,18 @@ public sealed class CreateStoreHandler
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public CreateStoreHandler(
         AuthorizationGuard auth,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task<int> Handle(CreateStoreCommand command, CancellationToken ct)
@@ -68,8 +64,6 @@ public sealed class CreateStoreHandler
             clock: _clock
         );
         await _staffRepo.AddAsync(staff, ct);
-
-        await _uow.SaveChangesAsync(ct);
 
         return store.Id;
     }

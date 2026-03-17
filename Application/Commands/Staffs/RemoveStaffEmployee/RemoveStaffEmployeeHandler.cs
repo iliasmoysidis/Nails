@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -12,21 +11,18 @@ public sealed class RemoveStaffEmployeeHandler
     private readonly IStaffRepository _staffRepo;
     private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public RemoveStaffEmployeeHandler(
         AuthorizationGuard auth,
         IStaffRepository staffRepo,
         IAssignmentsRepository assignmentsRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _staffRepo = staffRepo;
         _assignmentsRepo = assignmentsRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(RemoveStaffEmployeeCommand command, CancellationToken ct)
@@ -42,7 +38,5 @@ public sealed class RemoveStaffEmployeeHandler
         assignments.RemoveProfessionalAssignments(command.ProfessionalId);
 
         staff.RemoveEmployee(command.ProfessionalId, _clock);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

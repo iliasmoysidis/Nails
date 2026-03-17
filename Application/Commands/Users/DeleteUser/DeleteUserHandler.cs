@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -11,19 +10,17 @@ public sealed class DeleteUserHandler
     private readonly AuthorizationGuard _auth;
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
+
 
     public DeleteUserHandler(
         AuthorizationGuard auth,
         IUserRepository repo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _repo = repo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(DeleteUserCommand command, CancellationToken ct)
@@ -35,7 +32,5 @@ public sealed class DeleteUserHandler
             ?? throw new ApplicationLayerNotFoundException("User not found.");
 
         user.SoftDelete(_clock);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

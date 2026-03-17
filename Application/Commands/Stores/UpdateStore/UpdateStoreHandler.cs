@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -14,21 +13,18 @@ public sealed class UpdateStoreHandler
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public UpdateStoreHandler(
         AuthorizationGuard auth,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(UpdateStoreCommand command, CancellationToken ct)
@@ -53,8 +49,6 @@ public sealed class UpdateStoreHandler
                 ),
             phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
         );
-
-        await _uow.SaveChangesAsync(ct);
     }
 
     private static StoreName? ToName(string? name)

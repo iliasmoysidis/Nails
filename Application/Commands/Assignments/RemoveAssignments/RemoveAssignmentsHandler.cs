@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 
@@ -12,15 +11,14 @@ public sealed class RemoveAssignmentsHandler
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IAssignmentsRepository _professionalRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IUnitOfWork _uow;
+
 
     public RemoveAssignmentsHandler(
         ValidationGuard val,
         AuthorizationGuard auth,
         IStoreCatalogRepository storeCatalogRepo,
         IAssignmentsRepository professionalRepo,
-        IStaffRepository staffRepo,
-        IUnitOfWork uow
+        IStaffRepository staffRepo
     )
     {
         _val = val;
@@ -28,7 +26,7 @@ public sealed class RemoveAssignmentsHandler
         _storeCatalogRepo = storeCatalogRepo;
         _professionalRepo = professionalRepo;
         _staffRepo = staffRepo;
-        _uow = uow;
+
     }
 
     public async Task Handle(RemoveAssignmentsCommand command, CancellationToken ct)
@@ -53,7 +51,5 @@ public sealed class RemoveAssignmentsHandler
         {
             assignments.Remove(command.ProfessionalId, offeringId);
         }
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

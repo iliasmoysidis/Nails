@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -11,19 +10,16 @@ public sealed class DeleteProfessionalHandler
     private readonly AuthorizationGuard _auth;
     private readonly IProfessionalRepository _repo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public DeleteProfessionalHandler(
         AuthorizationGuard auth,
         IProfessionalRepository repo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _repo = repo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(DeleteProfessionalCommand command, CancellationToken ct)
@@ -35,7 +31,5 @@ public sealed class DeleteProfessionalHandler
             ?? throw new ApplicationLayerNotFoundException("Professional not found.");
 
         professional.SoftDelete(_clock);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

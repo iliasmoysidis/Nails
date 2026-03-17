@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -11,16 +10,13 @@ public sealed class RegisterUserHandler
 {
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public RegisterUserHandler(
         IUserRepository repo,
-        IClock clock,
-        IUnitOfWork uow)
+        IClock clock)
     {
         _repo = repo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task<int> Handle(RegisterUserCommand command, CancellationToken ct)
@@ -47,7 +43,6 @@ public sealed class RegisterUserHandler
         );
 
         await _repo.AddAsync(user, ct);
-        await _uow.SaveChangesAsync(ct);
 
         return user.Id;
     }

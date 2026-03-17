@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.ValueObjects.Calendar;
@@ -11,19 +10,16 @@ public sealed class AddStoreCalendarHolidayHandler
     private readonly AuthorizationGuard _auth;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IUnitOfWork _uow;
 
     public AddStoreCalendarHolidayHandler(
         AuthorizationGuard auth,
         IStoreCalendarRepository storeCalendarRepo,
-        IStaffRepository staffRepo,
-        IUnitOfWork uow
+        IStaffRepository staffRepo
     )
     {
         _auth = auth;
         _storeCalendarRepo = storeCalendarRepo;
         _staffRepo = staffRepo;
-        _uow = uow;
     }
 
     public async Task Handle(AddStoreCalendarHolidayCommand command, CancellationToken ct)
@@ -39,7 +35,5 @@ public sealed class AddStoreCalendarHolidayHandler
         var holiday = CalendarException.DayOff(command.Date);
 
         calendar.AddException(holiday);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

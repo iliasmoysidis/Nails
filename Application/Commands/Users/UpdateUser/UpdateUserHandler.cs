@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -12,19 +11,16 @@ public sealed class UpdateUserHandler
     private readonly AuthorizationGuard _auth;
     private readonly IUserRepository _repo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public UpdateUserHandler(
         AuthorizationGuard auth,
         IUserRepository repo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _repo = repo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(UpdateUserCommand command, CancellationToken ct)
@@ -40,8 +36,6 @@ public sealed class UpdateUserHandler
             fullName: ToFullName(command.FirstName, command.LastName),
             phone: ToPhone(command.PhoneCountryCode, command.PhoneNumber)
         );
-
-        await _uow.SaveChangesAsync(ct);
     }
 
     private static FullName? ToFullName(string? firstName, string? lastName)

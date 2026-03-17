@@ -1,5 +1,5 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
+
 using Application.Guards;
 using Application.Exceptions;
 
@@ -12,15 +12,13 @@ public sealed class AddAssignmentsHandler
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IUnitOfWork _uow;
 
     public AddAssignmentsHandler(
         ValidationGuard val,
         AuthorizationGuard auth,
         IStoreCatalogRepository storeCatalogRepo,
         IAssignmentsRepository assignmentsRepo,
-        IStaffRepository staffRepo,
-        IUnitOfWork uow
+        IStaffRepository staffRepo
     )
     {
         _val = val;
@@ -28,7 +26,6 @@ public sealed class AddAssignmentsHandler
         _storeCatalogRepo = storeCatalogRepo;
         _assignmentsRepo = assignmentsRepo;
         _staffRepo = staffRepo;
-        _uow = uow;
     }
 
     public async Task Handle(AddAssignmentsCommand command, CancellationToken ct)
@@ -54,7 +51,5 @@ public sealed class AddAssignmentsHandler
         {
             assignments.Add(command.ProfessionalId, offeringId);
         }
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -15,21 +14,19 @@ public sealed class CreateOfferingHandler
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
+
 
     public CreateOfferingHandler(
         AuthorizationGuard auth,
         IStoreCatalogRepository storeCatalogRepo,
         IStaffRepository staffRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _storeCatalogRepo = storeCatalogRepo;
         _staffRepo = staffRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task<int> Handle(CreateOfferingCommand command, CancellationToken ct)
@@ -49,8 +46,6 @@ public sealed class CreateOfferingHandler
             description: Description.From(command.Description),
             clock: _clock
         );
-
-        await _uow.SaveChangesAsync(ct);
 
         return offering.Id;
     }

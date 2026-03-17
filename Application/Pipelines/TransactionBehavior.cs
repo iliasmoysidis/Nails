@@ -8,7 +8,6 @@ public sealed class TransactionBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IUnitOfWork _uow;
-
     public TransactionBehavior(IUnitOfWork uow)
     {
         _uow = uow;

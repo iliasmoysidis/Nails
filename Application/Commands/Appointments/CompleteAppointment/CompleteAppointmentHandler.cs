@@ -1,6 +1,5 @@
 
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -13,21 +12,18 @@ public sealed class CompleteAppointmentHandler
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public CompleteAppointmentHandler(
         AuthorizationGuard auth,
         IAppointmentRepository appointmentRepo,
         IStaffRepository staffRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
         _appointmentRepo = appointmentRepo;
         _staffRepo = staffRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(CompleteAppointmentCommand command, CancellationToken ct)
@@ -41,7 +37,5 @@ public sealed class CompleteAppointmentHandler
         _auth.EnsureStaffMember(staff);
 
         appointment.Complete(_clock);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

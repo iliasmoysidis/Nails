@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 
@@ -10,19 +9,16 @@ public sealed class SetStaffCalendarDayOffHandler
     private readonly AuthorizationGuard _auth;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IUnitOfWork _uow;
 
     public SetStaffCalendarDayOffHandler(
         AuthorizationGuard auth,
         IStaffCalendarRepository staffCalendarRepo,
-        IStaffRepository staffRepo,
-        IUnitOfWork uow
+        IStaffRepository staffRepo
     )
     {
         _auth = auth;
         _staffCalendarRepo = staffCalendarRepo;
         _staffRepo = staffRepo;
-        _uow = uow;
     }
 
     public async Task Handle(SetStaffCalendarDayOffCommand command, CancellationToken ct)
@@ -36,7 +32,5 @@ public sealed class SetStaffCalendarDayOffHandler
             ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
 
         calendar.SetDayOff(command.Day);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

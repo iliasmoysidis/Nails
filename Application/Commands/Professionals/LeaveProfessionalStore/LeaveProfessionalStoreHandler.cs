@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Exceptions;
@@ -16,7 +15,6 @@ public sealed class LeaveProfessionalStoreHandler
     private readonly IStaffCalendarRepository _calendarRepo;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public LeaveProfessionalStoreHandler(
         AuthorizationGuard auth,
@@ -25,8 +23,7 @@ public sealed class LeaveProfessionalStoreHandler
         IAssignmentsRepository assignmentsRepo,
         IStaffCalendarRepository calendarRepo,
         IAppointmentRepository appointmentRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
@@ -36,7 +33,7 @@ public sealed class LeaveProfessionalStoreHandler
         _calendarRepo = calendarRepo;
         _appointmentRepo = appointmentRepo;
         _clock = clock;
-        _uow = uow;
+
     }
 
     public async Task Handle(LeaveProfessionalStoreCommand command, CancellationToken ct)
@@ -72,7 +69,5 @@ public sealed class LeaveProfessionalStoreHandler
         }
 
         await _calendarRepo.RemoveProfessionalAsync(command.StoreId, command.ProfessionalId, ct);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

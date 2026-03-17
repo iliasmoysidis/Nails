@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.ValueObjects.Calendar;
@@ -13,15 +12,13 @@ public sealed class SetStaffCalendarWorkingDayHandler
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IUnitOfWork _uow;
 
     public SetStaffCalendarWorkingDayHandler(
         ValidationGuard val,
         AuthorizationGuard auth,
         IStoreCalendarRepository storeCalendarRepo,
         IStaffCalendarRepository staffCalendarRepo,
-        IStaffRepository staffRepo,
-        IUnitOfWork uow
+        IStaffRepository staffRepo
     )
     {
         _val = val;
@@ -29,7 +26,6 @@ public sealed class SetStaffCalendarWorkingDayHandler
         _storeCalendarRepo = storeCalendarRepo;
         _staffCalendarRepo = staffCalendarRepo;
         _staffRepo = staffRepo;
-        _uow = uow;
     }
 
     public async Task Handle(SetStaffCalendarWorkingDayCommand command, CancellationToken ct)
@@ -52,7 +48,5 @@ public sealed class SetStaffCalendarWorkingDayHandler
             ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
 
         staffCalendar.SetWorkingDay(workingDay);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

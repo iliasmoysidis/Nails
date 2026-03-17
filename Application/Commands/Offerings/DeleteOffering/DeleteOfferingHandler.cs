@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -13,15 +12,13 @@ public sealed class DeleteOfferingHandler
     private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public DeleteOfferingHandler(
         AuthorizationGuard auth,
         IAssignmentsRepository assignmentsRepo,
         IStoreCatalogRepository catalogRepo,
         IStaffRepository staffRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _auth = auth;
@@ -29,7 +26,6 @@ public sealed class DeleteOfferingHandler
         _assignmentsRepo = assignmentsRepo;
         _staffRepo = staffRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(DeleteOfferingCommand command, CancellationToken ct)
@@ -48,7 +44,5 @@ public sealed class DeleteOfferingHandler
         assignments.RemoveOfferingAssignments(command.OfferingId);
 
         catalog.RemoveOffering(command.OfferingId, _clock);
-
-        await _uow.SaveChangesAsync(ct);
     }
 }

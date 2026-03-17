@@ -1,6 +1,6 @@
 
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
+
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Entities;
@@ -20,7 +20,6 @@ public sealed class CreateAppointmentHandler
     private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IOfferingRepository _offeringRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public CreateAppointmentHandler(
         ValidationGuard val,
@@ -31,8 +30,7 @@ public sealed class CreateAppointmentHandler
         IStoreCatalogRepository storeCatalogRepo,
         IAssignmentsRepository assignmentsRepo,
         IOfferingRepository offeringRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _val = val;
@@ -44,7 +42,6 @@ public sealed class CreateAppointmentHandler
         _assignmentsRepo = assignmentsRepo;
         _offeringRepo = offeringRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task<int> Handle(CreateAppointmentCommand command, CancellationToken ct)
@@ -99,8 +96,6 @@ public sealed class CreateAppointmentHandler
         );
 
         await _appointmentRepo.AddAsync(appointment, ct);
-
-        await _uow.SaveChangesAsync(ct);
 
         return appointment.Id;
     }

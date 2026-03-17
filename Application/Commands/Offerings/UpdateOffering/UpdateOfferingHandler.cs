@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Guards;
 using Application.Exceptions;
 using Domain.Interfaces;
@@ -16,15 +15,13 @@ public sealed class UpdateOfferingHandler
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public UpdateOfferingHandler(
         ValidationGuard val,
         AuthorizationGuard auth,
         IStoreCatalogRepository storeCatalogRepo,
         IStaffRepository staffRepo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _val = val;
@@ -32,7 +29,6 @@ public sealed class UpdateOfferingHandler
         _storeCatalogRepo = storeCatalogRepo;
         _staffRepo = staffRepo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task Handle(UpdateOfferingCommand command, CancellationToken ct)
@@ -56,8 +52,6 @@ public sealed class UpdateOfferingHandler
             duration: ToDuration(command.DurationMinutes),
             description: ToDescription(command.Description)
             );
-
-        await _uow.SaveChangesAsync(ct);
     }
 
     private static OfferingName? ToName(string? value)

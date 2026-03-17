@@ -1,5 +1,4 @@
 using Application.Abstractions.Repositories;
-using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -11,17 +10,14 @@ public sealed class RegisterProfessionalHandler
 {
     private readonly IProfessionalRepository _repo;
     private readonly IClock _clock;
-    private readonly IUnitOfWork _uow;
 
     public RegisterProfessionalHandler(
         IProfessionalRepository repo,
-        IClock clock,
-        IUnitOfWork uow
+        IClock clock
     )
     {
         _repo = repo;
         _clock = clock;
-        _uow = uow;
     }
 
     public async Task<int> Handle(RegisterProfessionalCommand command, CancellationToken ct)
@@ -56,7 +52,6 @@ public sealed class RegisterProfessionalHandler
         );
 
         await _repo.AddAsync(professional, ct);
-        await _uow.SaveChangesAsync(ct);
 
         return professional.Id;
     }
