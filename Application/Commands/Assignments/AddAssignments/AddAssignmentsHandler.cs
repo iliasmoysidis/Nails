@@ -1,55 +1,24 @@
-using Application.Abstractions.Repositories;
-
-using Application.Guards;
-using Application.Exceptions;
+using MediatR;
 
 namespace Application.Commands.Assignments;
 
 public sealed class AddAssignmentsHandler
+    : IRequestHandler<AddAssignmentsCommand>
 {
-    private readonly ValidationGuard _val;
-    private readonly AuthorizationGuard _auth;
-    private readonly IStoreCatalogRepository _storeCatalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
-    private readonly IStaffRepository _staffRepo;
+    private readonly AddAssignmentsContext _ctx;
 
-    public AddAssignmentsHandler(
-        ValidationGuard val,
-        AuthorizationGuard auth,
-        IStoreCatalogRepository storeCatalogRepo,
-        IAssignmentsRepository assignmentsRepo,
-        IStaffRepository staffRepo
-    )
+    public AddAssignmentsHandler(AddAssignmentsContext ctx)
     {
-        _val = val;
-        _auth = auth;
-        _storeCatalogRepo = storeCatalogRepo;
-        _assignmentsRepo = assignmentsRepo;
-        _staffRepo = staffRepo;
+        _ctx = ctx;
     }
 
-    public async Task Handle(AddAssignmentsCommand command, CancellationToken ct)
+    public Task Handle(AddAssignmentsCommand command, CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        var catalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Store catalog not found.");
-
-        _val.EnsureProfessionalWorksForStore(staff, command.ProfessionalId);
         foreach (var offeringId in command.OfferingIds)
         {
-            _val.EnsureStoreOffersService(catalog, offeringId);
+            _ctx.Assignments.Add(command.ProfessionalId, offeringId);
         }
 
-        _auth.EnsureOwner(staff);
-
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Professional offerings not found.");
-
-        foreach (var offeringId in command.OfferingIds)
-        {
-            assignments.Add(command.ProfessionalId, offeringId);
-        }
+        return Task.CompletedTask;
     }
 }
