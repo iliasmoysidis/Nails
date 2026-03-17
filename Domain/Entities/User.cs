@@ -1,17 +1,14 @@
-using Domain.Common;
 using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
 
 namespace Domain.Entities;
 
-public class User : HistoricEntity
+public class User
 {
     public int Id { get; private set; }
-    public FullName FullName { get; private set; } = null!;
-    public Email Email { get; private set; } = null!;
-    public Phone Phone { get; private set; } = null!;
-
-    private User() { }
+    public FullName FullName { get; private set; }
+    public Email Email { get; private set; }
+    public Phone Phone { get; private set; }
 
     private User(
         FullName fullName,
@@ -24,37 +21,27 @@ public class User : HistoricEntity
         Phone = phone;
     }
 
-    public static User Create(FullName fullName, Email email, Phone phone, IClock clock)
+    public static User Create(FullName fullName, Email email, Phone phone)
     {
         var user = new User(fullName, email, phone);
-        user.MarkAsCreated(clock);
         return user;
     }
 
-    public void UpdatePersonalInfo(IClock clock, FullName? fullName = null, Phone? phone = null)
+    public void UpdatePersonalInfo(FullName? fullName = null, Phone? phone = null)
     {
-        EnsureActive();
-
-        var changed = false;
-
-        changed |= TryUpdateName(fullName);
-        changed |= TryUpdatePhone(phone);
-
-        if (changed)
-            MarkAsUpdated(clock);
+        TryUpdateName(fullName);
+        TryUpdatePhone(phone);
     }
 
-    private bool TryUpdateName(FullName? fullName)
+    private void TryUpdateName(FullName? fullName)
     {
-        if (fullName is null || fullName == FullName) return false;
+        if (fullName is null || fullName == FullName) return;
         FullName = fullName;
-        return true;
     }
 
-    private bool TryUpdatePhone(Phone? phone)
+    private void TryUpdatePhone(Phone? phone)
     {
-        if (phone is null || phone == Phone) return false;
+        if (phone is null || phone == Phone) return;
         Phone = phone;
-        return true;
     }
 }

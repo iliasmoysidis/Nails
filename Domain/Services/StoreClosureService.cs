@@ -6,7 +6,6 @@ namespace Domain.Services;
 public sealed class StoreClosureService : IStoreClosureService
 {
     public void CloseStore(
-        Store store,
         Staff staff,
         StoreCatalog? catalog,
         Assignments? assignments,
@@ -23,8 +22,8 @@ public sealed class StoreClosureService : IStoreClosureService
             appointment.Cancel(clock, "Store has been closed.");
         }
 
-        staff.Clear(clock);
-        catalog?.Clear(clock);
+        staff.Clear();
+        catalog?.Clear();
         assignments?.Clear();
         storeCalendar?.Clear();
 
@@ -32,8 +31,6 @@ public sealed class StoreClosureService : IStoreClosureService
         {
             staffCalendar.Clear();
         }
-
-        store.SoftDelete(clock);
     }
 
 }

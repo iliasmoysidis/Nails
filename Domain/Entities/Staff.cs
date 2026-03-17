@@ -1,17 +1,14 @@
 using Domain.Enums;
 using Domain.Exceptions;
-using Domain.Interfaces;
-using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
 public class Staff
 {
-    public int StoreId { get; private set; }
+    public int StoreId { get; }
 
     private readonly List<StaffMember> _members = new();
-    public IReadOnlyCollection<StaffMember> Members
-        => _members.Where(m => m.IsActive).ToArray();
+    public IReadOnlyCollection<StaffMember> Members => _members;
 
     private Staff() { }
 
@@ -20,125 +17,105 @@ public class Staff
         StoreId = storeId;
     }
 
-    public static Staff Create(int storeId, int professionalId, IClock clock)
+    public static Staff Create(int storeId, int ownerProfessionalId)
     {
         var staff = new Staff(storeId);
 
-        staff._members.Add(StaffMember.Join(
-            storeId,
-            professionalId,
-            [StaffRole.Owner],
-            clock)
+        staff._members.Add(
+            StaffMember.Create(ownerProfessionalId, [StaffRole.Owner])
         );
 
         return staff;
     }
 
     public bool IsStaff(int professionalId)
-        => GetActiveMember(professionalId) is not null;
+        => GetMember(professionalId) is not null;
 
     public bool IsOwner(int professionalId)
-        => GetActiveMember(professionalId)?.HasRole(StaffRole.Owner) == true;
+        => GetMember(professionalId)?.HasRole(StaffRole.Owner) == true;
 
     public bool IsEmployee(int professionalId)
-        => GetActiveMember(professionalId)?.HasRole(StaffRole.Employee) == true;
+        => GetMember(professionalId)?.HasRole(StaffRole.Employee) == true;
 
-    public IReadOnlyCollection<int> ActiveProfessionalIdsAt(UtcDateTime time)
-        => _members
-            .Where(m => m.WasActiveAt(time))
-            .Select(m => m.ProfessionalId)
-            .ToArray();
+    public void AddOwner(int professionalId)
+        => AddOrAssignRole(professionalId, StaffRole.Owner);
 
-    public bool WasOwnerAt(int professionalId, UtcDateTime time)
-        => _members.Any(m => m.ProfessionalId == professionalId && m.HadRoleAt(StaffRole.Owner, time));
+    public void AddEmployee(int professionalId)
+        => AddOrAssignRole(professionalId, StaffRole.Employee);
 
-    public bool WasEmployeeAt(int professionalId, UtcDateTime time)
-        => _members.Any(m => m.ProfessionalId == professionalId && m.HadRoleAt(StaffRole.Employee, time));
-
-    public IReadOnlyCollection<int> OwnerProfessionalIdsAt(UtcDateTime time)
-        => _members
-            .Where(m => m.WasActiveAt(time) && m.HadRoleAt(StaffRole.Owner, time))
-            .Select(m => m.ProfessionalId)
-            .ToArray();
-
-    public void AddOwner(int professionalId, IClock clock)
-        => AddOrAssignRole(professionalId, StaffRole.Owner, clock);
-
-    public void AddEmployee(int professionalId, IClock clock)
-        => AddOrAssignRole(professionalId, StaffRole.Employee, clock);
-
-    public void RemoveOwner(int professionalId, IClock clock)
+    public void RemoveOwner(int professionalId)
     {
-        var member = GetActiveMemberOrThrow(professionalId);
+        var member = GetMemberOrThrow(professionalId);
 
-        if (!member.HasRole(StaffRole.Owner)) return;
+        if (!member.HasRole(StaffRole.Owner))
+            return;
 
-        EnsureNotLastActiveOwnerRemoving(member);
+        EnsureNotLastOwner(member);
 
-        member.RemoveRole(StaffRole.Owner, clock);
+        member.RemoveRole(StaffRole.Owner);
 
-        RemoveIfRoleless(member, clock);
+        RemoveIfRoleless(member);
     }
 
-    public void RemoveEmployee(int professionalId, IClock clock)
+    public void RemoveEmployee(int professionalId)
     {
-        var member = GetActiveMemberOrThrow(professionalId);
+        var member = GetMemberOrThrow(professionalId);
 
-        if (!member.HasRole(StaffRole.Employee)) return;
+        if (!member.HasRole(StaffRole.Employee))
+            return;
 
-        member.RemoveRole(StaffRole.Employee, clock);
+        member.RemoveRole(StaffRole.Employee);
 
-        RemoveIfRoleless(member, clock);
+        RemoveIfRoleless(member);
     }
 
-    public void RemoveFromStaff(int professionalId, IClock clock)
+    public void RemoveFromStaff(int professionalId)
     {
-        var member = GetActiveMemberOrThrow(professionalId);
+        var member = GetMemberOrThrow(professionalId);
 
         if (member.HasRole(StaffRole.Owner))
-            EnsureNotLastActiveOwnerRemoving(member);
+            EnsureNotLastOwner(member);
 
-        member.Leave(clock);
+        _members.Remove(member);
     }
 
-    public void Clear(IClock clock)
-    {
-        foreach (var member in _members.Where(m => m.IsActive))
-            member.Leave(clock);
-    }
+    public void Clear()
+        => _members.Clear();
 
-    private void AddOrAssignRole(int professionalId, StaffRole role, IClock clock)
+    private void AddOrAssignRole(int professionalId, StaffRole role)
     {
-        var member = GetActiveMember(professionalId);
+        var member = GetMember(professionalId);
 
         if (member is null)
         {
-            _members.Add(StaffMember.Join(StoreId, professionalId, [role], clock));
+            _members.Add(
+                StaffMember.Create(professionalId, [role])
+            );
 
             return;
         }
 
-        member.AssignRole(role, clock);
+        member.AddRole(role);
     }
 
-    private void RemoveIfRoleless(StaffMember member, IClock clock)
+    private void RemoveIfRoleless(StaffMember member)
     {
-        if (!member.HasAnyActiveRole())
-            member.Leave(clock);
+        if (!member.HasAnyRole())
+            _members.Remove(member);
     }
 
-    private void EnsureNotLastActiveOwnerRemoving(StaffMember member)
+    private void EnsureNotLastOwner(StaffMember member)
     {
-        var owners = _members.Count(m => m.IsActive && m.HasRole(StaffRole.Owner));
+        var owners = _members.Count(m => m.HasRole(StaffRole.Owner));
 
         if (member.HasRole(StaffRole.Owner) && owners == 1)
             throw new InvariantException("Cannot remove last owner.");
     }
 
-    private StaffMember? GetActiveMember(int professionalId)
-        => _members.FirstOrDefault(m => m.IsActive && m.ProfessionalId == professionalId);
+    private StaffMember? GetMember(int professionalId)
+        => _members.FirstOrDefault(m => m.ProfessionalId == professionalId);
 
-    private StaffMember GetActiveMemberOrThrow(int professionalId)
-        => GetActiveMember(professionalId)
-            ?? throw new NotFoundException("Professional is not active staff.");
+    private StaffMember GetMemberOrThrow(int professionalId)
+        => GetMember(professionalId)
+           ?? throw new NotFoundException("Professional is not active staff.");
 }

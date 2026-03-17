@@ -1,5 +1,4 @@
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
@@ -8,11 +7,10 @@ namespace Domain.Entities;
 
 public class StoreCatalog
 {
-    public int StoreId { get; private set; }
+    public int StoreId { get; }
 
     private readonly List<Offering> _offerings = new();
-    public IReadOnlyCollection<Offering> Offerings
-        => _offerings.Where(o => !o.IsDeleted).ToArray();
+    public IReadOnlyCollection<Offering> Offerings => _offerings;
 
     private StoreCatalog() { }
 
@@ -22,17 +20,13 @@ public class StoreCatalog
     }
 
     public static StoreCatalog Create(int storeId)
-    {
-        return new(storeId);
-    }
+        => new(storeId);
 
     public Offering AddOffering(
         OfferingName name,
         Money price,
         Duration duration,
-        Description description,
-        IClock clock
-        )
+        Description description)
     {
         EnsureNameIsUnique(name);
 
@@ -41,57 +35,48 @@ public class StoreCatalog
             name,
             price,
             duration,
-            description,
-            clock
-            );
+            description);
 
         _offerings.Add(offering);
 
         return offering;
     }
 
-    public void RemoveOffering(int offeringId, IClock clock)
+    public void RemoveOffering(int offeringId)
+    {
+        var offering = GetOffering(offeringId);
+        _offerings.Remove(offering);
+    }
+
+    public void Clear()
+        => _offerings.Clear();
+
+    public void UpdateOffering(
+        int offeringId,
+        OfferingName? name = null,
+        Money? price = null,
+        Duration? duration = null,
+        Description? description = null)
     {
         var offering = GetOffering(offeringId);
 
-        offering.SoftDelete(clock);
-    }
-
-    public void Clear(IClock clock)
-    {
-        foreach (var offering in _offerings.Where(o => !o.IsDeleted))
-        {
-            offering.SoftDelete(clock);
-        }
-    }
-
-    public void UpdateOffering(int offeringId, IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, Description? description = null)
-    {
-        var offering = GetOffering(offeringId);
-
-        if (name is not null)
+        if (name != null)
             EnsureNameIsUnique(name, offeringId);
 
         offering.UpdateDetails(
-            clock: clock,
-            name: name,
-            price: price,
-            duration: duration,
-            description: description);
+            name,
+            price,
+            duration,
+            description);
     }
 
-    public Offering GetOffering(int offeringId)
-    {
-        return _offerings.FirstOrDefault(o => o.Id == offeringId && !o.IsDeleted)
-            ?? throw new NotFoundException("Offering not found.");
-    }
+    private Offering GetOffering(int offeringId)
+        => _offerings.FirstOrDefault(o => o.Id == offeringId)
+           ?? throw new NotFoundException("Offering not found.");
 
-    private void EnsureNameIsUnique(OfferingName name, int? offeringId = null)
+    private void EnsureNameIsUnique(OfferingName name, int? ignoreId = null)
     {
-        if (_offerings.Any(o =>
-            !o.IsDeleted &&
-            o.Name == name &&
-            (offeringId == null || o.Id != offeringId)))
+        if (_offerings.Any(o => o.Name == name && o.Id != ignoreId))
             throw new InvariantException("Offering name must be unique.");
     }
 }

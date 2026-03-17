@@ -1,28 +1,24 @@
-using Domain.Common;
-using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
 using Domain.ValueObjects.Store;
 
 namespace Domain.Entities;
 
-public class Store : HistoricEntity
+public class Store
 {
     public int Id { get; private set; }
-    public StoreName Name { get; private set; } = null!;
-    public Address Address { get; private set; } = null!;
-    public TaxIdentificationNumber TaxIdNumber { get; private set; } = null!;
-    public Email Email { get; private set; } = null!;
-    public Phone Phone { get; private set; } = null!;
 
-    private Store() { }
+    public StoreName Name { get; private set; }
+    public Address Address { get; private set; }
+    public TaxIdentificationNumber TaxIdNumber { get; private set; }
+    public Email Email { get; private set; }
+    public Phone Phone { get; private set; }
 
     private Store(
         StoreName name,
         Address address,
         TaxIdentificationNumber taxIdNumber,
         Email email,
-        Phone phone
-    )
+        Phone phone)
     {
         Name = name;
         Address = address;
@@ -36,61 +32,21 @@ public class Store : HistoricEntity
         Address address,
         TaxIdentificationNumber taxIdNumber,
         Email email,
-        Phone phone,
-        IClock clock
-        )
-    {
-        var store = new Store(
-            name: name,
-            address: address,
-            taxIdNumber: taxIdNumber,
-            email: email,
-            phone: phone
-        );
-
-
-        store.MarkAsCreated(clock);
-
-        return store;
-    }
+        Phone phone)
+        => new(name, address, taxIdNumber, email, phone);
 
     public void UpdateDetails(
-        IClock clock,
         StoreName? name = null,
         Address? address = null,
-        Phone? phone = null
-    )
+        Phone? phone = null)
     {
-        EnsureActive();
+        if (name != null && name != Name)
+            Name = name;
 
-        var changed = false;
+        if (address != null && address != Address)
+            Address = address;
 
-        changed |= TryUpdateName(name);
-        changed |= TryUpdateAddress(address);
-        changed |= TryUpdatePhone(phone);
-
-        if (changed)
-            MarkAsUpdated(clock);
-    }
-
-    private bool TryUpdateName(StoreName? name)
-    {
-        if (name is null || name == Name) return false;
-        Name = name;
-        return true;
-    }
-
-    private bool TryUpdateAddress(Address? address)
-    {
-        if (address is null || address == Address) return false;
-        Address = address;
-        return true;
-    }
-
-    private bool TryUpdatePhone(Phone? phone)
-    {
-        if (phone is null || phone == Phone) return false;
-        Phone = phone;
-        return true;
+        if (phone != null && phone != Phone)
+            Phone = phone;
     }
 }

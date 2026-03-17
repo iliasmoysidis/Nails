@@ -1,16 +1,15 @@
-using Domain.Common;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.ValueObjects.Finance;
 using Domain.ValueObjects.Offerings;
 using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
-public class Offering : HistoricEntity
+public class Offering
 {
     public int Id { get; private set; }
-    public int StoreId { get; private set; }
+    public int StoreId { get; }
+
     public OfferingName Name { get; private set; }
     public Money Price { get; private set; }
     public Duration Duration { get; private set; }
@@ -21,8 +20,7 @@ public class Offering : HistoricEntity
         OfferingName name,
         Money price,
         Duration duration,
-        Description description
-        )
+        Description description)
     {
         StoreId = storeId;
         Name = name;
@@ -36,68 +34,31 @@ public class Offering : HistoricEntity
         OfferingName name,
         Money price,
         Duration duration,
-        Description description,
-        IClock clock
-        )
+        Description description)
+        => new(storeId, name, price, duration, description);
+
+    public void UpdateDetails(
+        OfferingName? name = null,
+        Money? price = null,
+        Duration? duration = null,
+        Description? description = null)
     {
-        var offering = new Offering(
-            storeId: storeId,
-            name: name,
-            price: price,
-            duration: duration,
-            description: description
-        );
+        if (name != null && name != Name)
+            Name = name;
 
-        offering.MarkAsCreated(clock);
+        if (price != null)
+        {
+            if (price.Currency != Price.Currency)
+                throw new InvariantException("Cannot change offering currency.");
 
-        return offering;
-    }
+            if (price != Price)
+                Price = price;
+        }
 
-    public void UpdateDetails(IClock clock, OfferingName? name = null, Money? price = null, Duration? duration = null, Description? description = null)
-    {
-        EnsureActive();
+        if (duration != null && duration != Duration)
+            Duration = duration;
 
-        var changed = false;
-
-        changed |= TryUpdateName(name);
-        changed |= TryUpdatePrice(price);
-        changed |= TryUpdateDuration(duration);
-        changed |= TryUpdateDescription(description);
-
-        if (changed) MarkAsUpdated(clock);
-    }
-
-    private bool TryUpdateName(OfferingName? name)
-    {
-        if (name is null || name == Name) return false;
-        Name = name;
-        return true;
-    }
-
-    private bool TryUpdatePrice(Money? price)
-    {
-        if (price is null) return false;
-
-        if (price.Currency != Price.Currency)
-            throw new InvariantException("Cannot change offering currency.");
-
-        if (price == Price) return false;
-
-        Price = price;
-        return true;
-    }
-
-    private bool TryUpdateDuration(Duration? duration)
-    {
-        if (duration is null || duration == Duration) return false;
-        Duration = duration;
-        return true;
-    }
-
-    private bool TryUpdateDescription(Description? description)
-    {
-        if (description is null || description == Description) return false;
-        Description = description;
-        return true;
+        if (description != null && description != Description)
+            Description = description;
     }
 }

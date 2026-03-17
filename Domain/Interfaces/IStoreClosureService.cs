@@ -5,7 +5,6 @@ namespace Domain.Interfaces;
 public interface IStoreClosureService
 {
     void CloseStore(
-        Store store,
         Staff staff,
         StoreCatalog? catalog,
         Assignments? assignments,

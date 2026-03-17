@@ -21,35 +21,27 @@ public class Assignments
 
     public void Add(int professionalId, int offeringId)
     {
-        var assignment = new Assignment(professionalId, offeringId);
-
-        if (!_assignments.Add(assignment))
+        if (!_assignments.Add(new Assignment(professionalId, offeringId)))
             throw new InvariantException("Offering is already assigned to this professional.");
     }
 
     public void Remove(int professionalId, int offeringId)
     {
-        var assignment = new Assignment(professionalId, offeringId);
-
-        if (!_assignments.Remove(assignment))
+        if (!_assignments.Remove(new Assignment(professionalId, offeringId)))
             throw new InvariantException("Offering is not assigned to the professional.");
     }
 
     public void Clear()
-    {
-        _assignments.Clear();
-    }
+        => _assignments.Clear();
 
-    public void RemoveOfferingAssignments(int offeringId)
+    public void RemoveByOffering(int offeringId)
         => _assignments.RemoveWhere(a => a.OfferingId == offeringId);
 
-    public void RemoveProfessionalAssignments(int professionalId)
+    public void RemoveByProfessional(int professionalId)
         => _assignments.RemoveWhere(a => a.ProfessionalId == professionalId);
 
     public bool IsAssigned(int professionalId, int offeringId)
-        => _assignments.Any(a =>
-            a.ProfessionalId == professionalId &&
-            a.OfferingId == offeringId);
+        => _assignments.Contains(new Assignment(professionalId, offeringId));
 
     public IReadOnlyCollection<int> GetOfferingIds(int professionalId)
         => _assignments

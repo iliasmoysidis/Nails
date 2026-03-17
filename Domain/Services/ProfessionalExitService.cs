@@ -19,8 +19,8 @@ public sealed class ProfessionalExitService : IProfessionalExitService
             appointment.Cancel(clock, "Professional left the store.");
         }
 
-        assignments?.RemoveProfessionalAssignments(professionalId);
+        assignments?.RemoveByProfessional(professionalId);
 
-        staff.RemoveFromStaff(professionalId, clock);
+        staff.RemoveFromStaff(professionalId);
     }
 }

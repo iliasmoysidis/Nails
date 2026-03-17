@@ -5,7 +5,7 @@ namespace Domain.Entities;
 
 public class StoreCalendar
 {
-    public int StoreId { get; private set; }
+    public int StoreId { get; }
 
     private readonly Dictionary<DayOfWeek, WorkingDay> _workingDays = new();
     private readonly Dictionary<DateOnly, CalendarException> _exceptions = new();
@@ -17,27 +17,23 @@ public class StoreCalendar
         StoreId = storeId;
     }
 
-    public static StoreCalendar Create(int storeId) => new(storeId);
+    public static StoreCalendar Create(int storeId)
+        => new(storeId);
 
     public void SetWorkingDay(WorkingDay day)
-    {
-        _workingDays[day.Day] = day;
-    }
+        => _workingDays[day.Day] = day;
 
     public void SetDayOff(DayOfWeek day)
-    {
-        _workingDays[day] = WorkingDay.DayOff(day);
-    }
+        => _workingDays[day] = WorkingDay.DayOff(day);
 
-    public void AddException(CalendarException exception)
-    {
-        _exceptions[exception.Date] = exception;
-    }
+    public void SetException(CalendarException exception)
+        => _exceptions[exception.Date] = exception;
 
     public void RemoveException(DateOnly date)
-    {
-        _exceptions.Remove(date);
-    }
+        => _exceptions.Remove(date);
+
+    public IReadOnlyCollection<CalendarException> GetExceptions()
+        => _exceptions.Values;
 
     public bool IsOpenAt(UtcDateTime dateTime)
     {
@@ -48,21 +44,11 @@ public class StoreCalendar
     }
 
     public bool IsOpenOn(DateOnly date)
-    {
-        return GetWorkingTimeRanges(date).Any();
-    }
-
-    public void Clear()
-    {
-        _workingDays.Clear();
-        _exceptions.Clear();
-    }
+        => GetWorkingTimeRanges(date).Any();
 
     public bool IsWithinStoreHours(DateOnly date, TimeRange range)
-    {
-        var ranges = GetWorkingTimeRanges(date);
-        return ranges.Any(r => r.Start <= range.Start && r.End >= range.End);
-    }
+        => GetWorkingTimeRanges(date)
+            .Any(r => r.Start <= range.Start && r.End >= range.End);
 
     public bool IsWithinWeeklyStoreHours(DayOfWeek day, TimeRange range)
     {
@@ -74,28 +60,26 @@ public class StoreCalendar
 
         return workingDay.TimeRanges.Any(r =>
             r.Start <= range.Start &&
-            r.End >= range.End
-        );
+            r.End >= range.End);
     }
 
     public IReadOnlyCollection<TimeRange> GetWorkingTimeRanges(DateOnly date)
     {
         if (_exceptions.TryGetValue(date, out var exception))
-        {
             return exception.IsDayOff ? EmptyRanges : exception.TimeRanges;
-        }
 
         if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
-        {
             return workingDay.IsDayOff ? EmptyRanges : workingDay.TimeRanges;
-        }
 
         return EmptyRanges;
     }
 
-    public IReadOnlyCollection<CalendarException> GetExceptions()
-        => _exceptions.Values.ToArray();
+    public void Clear()
+    {
+        _workingDays.Clear();
+        _exceptions.Clear();
+    }
 
-    private static readonly IReadOnlyCollection<TimeRange> EmptyRanges = Array.Empty<TimeRange>();
-
+    private static readonly IReadOnlyCollection<TimeRange> EmptyRanges
+        = Array.Empty<TimeRange>();
 }

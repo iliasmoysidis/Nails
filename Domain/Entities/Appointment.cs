@@ -1,4 +1,3 @@
-using Domain.Common;
 using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
@@ -8,31 +7,42 @@ using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
-public class Appointment : HistoricEntity
+public class Appointment
 {
     public int Id { get; private set; }
-    public int UserId { get; private set; }
-    public int ProfessionalId { get; private set; }
-    public int OfferingId { get; private set; }
-    public int StoreId { get; private set; }
-    public UtcDateTime StartAt { get; private set; }
-    public Duration Duration { get; private set; }
+    public int UserId { get; }
+    public int ProfessionalId { get; }
+    public int OfferingId { get; }
+    public int StoreId { get; }
+
+    public UtcDateTime StartAt { get; }
+    public Duration Duration { get; }
     public UtcDateTime EndAt => StartAt.Add(Duration.Value);
+
     public Money Price { get; private set; }
     public Notes Notes { get; private set; }
     public AppointmentStatus Status { get; private set; }
     public UtcDateTime? CanceledAt { get; private set; }
-
 
     public bool IsPending => Status == AppointmentStatus.PendingConfirmation;
     public bool IsConfirmed => Status == AppointmentStatus.Confirmed;
     public bool IsCompleted => Status == AppointmentStatus.Completed;
     public bool IsCanceled => Status == AppointmentStatus.Canceled;
     public bool IsNoShow => Status == AppointmentStatus.NoShow;
-    public bool IsUpcoming(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt > now;
-    public bool IsPast(UtcDateTime now) => EndAt < now;
-    public bool IsInProgress(UtcDateTime now) => Status == AppointmentStatus.Confirmed && StartAt <= now && EndAt > now;
-    public bool IsTerminal => Status is AppointmentStatus.Completed or AppointmentStatus.Canceled or AppointmentStatus.NoShow;
+
+    public bool IsUpcoming(UtcDateTime now)
+        => Status == AppointmentStatus.Confirmed && StartAt > now;
+
+    public bool IsPast(UtcDateTime now)
+        => EndAt < now;
+
+    public bool IsInProgress(UtcDateTime now)
+        => Status == AppointmentStatus.Confirmed && StartAt <= now && EndAt > now;
+
+    public bool IsTerminal
+        => Status is AppointmentStatus.Completed
+           or AppointmentStatus.Canceled
+           or AppointmentStatus.NoShow;
 
     private Appointment(
         int userId,
@@ -64,77 +74,72 @@ public class Appointment : HistoricEntity
         Duration duration,
         Money price,
         Notes notes,
-        IClock clock
-        )
+        IClock clock)
     {
-        EnsureStartIsAfterNow(startAt, clock);
+        var now = clock.Now;
 
-        var appointment = new Appointment(
-            userId: userId,
-            professionalId: professionalId,
-            offeringId: offeringId,
-            storeId: storeId,
-            startAt: startAt,
-            duration: duration,
-            price: price,
-            notes: notes
-        );
+        if (startAt <= now)
+            throw new ValidationException("Appointment start time must be in the future.");
 
-        appointment.MarkAsCreated(clock);
-        return appointment;
+        return new Appointment(
+            userId,
+            professionalId,
+            offeringId,
+            storeId,
+            startAt,
+            duration,
+            price,
+            notes);
     }
 
     public void Confirm(IClock clock)
     {
-        EnsureActive();
         EnsureStatus(AppointmentStatus.PendingConfirmation);
 
-        if (StartAt <= clock.Now)
+        var now = clock.Now;
+
+        if (StartAt <= now)
             throw new InvariantException("Cannot confirm appointments in the past.");
 
         Status = AppointmentStatus.Confirmed;
-        MarkAsUpdated(clock);
     }
 
     public void Cancel(IClock clock, string? reason = null)
     {
         EnsureMutable();
 
-        if (StartAt <= clock.Now)
+        var now = clock.Now;
+
+        if (StartAt <= now)
             throw new InvariantException("Cannot cancel an ongoing appointment.");
 
         Notes = Notes.Append("Cancellation reason", reason);
 
         Status = AppointmentStatus.Canceled;
-        CanceledAt = clock.Now;
-        MarkAsUpdated(clock);
+        CanceledAt = now;
     }
 
     public void Complete(IClock clock)
     {
-        EnsureActive();
         EnsureStatus(AppointmentStatus.Confirmed);
 
         if (clock.Now < EndAt)
             throw new InvariantException("Cannot complete appointment before its end time.");
 
         Status = AppointmentStatus.Completed;
-        MarkAsUpdated(clock);
     }
 
     public void MarkAsNoShow(IClock clock)
     {
-        EnsureActive();
         EnsureStatus(AppointmentStatus.Confirmed);
 
         if (clock.Now < StartAt)
             throw new InvariantException("Cannot mark as no-show before appointment start time.");
 
         Status = AppointmentStatus.NoShow;
-        MarkAsUpdated(clock);
     }
 
-    public void AdjustPrice(Money newPrice, string reason, IClock clock)
+    public void AdjustPrice(Money newPrice, string reason)
     {
         EnsureMutable();
 
@@ -143,14 +148,10 @@ public class Appointment : HistoricEntity
 
         Price = newPrice;
         Notes = Notes.Append("Price adjusted", $"{newPrice}. {reason}");
-
-        MarkAsUpdated(clock);
     }
 
     public bool ConflictsWith(UtcDateTime start, UtcDateTime end)
     {
-        if (IsDeleted) return false;
-
         if (end <= start)
             throw new ValidationException("Invalid time range.");
 
@@ -162,18 +163,8 @@ public class Appointment : HistoricEntity
 
     private void EnsureMutable()
     {
-        EnsureActive();
-
         if (IsTerminal)
-        {
             throw new StateException("Appointment cannot be modified.");
-        }
-    }
-
-    private static void EnsureStartIsAfterNow(UtcDateTime startAt, IClock clock)
-    {
-        if (startAt <= clock.Now)
-            throw new ValidationException("Appointment start time must be in the future.");
     }
 
     private void EnsureStatus(AppointmentStatus expected)

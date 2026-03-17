@@ -5,11 +5,13 @@ namespace Domain.Entities;
 
 public class StaffCalendar
 {
-    public int StoreId { get; private set; }
-    public int ProfessionalId { get; private set; }
+    public int StoreId { get; }
+    public int ProfessionalId { get; }
 
     private readonly Dictionary<DayOfWeek, WorkingDay> _workingDays = new();
     private readonly Dictionary<DateOnly, CalendarException> _exceptions = new();
+
+    private static readonly IReadOnlyCollection<TimeRange> EmptyRanges = Array.Empty<TimeRange>();
 
     private StaffCalendar() { }
 
@@ -19,46 +21,47 @@ public class StaffCalendar
         ProfessionalId = professionalId;
     }
 
-    public static StaffCalendar Create(int storeId, int professionalId) => new(storeId, professionalId);
+    public static StaffCalendar Create(int storeId, int professionalId)
+        => new(storeId, professionalId);
 
     public void SetWorkingDay(WorkingDay day)
-    {
-        _workingDays[day.Day] = day;
-    }
+        => _workingDays[day.Day] = day;
 
     public void SetDayOff(DayOfWeek day)
-    {
-        _workingDays[day] = WorkingDay.DayOff(day);
-    }
+        => _workingDays[day] = WorkingDay.DayOff(day);
 
     public void AddException(CalendarException exception)
-    {
-        _exceptions[exception.Date] = exception;
-    }
+        => _exceptions[exception.Date] = exception;
 
     public void RemoveException(DateOnly date)
-    {
-        _exceptions.Remove(date);
-    }
-
-    public bool IsAvailable(UtcDateTime startAt, UtcDateTime endAt)
-    {
-        if (endAt <= startAt) return false;
-        if (endAt.Date != startAt.Date) return false;
-
-        var date = startAt.Date;
-        var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
-
-        return GetWorkingTimeRanges(date)
-            .Any(r =>
-                r.Start <= range.Start &&
-                r.End >= range.End);
-    }
+        => _exceptions.Remove(date);
 
     public void Clear()
     {
         _workingDays.Clear();
         _exceptions.Clear();
+    }
+
+    public bool IsAvailable(UtcDateTime startAt, UtcDateTime endAt)
+    {
+        if (endAt <= startAt || startAt.Date != endAt.Date)
+            return false;
+
+        var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
+
+        return GetWorkingTimeRanges(startAt.Date)
+            .Any(r => r.Start <= range.Start && r.End >= range.End);
+    }
+
+    public IReadOnlyCollection<TimeRange> GetWorkingTimeRanges(DateOnly date)
+    {
+        if (_exceptions.TryGetValue(date, out var exception))
+            return exception.IsDayOff ? EmptyRanges : exception.TimeRanges;
+
+        if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
+            return workingDay.IsDayOff ? EmptyRanges : workingDay.TimeRanges;
+
+        return EmptyRanges;
     }
 
     public bool TryGetWorkingDay(DayOfWeek day, out WorkingDay workingDay)
@@ -67,45 +70,28 @@ public class StaffCalendar
     public bool TryGetException(DateOnly date, out CalendarException exception)
         => _exceptions.TryGetValue(date, out exception!);
 
-    public IReadOnlyCollection<TimeRange> GetWorkingTimeRanges(DateOnly date)
-    {
-        if (_exceptions.TryGetValue(date, out var exception))
-        {
-            return exception.IsDayOff ? EmptyRanges : exception.TimeRanges;
-        }
-
-        if (_workingDays.TryGetValue(date.DayOfWeek, out var workingDay))
-        {
-            return workingDay.IsDayOff ? EmptyRanges : workingDay.TimeRanges;
-        }
-
-        return EmptyRanges;
-    }
-
     public bool ConflictsWithWorkingDay(WorkingDay day)
     {
-        if (day.IsDayOff) return false;
+        if (day.IsDayOff)
+            return false;
 
-        if (!TryGetWorkingDay(day.Day, out var mine)) return false;
+        if (!_workingDays.TryGetValue(day.Day, out var existing) || existing.IsDayOff)
+            return false;
 
-        if (mine.IsDayOff) return false;
-
-        return TimeRange.AnyOverlap(mine.TimeRanges, day.TimeRanges);
+        return TimeRange.AnyOverlap(existing.TimeRanges, day.TimeRanges);
     }
 
     public bool ConflictsWithException(CalendarException exception)
     {
-        if (exception.IsDayOff) return false;
+        if (exception.IsDayOff)
+            return false;
 
         var workingRanges = GetWorkingTimeRanges(exception.Date);
 
-        if (!workingRanges.Any()) return false;
-
-        return TimeRange.AnyOverlap(workingRanges, exception.TimeRanges);
+        return workingRanges.Any()
+            && TimeRange.AnyOverlap(workingRanges, exception.TimeRanges);
     }
 
     public IReadOnlyCollection<CalendarException> GetExceptions()
         => _exceptions.Values.ToArray();
-
-    private static readonly IReadOnlyCollection<TimeRange> EmptyRanges = Array.Empty<TimeRange>();
 }

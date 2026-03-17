@@ -26,8 +26,6 @@ public sealed class AppointmentAvailabilityService
 
         foreach (var appointment in appointments)
         {
-            if (appointment.IsDeleted) continue;
-
             if (appointment.Id == ignoreAppointmentId) continue;
 
             if (appointment.ConflictsWith(startAt, endAt))
