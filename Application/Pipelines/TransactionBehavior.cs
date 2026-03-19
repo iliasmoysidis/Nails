@@ -19,10 +19,21 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         CancellationToken ct
     )
     {
-        var response = await next();
+        await _uow.BeginTransactionAsync(ct);
+        try
+        {
+            var response = await next();
 
-        await _uow.SaveChangesAsync(ct);
+            await _uow.SaveChangesAsync(ct);
 
-        return response;
+            await _uow.CommitAsync(ct);
+
+            return response;
+        }
+        catch
+        {
+            await _uow.RollbackAsync(ct);
+            throw;
+        }
     }
 }
