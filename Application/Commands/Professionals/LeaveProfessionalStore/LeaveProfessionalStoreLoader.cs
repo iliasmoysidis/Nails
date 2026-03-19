@@ -6,18 +6,14 @@ namespace Application.Commands.Professionals;
 public sealed class LeaveProfessionalStoreLoader
     : IRequestContextLoader<LeaveProfessionalStoreCommand, LeaveProfessionalStoreContext>
 {
-    private readonly IStaffRepository _staffRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
-    private readonly IAppointmentRepository _appointmentRepo;
+    private readonly IStaffRepository _repo;
+
 
     public LeaveProfessionalStoreLoader(
-        IStaffRepository staffRepo,
-        IAssignmentsRepository assignmentsRepo,
-        IAppointmentRepository appointmentRepo)
+        IStaffRepository repo
+    )
     {
-        _staffRepo = staffRepo;
-        _assignmentsRepo = assignmentsRepo;
-        _appointmentRepo = appointmentRepo;
+        _repo = repo;
     }
 
     public async Task PopulateAsync(
@@ -25,19 +21,9 @@ public sealed class LeaveProfessionalStoreLoader
         LeaveProfessionalStoreContext ctx,
         CancellationToken ct)
     {
-        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var staff = await _repo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
-
-        var upcoming = await _appointmentRepo.GetUpcomingByStoreIdAndProfessionalId(
-            command.StoreId,
-            command.ProfessionalId,
-            ct
-        );
-
         ctx.Staff = staff;
-        ctx.Assignments = assignments;
-        ctx.UpcomingAppointments = upcoming;
     }
 }
