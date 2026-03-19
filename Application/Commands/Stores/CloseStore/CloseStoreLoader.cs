@@ -8,28 +8,13 @@ public sealed class CloseStoreLoader
 {
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IStoreCatalogRepository _catalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
-    private readonly IStoreCalendarRepository _storeCalendarRepo;
-    private readonly IStaffCalendarRepository _staffCalendarRepo;
-    private readonly IAppointmentRepository _appointmentRepo;
 
     public CloseStoreLoader(
         IStoreRepository storeRepo,
-        IStaffRepository staffRepo,
-        IStoreCatalogRepository catalogRepo,
-        IAssignmentsRepository assignmentsRepo,
-        IStoreCalendarRepository storeCalendarRepo,
-        IStaffCalendarRepository staffCalendarRepo,
-        IAppointmentRepository appointmentRepo)
+        IStaffRepository staffRepo)
     {
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
-        _catalogRepo = catalogRepo;
-        _assignmentsRepo = assignmentsRepo;
-        _storeCalendarRepo = storeCalendarRepo;
-        _staffCalendarRepo = staffCalendarRepo;
-        _appointmentRepo = appointmentRepo;
     }
 
     public async Task PopulateAsync(
@@ -45,11 +30,5 @@ public sealed class CloseStoreLoader
 
         ctx.Store = store;
         ctx.Staff = staff;
-        ctx.Catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct);
-        ctx.Assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct);
-        ctx.StoreCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct);
-        ctx.StaffCalendars = await _staffCalendarRepo.GetByStoreIdAsync(command.StoreId, ct);
-        ctx.UpcomingAppointments =
-            await _appointmentRepo.GetUpcomingByStoreIdAsync(command.StoreId, ct);
     }
 }
