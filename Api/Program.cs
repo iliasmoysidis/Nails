@@ -1,7 +1,7 @@
 using Application.Abstractions.Events;
-using Application.Abstractions.UnitOfWork;
 using Application.Commands.Stores;
-using Application.Pipelines;
+using Application.Pipelines.Command;
+using Application.Pipelines.Query;
 using Application.Services;
 using MediatR;
 
@@ -19,6 +19,7 @@ builder.Services.AddMediatR(cfg =>
     }
 );
 
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(QueryAuthorizationBehavior<,>));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

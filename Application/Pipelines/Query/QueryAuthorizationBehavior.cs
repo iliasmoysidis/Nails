@@ -1,15 +1,15 @@
 using Application.Abstractions.Authorization;
 using MediatR;
 
-namespace Application.Pipelines;
+namespace Application.Pipelines.Query;
 
-public sealed class AuthorizationBehavior<TRequest, TResponse>
+public sealed class QueryAuthorizationBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IEnumerable<IAuthorizer<TRequest>> _authorizers;
 
-    public AuthorizationBehavior(IEnumerable<IAuthorizer<TRequest>> authorizers)
+    public QueryAuthorizationBehavior(IEnumerable<IAuthorizer<TRequest>> authorizers)
     {
         _authorizers = authorizers;
     }
@@ -18,7 +18,7 @@ public sealed class AuthorizationBehavior<TRequest, TResponse>
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken ct
-   )
+    )
     {
         foreach (var authorizer in _authorizers)
         {

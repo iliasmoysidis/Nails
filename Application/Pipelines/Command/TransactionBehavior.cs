@@ -1,7 +1,7 @@
 using Application.Abstractions.UnitOfWork;
 using MediatR;
 
-namespace Application.Pipelines;
+namespace Application.Pipelines.Command;
 
 public sealed class TransactionBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>

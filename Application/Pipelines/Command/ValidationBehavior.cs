@@ -1,7 +1,7 @@
 using Application.Abstractions.Validation;
 using MediatR;
 
-namespace Application.Pipelines;
+namespace Application.Pipelines.Command;
 
 public sealed class ValidationBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
