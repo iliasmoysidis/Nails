@@ -1,6 +1,5 @@
 using Application.Abstractions.Queries;
 using Application.DTO.Assignments;
-using Application.DTO.Offering;
 
 namespace Application.Queries.Assignments;
 

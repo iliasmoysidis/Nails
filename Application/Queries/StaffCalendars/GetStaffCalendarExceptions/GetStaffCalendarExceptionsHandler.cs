@@ -8,18 +8,10 @@ namespace Application.Queries.StaffCalendars;
 
 public sealed class GetStaffCalendarExceptionsHandler
 {
-    private readonly AuthorizationGuard _auth;
-    private readonly IStaffRepository _repo;
     private readonly IStaffCalendarQueries _queries;
 
-    public GetStaffCalendarExceptionsHandler(
-        AuthorizationGuard auth,
-        IStaffRepository repo,
-        IStaffCalendarQueries queries
-    )
+    public GetStaffCalendarExceptionsHandler(IStaffCalendarQueries queries)
     {
-        _auth = auth;
-        _repo = repo;
         _queries = queries;
     }
 
@@ -28,11 +20,6 @@ public sealed class GetStaffCalendarExceptionsHandler
         CancellationToken ct
     )
     {
-        var staff = await _repo.GetByStoreIdAsync(query.StoreId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
-
-        _auth.EnsureStaffMember(staff);
-
         return await _queries.GetExceptionsAsync(
             storeId: query.StoreId,
             professionalId: query.ProfessionalId,
