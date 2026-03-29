@@ -1,0 +1,35 @@
+using Application.Abstractions.Context;
+using Application.Abstractions.Repositories;
+using Application.Exceptions;
+
+namespace Application.Features.Offerings.Update;
+
+public sealed class Loader
+    : IRequestContextLoader<Command, Context>
+{
+    private readonly IStaffRepository _staffRepo;
+    private readonly IStoreCatalogRepository _catalogRepo;
+
+    public Loader(
+        IStaffRepository staffRepo,
+        IStoreCatalogRepository catalogRepo)
+    {
+        _staffRepo = staffRepo;
+        _catalogRepo = catalogRepo;
+    }
+
+    public async Task PopulateAsync(
+        Command command,
+        Context ctx,
+        CancellationToken ct)
+    {
+        var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Staff not found.");
+
+        var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException($"Store catalog not found for store {command.StoreId}.");
+
+        ctx.Staff = staff;
+        ctx.Catalog = catalog;
+    }
+}

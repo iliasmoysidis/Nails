@@ -70,7 +70,7 @@ public class StoreCatalog
             description);
     }
 
-    private Offering GetOffering(int offeringId)
+    public Offering GetOffering(int offeringId)
         => _offerings.FirstOrDefault(o => o.Id == offeringId)
            ?? throw new NotFoundException("Offering not found.");
 
