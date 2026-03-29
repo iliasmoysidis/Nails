@@ -6,7 +6,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Professionals;
 
 public sealed class CancelAppointmentsWhenProfessionalLeft
-    : INotificationHandler<DomainEventNotification<ProfessionalLeftStoreDomainEvent>>
+    : INotificationHandler<ProfessionalLeftStoreDomainEvent>
 {
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
@@ -20,11 +20,11 @@ public sealed class CancelAppointmentsWhenProfessionalLeft
         _clock = clock;
     }
 
-    public async Task Handle(DomainEventNotification<ProfessionalLeftStoreDomainEvent> notification, CancellationToken ct)
+    public async Task Handle(ProfessionalLeftStoreDomainEvent notification, CancellationToken ct)
     {
         var appointments = await _repo.GetUpcomingByStoreIdAndProfessionalId(
-            storeId: notification.DomainEvent.StoreId,
-            professionalId: notification.DomainEvent.ProfessionalId,
+            storeId: notification.StoreId,
+            professionalId: notification.ProfessionalId,
             ct: ct
         );
 

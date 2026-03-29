@@ -5,7 +5,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Stores;
 
 public sealed class RemoveCalendarsWhenStoreClosed
-    : INotificationHandler<DomainEventNotification<StoreClosedDomainEvent>>
+    : INotificationHandler<StoreClosedDomainEvent>
 {
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
@@ -20,11 +20,11 @@ public sealed class RemoveCalendarsWhenStoreClosed
     }
 
     public async Task Handle(
-        DomainEventNotification<StoreClosedDomainEvent> notification,
+        StoreClosedDomainEvent notification,
         CancellationToken ct
     )
     {
-        var storeId = notification.DomainEvent.StoreId;
+        var storeId = notification.StoreId;
 
         await _storeCalendarRepo.RemoveAsync(storeId, ct);
         await _staffCalendarRepo.RemoveAsync(storeId, ct);

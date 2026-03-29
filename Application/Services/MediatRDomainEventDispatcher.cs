@@ -1,5 +1,4 @@
 using Application.Abstractions.Events;
-using Domain.Events;
 using Domain.Interfaces;
 using MediatR;
 
@@ -18,11 +17,7 @@ public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
     {
         foreach (var domainEvent in domainEvents)
         {
-            var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
-            var notification = Activator.CreateInstance(notificationType, domainEvent)
-                ?? throw new InvalidOperationException("Could not create domain event notification.");
-
-            await _publisher.Publish((INotification)notification, ct);
+            await _publisher.Publish(domainEvent, ct);
         }
     }
 }

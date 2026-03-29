@@ -5,7 +5,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Professionals;
 
 public sealed class RemoveAssignmentsWhenProfessionalLeft
-    : INotificationHandler<DomainEventNotification<ProfessionalLeftStoreDomainEvent>>
+    : INotificationHandler<ProfessionalLeftStoreDomainEvent>
 {
     private readonly IAssignmentsRepository _repo;
 
@@ -14,10 +14,10 @@ public sealed class RemoveAssignmentsWhenProfessionalLeft
         _repo = repo;
     }
 
-    public async Task Handle(DomainEventNotification<ProfessionalLeftStoreDomainEvent> notification, CancellationToken ct)
+    public async Task Handle(ProfessionalLeftStoreDomainEvent notification, CancellationToken ct)
     {
-        var assignments = await _repo.GetByStoreIdAsync(notification.DomainEvent.StoreId, ct);
+        var assignments = await _repo.GetByStoreIdAsync(notification.StoreId, ct);
 
-        assignments?.RemoveByProfessional(notification.DomainEvent.ProfessionalId);
+        assignments?.RemoveByProfessional(notification.ProfessionalId);
     }
 }

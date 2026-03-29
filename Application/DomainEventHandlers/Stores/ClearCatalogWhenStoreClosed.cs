@@ -5,7 +5,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Stores;
 
 public sealed class ClearCatalogWhenStoreClosed
-    : INotificationHandler<DomainEventNotification<StoreClosedDomainEvent>>
+    : INotificationHandler<StoreClosedDomainEvent>
 {
     private readonly IStoreCatalogRepository _repo;
 
@@ -15,11 +15,11 @@ public sealed class ClearCatalogWhenStoreClosed
     }
 
     public async Task Handle(
-        DomainEventNotification<StoreClosedDomainEvent> notification,
+        StoreClosedDomainEvent notification,
         CancellationToken ct
     )
     {
-        var catalog = await _repo.GetByIdAsync(notification.DomainEvent.StoreId, ct);
+        var catalog = await _repo.GetByIdAsync(notification.StoreId, ct);
 
         catalog?.Clear();
     }

@@ -5,7 +5,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Stores;
 
 public sealed class ClearAssignmentsWhenStoreClosed
-    : INotificationHandler<DomainEventNotification<StoreClosedDomainEvent>>
+    : INotificationHandler<StoreClosedDomainEvent>
 {
     private readonly IAssignmentsRepository _repo;
 
@@ -15,11 +15,11 @@ public sealed class ClearAssignmentsWhenStoreClosed
     }
 
     public async Task Handle(
-        DomainEventNotification<StoreClosedDomainEvent> notification,
+        StoreClosedDomainEvent notification,
         CancellationToken ct
     )
     {
-        var assignments = await _repo.GetByStoreIdAsync(notification.DomainEvent.StoreId, ct);
+        var assignments = await _repo.GetByStoreIdAsync(notification.StoreId, ct);
 
         assignments?.Clear();
     }

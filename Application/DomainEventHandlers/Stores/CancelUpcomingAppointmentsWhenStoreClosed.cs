@@ -6,7 +6,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Stores;
 
 public sealed class CancelUpcomingAppointmentsWhenStoreClosed
-    : INotificationHandler<DomainEventNotification<StoreClosedDomainEvent>>
+    : INotificationHandler<StoreClosedDomainEvent>
 {
     private readonly IAppointmentRepository _repo;
     private readonly IClock _clock;
@@ -21,13 +21,11 @@ public sealed class CancelUpcomingAppointmentsWhenStoreClosed
     }
 
     public async Task Handle(
-        DomainEventNotification<StoreClosedDomainEvent> notification,
+        StoreClosedDomainEvent notification,
         CancellationToken ct
     )
     {
-        var domainEvent = notification.DomainEvent;
-
-        var appointments = await _repo.GetUpcomingByStoreIdAsync(domainEvent.StoreId, ct);
+        var appointments = await _repo.GetUpcomingByStoreIdAsync(notification.StoreId, ct);
 
         foreach (var appointment in appointments)
         {

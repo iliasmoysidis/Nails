@@ -5,7 +5,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Professionals;
 
 public sealed class RemoveCalendarsWhenProfessionalLeft
-    : INotificationHandler<DomainEventNotification<ProfessionalLeftStoreDomainEvent>>
+    : INotificationHandler<ProfessionalLeftStoreDomainEvent>
 {
     private readonly IStaffCalendarRepository _repo;
 
@@ -14,11 +14,11 @@ public sealed class RemoveCalendarsWhenProfessionalLeft
         _repo = repo;
     }
 
-    public async Task Handle(DomainEventNotification<ProfessionalLeftStoreDomainEvent> notification, CancellationToken ct)
+    public async Task Handle(ProfessionalLeftStoreDomainEvent notification, CancellationToken ct)
     {
         await _repo.RemoveProfessionalAsync(
-            storeId: notification.DomainEvent.StoreId,
-            professionalId: notification.DomainEvent.ProfessionalId,
+            storeId: notification.StoreId,
+            professionalId: notification.ProfessionalId,
             ct: ct
         );
     }

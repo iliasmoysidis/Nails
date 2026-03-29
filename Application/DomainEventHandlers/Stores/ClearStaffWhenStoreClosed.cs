@@ -5,7 +5,7 @@ using MediatR;
 namespace Application.DomainEventHandlers.Stores;
 
 public sealed class ClearStaffWhenStoreClosed
-    : INotificationHandler<DomainEventNotification<StoreClosedDomainEvent>>
+    : INotificationHandler<StoreClosedDomainEvent>
 {
     private readonly IStaffRepository _repo;
 
@@ -15,11 +15,11 @@ public sealed class ClearStaffWhenStoreClosed
     }
 
     public async Task Handle(
-        DomainEventNotification<StoreClosedDomainEvent> notification,
+        StoreClosedDomainEvent notification,
         CancellationToken ct
     )
     {
-        var staff = await _repo.GetByStoreIdAsync(notification.DomainEvent.StoreId, ct);
+        var staff = await _repo.GetByStoreIdAsync(notification.StoreId, ct);
 
         staff?.Clear();
     }
