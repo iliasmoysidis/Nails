@@ -9,6 +9,8 @@ public sealed class AppDbContext : DbContext
     public DbSet<Store> Stores => Set<Store>();
     public DbSet<Staff> staff => Set<Staff>();
 
+    public DbSet<AssignmentEntity> Assignments => Set<AssignmentEntity>();
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
