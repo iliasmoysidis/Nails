@@ -1,8 +1,11 @@
+using Domain.Enums;
+
 namespace Infrastructure.Entities;
 
-public sealed class AssignmentEntity
+
+public class StaffRoleEntity
 {
     public int StoreId { get; set; }
     public int ProfessionalId { get; set; }
-    public int OfferingId { get; set; }
+    public StaffRole Role { get; set; }
 }

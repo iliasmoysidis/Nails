@@ -136,4 +136,16 @@ public class Staff : Entity
     private StaffMember GetMemberOrThrow(int professionalId)
         => GetMember(professionalId)
            ?? throw new NotFoundException("Professional is not active staff.");
+
+    public static Staff Rehydrate(int storeId, IEnumerable<(int ProfessionalId, IEnumerable<StaffRole> Roles)> data)
+    {
+        var staff = new Staff(storeId);
+
+        foreach (var item in data)
+        {
+            staff._members.Add(StaffMember.Create(item.ProfessionalId, item.Roles));
+        }
+
+        return staff;
+    }
 }
