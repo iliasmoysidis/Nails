@@ -3,7 +3,7 @@ using Domain.ValueObjects.Time;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Persistence;
+namespace Infrastructure.Persistence.Configurations;
 
 public sealed class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 {

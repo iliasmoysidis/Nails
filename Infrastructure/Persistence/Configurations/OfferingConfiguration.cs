@@ -19,8 +19,8 @@ public sealed class OfferingConfiguration : IEntityTypeConfiguration<Offering>
 
         builder.OwnsOne(x => x.Price, money =>
         {
-            money.Property(m => m.Amount).HasColumnName("PriceAmount");
-            money.Property(m => m.Currency).HasColumnName("PriceCurrency");
+            money.Property(m => m.Amount);
+            money.Property(m => m.Currency);
         });
 
         builder.OwnsOne(x => x.Duration, d =>
@@ -30,7 +30,7 @@ public sealed class OfferingConfiguration : IEntityTypeConfiguration<Offering>
 
         builder.OwnsOne(x => x.Description, d =>
         {
-            d.Property(x => x.Value).HasColumnName("Description");
+            d.Property(x => x.Value);
         });
     }
 }

@@ -1,0 +1,52 @@
+using Application.Abstractions.Repositories;
+using Domain.Entities;
+using Domain.ValueObjects.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Persistence.Repositories;
+
+public sealed class ProfessionalRepository : IProfessionalRepository
+{
+    private readonly AppDbContext _db;
+
+    public ProfessionalRepository(AppDbContext db)
+    {
+        _db = db;
+    }
+
+    public async Task AddAsync(Professional professional, CancellationToken ct)
+    {
+        await _db.Professional.AddAsync(professional, ct);
+    }
+
+    public async Task<bool> DeleteAsync(int professionalId, CancellationToken ct)
+    {
+        var affectedRows = await _db.Professional.Where(p => p.Id == professionalId).ExecuteDeleteAsync(ct);
+        return affectedRows > 0;
+    }
+
+    public async Task<bool> ExistsAsync(Email email, Phone phone, TaxIdentificationNumber taxIdNumber, CancellationToken ct)
+    {
+
+        return await _db.Professional
+        .AsNoTracking()
+        .AnyAsync(
+            p =>
+            p.Email.Value == email.Value ||
+            (
+                p.Phone.CountryCode == phone.CountryCode &&
+                p.Phone.Value == phone.Value
+            ) ||
+            (
+                p.TaxIdNumber.CountryCode == taxIdNumber.CountryCode &&
+                p.TaxIdNumber.Value == taxIdNumber.Value
+            ),
+        ct
+        );
+    }
+
+    public async Task<Professional?> GetByIdAsync(int professionalId, CancellationToken ct)
+    {
+        return await _db.Professional.FindAsync([professionalId], ct);
+    }
+}

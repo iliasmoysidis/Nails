@@ -7,8 +7,9 @@ public sealed class AppDbContext : DbContext
 {
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<Store> Stores => Set<Store>();
-    public DbSet<Staff> staff => Set<Staff>();
-    public DbSet<Offering> offering => Set<Offering>();
+    public DbSet<Staff> Staff => Set<Staff>();
+    public DbSet<Offering> Offering => Set<Offering>();
+    public DbSet<Professional> Professional => Set<Professional>();
 
     public DbSet<AssignmentEntity> Assignments => Set<AssignmentEntity>();
 
