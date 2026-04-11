@@ -18,6 +18,8 @@ public sealed class AppDbContext : DbContext
     public DbSet<StaffRoleEntity> StaffRoles => Set<StaffRoleEntity>();
     public DbSet<StaffCalendarWorkingRangeEntity> StaffCalendarWorkingRanges => Set<StaffCalendarWorkingRangeEntity>();
     public DbSet<StaffCalendarExceptionEntity> StaffCalendarExceptions => Set<StaffCalendarExceptionEntity>();
+    public DbSet<StoreCalendarWorkingRangeEntity> StoreCalendarWorkingRanges => Set<StoreCalendarWorkingRangeEntity>();
+    public DbSet<StoreCalendarExceptionEntity> StoreCalendarExceptions => Set<StoreCalendarExceptionEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

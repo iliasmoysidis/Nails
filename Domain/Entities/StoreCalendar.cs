@@ -45,4 +45,21 @@ public class StoreCalendar : BaseCalendar
             r.Start <= range.Start &&
             r.End >= range.End);
     }
+
+    public static StoreCalendar Rehydrate(
+        int storeId,
+        IEnumerable<WorkingDay> workingDays,
+        IEnumerable<CalendarException> exceptions
+    )
+    {
+        var calendar = new StoreCalendar(storeId);
+
+        foreach (var day in workingDays)
+            calendar.SetWorkingDay(day);
+
+        foreach (var exception in exceptions)
+            calendar.SetException(exception);
+
+        return calendar;
+    }
 }

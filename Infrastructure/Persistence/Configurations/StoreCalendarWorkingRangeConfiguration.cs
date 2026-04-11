@@ -4,26 +4,20 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configurations;
 
-public sealed class StaffCalendarWorkingRangeConfiguration : IEntityTypeConfiguration<StaffCalendarWorkingRangeEntity>
+public sealed class StoreCalendarWorkingRangeConfiguration : IEntityTypeConfiguration<StoreCalendarWorkingRangeEntity>
 {
-    public void Configure(EntityTypeBuilder<StaffCalendarWorkingRangeEntity> builder)
+    public void Configure(EntityTypeBuilder<StoreCalendarWorkingRangeEntity> builder)
     {
-        builder.ToTable("StaffWorkingRanges", t =>
+        builder.ToTable("StoreCalendarWorkingRanges", t =>
         {
-            t.HasCheckConstraint(
-                "CK_StaffWorkingRange_TimeRange",
-                "Start < End"
-            );
+            t.HasCheckConstraint("CK_StoreCalendarWorkingRange_TimeRange",
+            "Start < End");
         });
 
         builder.HasKey(x => x.Id);
 
         builder
             .Property(x => x.StoreId)
-            .IsRequired();
-
-        builder
-            .Property(x => x.ProfessionalId)
             .IsRequired();
 
         builder
@@ -39,6 +33,6 @@ public sealed class StaffCalendarWorkingRangeConfiguration : IEntityTypeConfigur
             .Property(x => x.End)
             .IsRequired();
 
-        builder.HasIndex(x => new { x.StoreId, x.ProfessionalId, x.Day });
+        builder.HasIndex(x => new { x.StoreId, x.Day });
     }
 }
