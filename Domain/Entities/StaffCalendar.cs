@@ -51,4 +51,22 @@ public class StaffCalendar : BaseCalendar
         return workingRanges.Any()
             && TimeRange.AnyOverlap(workingRanges, exception.TimeRanges);
     }
+
+    public static StaffCalendar Rehydrate(
+        int storeId,
+        int professionalId,
+        IEnumerable<WorkingDay> workingDays,
+        IEnumerable<CalendarException> exceptions
+    )
+    {
+        var calendar = new StaffCalendar(storeId, professionalId);
+
+        foreach (var day in workingDays)
+            calendar.SetWorkingDay(day);
+
+        foreach (var ex in exceptions)
+            calendar.SetException(ex);
+
+        return calendar;
+    }
 }
