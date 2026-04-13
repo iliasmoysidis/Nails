@@ -14,23 +14,30 @@ public sealed class OfferingConfiguration : IEntityTypeConfiguration<Offering>
 
         builder.OwnsOne(x => x.Name, name =>
         {
-            name.Property(n => n.Value).HasColumnName("Name");
+            name.Property(n => n.Value)
+                .HasColumnName("Name")
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.Price, money =>
         {
-            money.Property(m => m.Amount);
-            money.Property(m => m.Currency);
+            money.Property(m => m.Amount)
+                .IsRequired();
+            money.Property(m => m.Currency)
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.Duration, d =>
         {
-            d.Property(x => x.Value).HasColumnName("DurationMinutes");
+            d.Property(x => x.Value)
+                .HasColumnName("DurationMinutes")
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.Description, d =>
         {
-            d.Property(x => x.Value);
+            d.Property(x => x.Value)
+                .IsRequired(false);
         });
     }
 }

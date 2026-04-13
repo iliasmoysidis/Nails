@@ -79,4 +79,22 @@ public class StoreCatalog
         if (_offerings.Any(o => o.Name == name && o.Id != ignoreId))
             throw new InvariantException("Offering name must be unique.");
     }
+
+    public static StoreCatalog Rehydrate(
+        int storeId,
+        IEnumerable<Offering> offerings
+    )
+    {
+        var catalog = new StoreCatalog(storeId);
+
+        foreach (var offering in offerings)
+        {
+            if (offering.StoreId != storeId)
+                throw new InvariantException("Offering does not belong to this store.");
+
+            catalog._offerings.Add(offering);
+        }
+
+        return catalog;
+    }
 }
