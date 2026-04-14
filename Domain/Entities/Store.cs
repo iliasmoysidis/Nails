@@ -16,8 +16,6 @@ public class Store : Entity
     public Email Email { get; private set; }
     public Phone Phone { get; private set; }
 
-    public bool IsClosed { get; private set; }
-
     private Store(
         StoreName name,
         Address address,
@@ -42,11 +40,6 @@ public class Store : Entity
 
     public void Close(IClock clock)
     {
-        if (IsClosed)
-            throw new StateException("Store is already closed.");
-
-        IsClosed = true;
-
         RaiseDomainEvent(new StoreClosedDomainEvent(Id, clock.Now));
     }
 
