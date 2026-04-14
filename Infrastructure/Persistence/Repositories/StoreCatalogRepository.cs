@@ -15,7 +15,7 @@ public sealed class StoreCatalogRepository : IStoreCatalogRepository
 
     public async Task<StoreCatalog?> GetByIdAsync(int storeId, CancellationToken ct)
     {
-        var offerings = await _db.Offering
+        var offerings = await _db.Offerings
             .Where(o => o.StoreId == storeId)
             .ToListAsync();
 

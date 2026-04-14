@@ -1,4 +1,3 @@
-using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
 
 namespace Domain.Entities;

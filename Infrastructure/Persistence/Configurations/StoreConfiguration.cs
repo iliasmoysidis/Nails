@@ -18,28 +18,58 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
 
         builder.OwnsOne(x => x.Address, a =>
         {
-            a.Property(x => x.Street).IsRequired();
-            a.Property(x => x.City).IsRequired();
-            a.Property(x => x.PostalCode).IsRequired();
-            a.Property(x => x.State).IsRequired();
-            a.Property(x => x.CountryCode).IsRequired();
+            a.Property(x => x.Street)
+                .HasColumnName("Street")
+                .IsRequired();
+
+            a.Property(x => x.City)
+                .HasColumnName("City")
+                .IsRequired();
+
+            a.Property(x => x.PostalCode)
+                .HasColumnName("PostalCode")
+                .IsRequired();
+
+            a.Property(x => x.State)
+                .HasColumnName("State")
+                .IsRequired();
+
+            a.Property(x => x.CountryCode)
+                .HasColumnName("CountryCode")
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.TaxIdNumber, t =>
         {
-            t.Property(x => x.CountryCode).IsRequired();
-            t.Property(x => x.Value).IsRequired();
+            t.Property(x => x.CountryCode)
+                .HasColumnName("TaxCountryCode")
+                .IsRequired();
+
+            t.Property(x => x.Value)
+                .HasColumnName("TaxIdNumber")
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.Email, e =>
         {
-            e.Property(x => x.Value).IsRequired();
+            e.Property(x => x.Value)
+                .HasColumnName("Email")
+                .IsRequired();
         });
 
         builder.OwnsOne(x => x.Phone, p =>
         {
-            p.Property(x => x.CountryCode).IsRequired();
-            p.Property(x => x.NationalNumber).IsRequired();
+            p.Property(x => x.CountryCode)
+                .HasColumnName("PhoneCountryCode")
+                .IsRequired();
+
+            p.Property(x => x.NationalNumber)
+                .HasColumnName("PhoneNationalNumber")
+                .IsRequired();
         });
+
+        builder.HasIndex("Email").IsUnique();
+
+        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber").IsUnique();
     }
 }

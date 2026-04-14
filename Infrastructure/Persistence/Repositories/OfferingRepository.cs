@@ -14,6 +14,6 @@ public sealed class OfferingRepository : IOfferingRepository
 
     public async Task<Offering?> GetByIdAsync(int offeringId, CancellationToken ct)
     {
-        return await _db.Offering.FindAsync([offeringId], ct);
+        return await _db.Offerings.FindAsync([offeringId], ct);
     }
 }

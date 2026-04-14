@@ -16,19 +16,20 @@ public sealed class ProfessionalRepository : IProfessionalRepository
 
     public async Task AddAsync(Professional professional, CancellationToken ct)
     {
-        await _db.Professional.AddAsync(professional, ct);
+        await _db.Professionals.AddAsync(professional, ct);
     }
 
     public async Task<bool> DeleteAsync(int professionalId, CancellationToken ct)
     {
-        var affectedRows = await _db.Professional.Where(p => p.Id == professionalId).ExecuteDeleteAsync(ct);
+        var affectedRows = await _db.Professionals.Where(p => p.Id == professionalId)
+            .ExecuteDeleteAsync(ct);
         return affectedRows > 0;
     }
 
     public async Task<bool> ExistsAsync(Email email, Phone phone, TaxIdentificationNumber taxIdNumber, CancellationToken ct)
     {
 
-        return await _db.Professional
+        return await _db.Professionals
         .AsNoTracking()
         .AnyAsync(
             p =>
@@ -47,6 +48,6 @@ public sealed class ProfessionalRepository : IProfessionalRepository
 
     public async Task<Professional?> GetByIdAsync(int professionalId, CancellationToken ct)
     {
-        return await _db.Professional.FindAsync([professionalId], ct);
+        return await _db.Professionals.FindAsync([professionalId], ct);
     }
 }
