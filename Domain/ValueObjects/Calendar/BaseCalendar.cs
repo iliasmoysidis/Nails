@@ -8,19 +8,22 @@ public abstract class BaseCalendar
     protected static readonly IReadOnlyCollection<TimeRange> EmptyRanges
         = Array.Empty<TimeRange>();
 
-    public void SetWorkingDay(WorkingDay day)
+    internal void SetWorkingDay(WorkingDay day)
     {
         _workingDays[day.Day] = day;
     }
 
-    public void SetDayOff(DayOfWeek day)
-        => _workingDays[day] = WorkingDay.DayOff(day);
-
-    public void SetException(CalendarException exception)
+    internal void SetException(CalendarException exception)
         => _exceptions[exception.Date] = exception;
 
-    public void RemoveException(DateOnly date)
+    internal void SetDayOff(DayOfWeek day)
+        => _workingDays[day] = WorkingDay.DayOff(day);
+
+    internal void RemoveException(DateOnly date)
         => _exceptions.Remove(date);
+
+    public IReadOnlyCollection<WorkingDay> GetWorkingDays()
+        => _workingDays.Values;
 
     public IReadOnlyCollection<CalendarException> GetExceptions()
         => _exceptions.Values;
@@ -34,11 +37,5 @@ public abstract class BaseCalendar
             return workingDay.IsDayOff ? EmptyRanges : workingDay.TimeRanges;
 
         return EmptyRanges;
-    }
-
-    public void Clear()
-    {
-        _workingDays.Clear();
-        _exceptions.Clear();
     }
 }
