@@ -8,6 +8,8 @@ public interface IAppointmentRepository
 
     Task<IReadOnlyCollection<Appointment>> GetByProfessionalIdAsync(int professionalId, CancellationToken ct);
 
+    Task<IReadOnlyCollection<Appointment>> GetByUserIdAsync(int userId, CancellationToken ct);
+
     Task<IReadOnlyCollection<Appointment>> GetUpcomingByStoreIdAsync(int storeId, CancellationToken ct);
 
     Task<IReadOnlyCollection<Appointment>> GetUpcomingByStoreIdAndProfessionalId(int storeId, int professionalId, CancellationToken ct);

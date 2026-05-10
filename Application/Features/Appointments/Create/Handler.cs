@@ -1,6 +1,5 @@
 
 using Application.Abstractions.Repositories;
-using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects.Appointments;
 using MediatR;
@@ -12,7 +11,6 @@ public sealed class Handler
 {
     private readonly Context _ctx;
     private readonly IAppointmentRepository _repo;
-
     private readonly IClock _clock;
 
     public Handler(
@@ -28,17 +26,15 @@ public sealed class Handler
 
     public async Task<int> Handle(Command command, CancellationToken ct)
     {
-        var appointment = Appointment.Create(
+        var appointment = _ctx.BookingSchedule.Book(
             userId: command.UserId,
-            professionalId: command.ProfessionalId,
             offeringId: command.OfferingId,
-            storeId: command.StoreId,
             startAt: command.StartAt,
-            duration: _ctx.Offering.Duration,
-            price: _ctx.Offering.Price,
             notes: Notes.From(command.Notes),
             clock: _clock
         );
+
+        _ctx.UserSchedule.Add(appointment);
 
         await _repo.AddAsync(appointment, ct);
 

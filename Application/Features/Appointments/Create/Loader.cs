@@ -1,6 +1,7 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Features.Appointments.Create;
 
@@ -12,22 +13,20 @@ public sealed class Loader
     private readonly IStaffCalendarRepository _staffCalendarRepo;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
     private readonly IAssignmentsRepository _assignmentsRepo;
-    private readonly IOfferingRepository _offeringRepo;
 
     public Loader(
     IStoreCatalogRepository storeCatalogRepo,
     IStaffCalendarRepository staffCalendarRepo,
     IStoreCalendarRepository storeCalendarRepo,
     IAssignmentsRepository assignmentsRepo,
-    IAppointmentRepository appointmentRepo,
-    IOfferingRepository offeringRepo)
+    IAppointmentRepository appointmentRepo
+    )
     {
         _storeCatalogRepo = storeCatalogRepo;
         _staffCalendarRepo = staffCalendarRepo;
         _storeCalendarRepo = storeCalendarRepo;
         _assignmentsRepo = assignmentsRepo;
         _appointmentRepo = appointmentRepo;
-        _offeringRepo = offeringRepo;
     }
 
     public async Task PopulateAsync(
@@ -36,10 +35,7 @@ public sealed class Loader
         CancellationToken ct)
     {
         var storeCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
-    ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
-
-        var offering = await _offeringRepo.GetByIdAsync(command.OfferingId, ct)
-            ?? throw new ApplicationLayerNotFoundException("Offering not found");
+            ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
 
         var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found");
@@ -50,13 +46,23 @@ public sealed class Loader
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found");
 
-        var appointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
+        var professionalAppointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
 
-        ctx.StoreCatalog = storeCatalog;
-        ctx.Offering = offering;
-        ctx.StoreCalendar = storeCalendar;
-        ctx.StaffCalendar = staffCalendar;
-        ctx.Assignments = assignments;
-        ctx.Appointments = appointments;
+        var userAppointments = await _appointmentRepo.GetByUserIdAsync(command.UserId, ct);
+
+        ctx.BookingSchedule = new BookingSchedule(
+            storeId: command.StoreId,
+            professionalId: command.ProfessionalId,
+            storeCalendar: storeCalendar,
+            staffCalendar: staffCalendar,
+            storeCatalog: storeCatalog,
+            assignments: assignments,
+            appointments: professionalAppointments
+        );
+
+        ctx.UserSchedule = new UserSchedule(
+            userId: command.UserId,
+            appointments: userAppointments
+        );
     }
 }
