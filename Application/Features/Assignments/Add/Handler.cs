@@ -14,10 +14,7 @@ public sealed class Handler
 
     public Task Handle(Command command, CancellationToken ct)
     {
-        foreach (var offeringId in command.OfferingIds)
-        {
-            _ctx.Assignments.Add(command.ProfessionalId, offeringId);
-        }
+        _ctx.StoreCapabilities.Assign(command.ProfessionalId, command.OfferingIds);
 
         return Task.CompletedTask;
     }

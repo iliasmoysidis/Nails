@@ -1,6 +1,7 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
+using Domain.Entities;
 
 namespace Application.Features.Assignments.Add;
 
@@ -35,8 +36,10 @@ public sealed class Loader
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found.");
 
-        ctx.Staff = staff;
-        ctx.Catalog = catalog;
-        ctx.Assignments = assignments;
+        ctx.StoreCapabilities = new StoreCapabilities(
+            staff,
+            catalog,
+            assignments
+        );
     }
 }

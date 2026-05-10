@@ -16,10 +16,9 @@ public sealed class Authorizer
         _auth = auth;
         _ctx = ctx;
     }
-
     public Task AuthorizeAsync(Command request, CancellationToken ct)
     {
-        _auth.EnsureOwner(_ctx.Staff);
+        _auth.EnsureOwner(_ctx.StoreCapabilities.Staff);
 
         return Task.CompletedTask;
     }

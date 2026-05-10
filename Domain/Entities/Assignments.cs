@@ -19,13 +19,13 @@ public class Assignments
     public static Assignments Create(int storeId)
         => new(storeId);
 
-    public void Add(int professionalId, int offeringId)
+    internal void Add(int professionalId, int offeringId)
     {
         if (!_assignments.Add(new Assignment(professionalId, offeringId)))
             throw new InvariantException("Offering is already assigned to this professional.");
     }
 
-    public void Remove(int professionalId, int offeringId)
+    internal void Remove(int professionalId, int offeringId)
     {
         if (!_assignments.Remove(new Assignment(professionalId, offeringId)))
             throw new InvariantException("Offering is not assigned to the professional.");

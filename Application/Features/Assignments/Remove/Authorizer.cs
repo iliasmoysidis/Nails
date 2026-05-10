@@ -11,7 +11,8 @@ public sealed class Authorizer
 
     public Authorizer(
         AuthorizationGuard auth,
-        Context ctx)
+        Context ctx
+    )
     {
         _auth = auth;
         _ctx = ctx;
@@ -19,7 +20,7 @@ public sealed class Authorizer
 
     public Task AuthorizeAsync(Command request, CancellationToken ct)
     {
-        _auth.EnsureOwner(_ctx.Staff);
+        _auth.EnsureOwner(_ctx.StoreCapabilities.Staff);
 
         return Task.CompletedTask;
     }

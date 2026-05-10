@@ -3,7 +3,6 @@ using MediatR;
 
 namespace Application.Features.Appointments.Confirm;
 
-
 public sealed class Handler : IRequestHandler<Command>
 {
     private readonly Context _ctx;
