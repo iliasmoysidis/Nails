@@ -18,9 +18,9 @@ public sealed class Handler
         Command command,
         CancellationToken ct)
     {
-        var holiday = CalendarException.DayOff(command.Date);
+        var vacation = CalendarException.DayOff(command.Date);
 
-        _ctx.StaffCalendar.AddException(holiday);
+        _ctx.ProfessionalAvailability.SetException(vacation);
 
         return Task.CompletedTask;
     }

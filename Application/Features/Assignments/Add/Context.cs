@@ -1,8 +1,9 @@
 using Domain.Entities;
+using Domain.Services;
 
 namespace Application.Features.Assignments.Add;
 
 public sealed class Context
 {
-    public StoreCapabilities StoreCapabilities { get; set; } = default!;
+    public StoreAssignments StoreAssignments { get; set; } = default!;
 }

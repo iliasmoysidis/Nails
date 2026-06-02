@@ -20,7 +20,7 @@ public sealed class Handler
         var ranges = command.TimeRanges.Select(r => new TimeRange(r.Start, r.End));
         var workingDay = WorkingDay.WithRanges(command.Day, ranges);
 
-        _ctx.StaffCalendar.SetWorkingDay(workingDay);
+        _ctx.ProfessionalAvailability.SetWorkingDay(workingDay);
 
         return Task.CompletedTask;
     }

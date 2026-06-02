@@ -19,6 +19,21 @@ public class StaffCalendar : BaseCalendar
     public static StaffCalendar Create(int storeId, int professionalId)
         => new(storeId, professionalId);
 
+    public void AddVacation(DateOnly date)
+    {
+        SetException(CalendarException.DayOff(date));
+    }
+
+    public void SetSpecialAvailability(CalendarException exception)
+    {
+        SetException(exception);
+    }
+
+    public void RemoveSpecialAvailability(DateOnly date)
+    {
+        RemoveException(date);
+    }
+
     public bool IsAvailable(UtcDateTime startAt, UtcDateTime endAt)
     {
         if (endAt <= startAt || startAt.Date != endAt.Date)

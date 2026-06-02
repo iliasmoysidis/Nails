@@ -1,9 +1,10 @@
 using Domain.Entities;
+using Domain.Services;
 
 namespace Application.Features.Appointments.Create;
 
 public sealed class Context
 {
-    public BookingSchedule BookingSchedule { get; set; } = default!;
+    public AppointmentBooking AppointmentBooking { get; set; } = default!;
     public UserSchedule UserSchedule { get; set; } = default!;
 }

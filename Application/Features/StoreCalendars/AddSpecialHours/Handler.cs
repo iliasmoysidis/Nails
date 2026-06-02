@@ -21,9 +21,7 @@ public sealed class Handler
             .Select(r => new TimeRange(r.Start, r.End))
             .ToList();
 
-        var exception = CalendarException.PartialDay(command.Date, ranges);
-
-        _ctx.StoreCalendar.SetException(exception);
+        _ctx.StoreCalendar.SetSpecialOpeningHours(command.Date, ranges);
 
         return Task.CompletedTask;
     }

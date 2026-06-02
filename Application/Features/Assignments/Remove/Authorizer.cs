@@ -20,7 +20,7 @@ public sealed class Authorizer
 
     public Task AuthorizeAsync(Command request, CancellationToken ct)
     {
-        _auth.EnsureOwner(_ctx.StoreCapabilities.Staff);
+        _auth.EnsureOwner(_ctx.StoreAssignments.Staff);
 
         return Task.CompletedTask;
     }

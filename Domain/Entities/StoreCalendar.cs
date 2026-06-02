@@ -17,6 +17,30 @@ public class StoreCalendar : BaseCalendar
     public static StoreCalendar Create(int storeId)
         => new(storeId);
 
+    public void AddHoliday(DateOnly date)
+    {
+        SetException(CalendarException.DayOff(date));
+    }
+
+    public void SetSpecialOpeningHours(DateOnly date, IEnumerable<TimeRange> ranges)
+    {
+        SetException(CalendarException.PartialDay(date, ranges));
+    }
+
+    public void RemoveSpecialOpeningHours(DateOnly date)
+    {
+        RemoveException(date);
+    }
+
+    public void SetOpeningHours(DayOfWeek day, IEnumerable<TimeRange> ranges)
+    {
+        SetWorkingDay(WorkingDay.WithRanges(day, ranges));
+    }
+
+    public void CloseDay(DayOfWeek day)
+    {
+        SetDayOff(day);
+    }
 
     public bool IsOpenAt(UtcDateTime dateTime)
     {

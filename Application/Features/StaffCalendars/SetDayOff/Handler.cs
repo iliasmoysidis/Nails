@@ -16,7 +16,7 @@ public sealed class Handler
         Command command,
         CancellationToken ct)
     {
-        _ctx.StaffCalendar.SetDayOff(command.Day);
+        _ctx.ProfessionalAvailability.SetDayOff(command.Day);
 
         return Task.CompletedTask;
     }

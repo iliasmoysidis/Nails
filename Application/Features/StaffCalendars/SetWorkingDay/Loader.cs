@@ -1,6 +1,8 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
+using Domain.Entities;
+using Domain.Services;
 
 namespace Application.Features.StaffCalendars.SetWorkingDay;
 
@@ -11,16 +13,16 @@ public sealed class Loader
 {
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
-    private readonly IStaffCalendarRepository _staffCalendarRepo;
+    private readonly IProfessionalScheduleRepository _professionalScheduleRepo;
 
     public Loader(
         IStaffRepository staffRepo,
         IStoreCalendarRepository storeCalendarRepo,
-        IStaffCalendarRepository staffCalendarRepo)
+        IProfessionalScheduleRepository professionalScheduleRepo)
     {
         _staffRepo = staffRepo;
         _storeCalendarRepo = storeCalendarRepo;
-        _staffCalendarRepo = staffCalendarRepo;
+        _professionalScheduleRepo = professionalScheduleRepo;
     }
 
     public async Task PopulateAsync(
@@ -34,14 +36,16 @@ public sealed class Loader
         var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
 
-        var staffCalendar = await _staffCalendarRepo.GetAsync(
-            command.StoreId,
-            command.ProfessionalId,
-            ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
+        var professionalSchedule = await _professionalScheduleRepo
+            .GetByProfessionalIdAsync(command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional schedule not found.");
 
         ctx.Staff = staff;
-        ctx.StoreCalendar = storeCalendar;
-        ctx.StaffCalendar = staffCalendar;
+
+        ctx.ProfessionalAvailability = new ProfessionalAvailability(
+            storeCalendar,
+            professionalSchedule,
+            command.StoreId
+        );
     }
 }

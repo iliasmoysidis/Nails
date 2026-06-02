@@ -17,7 +17,7 @@ public sealed class Handler
         Command command,
         CancellationToken ct)
     {
-        _ctx.StaffCalendar.RemoveException(command.Date);
+        _ctx.ProfessionalAvailability.RemoveException(command.Date);
 
         return Task.CompletedTask;
     }

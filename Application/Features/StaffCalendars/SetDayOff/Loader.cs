@@ -1,6 +1,8 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
+using Domain.Entities;
+using Domain.Services;
 
 namespace Application.Features.StaffCalendars.SetDayOff;
 
@@ -10,14 +12,17 @@ public sealed class Loader
         Context>
 {
     private readonly IStaffRepository _staffRepo;
-    private readonly IStaffCalendarRepository _staffCalendarRepo;
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
+    private readonly IProfessionalScheduleRepository _professionalScheduleRepo;
 
     public Loader(
         IStaffRepository staffRepo,
-        IStaffCalendarRepository staffCalendarRepo)
+        IStoreCalendarRepository storeCalendarRepo,
+        IProfessionalScheduleRepository professionalScheduleRepo)
     {
         _staffRepo = staffRepo;
-        _staffCalendarRepo = staffCalendarRepo;
+        _storeCalendarRepo = storeCalendarRepo;
+        _professionalScheduleRepo = professionalScheduleRepo;
     }
 
     public async Task PopulateAsync(
@@ -28,13 +33,19 @@ public sealed class Loader
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var calendar = await _staffCalendarRepo.GetAsync(
-            command.StoreId,
-            command.ProfessionalId,
-            ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
+
+        var professionalSchedule = await _professionalScheduleRepo
+            .GetByProfessionalIdAsync(command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional schedule not found.");
 
         ctx.Staff = staff;
-        ctx.StaffCalendar = calendar;
+
+        ctx.ProfessionalAvailability = new ProfessionalAvailability(
+            storeCalendar,
+            professionalSchedule,
+            command.StoreId
+        );
     }
 }

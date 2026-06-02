@@ -18,9 +18,7 @@ public sealed class Handler
         CancellationToken ct
     )
     {
-        var holiday = CalendarException.DayOff(command.Date);
-
-        _ctx.StoreCalendar.SetException(holiday);
+        _ctx.StoreCalendar.AddHoliday(command.Date);
 
         return Task.CompletedTask;
     }

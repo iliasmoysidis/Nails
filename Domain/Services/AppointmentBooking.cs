@@ -1,12 +1,13 @@
+using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.ValueObjects.Appointments;
 using Domain.ValueObjects.Calendar;
 using Domain.ValueObjects.Time;
 
-namespace Domain.Entities;
+namespace Domain.Services;
 
-public class BookingSchedule
+public class AppointmentBooking
 {
     public int StoreId { get; }
     public int ProfessionalId { get; }
@@ -18,7 +19,7 @@ public class BookingSchedule
 
     private readonly List<Appointment> _appointments = [];
 
-    public BookingSchedule(
+    public AppointmentBooking(
         int storeId,
         int professionalId,
         StoreCalendar storeCalendar,

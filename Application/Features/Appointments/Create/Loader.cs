@@ -2,6 +2,7 @@ using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
 using Domain.Entities;
+using Domain.Services;
 
 namespace Application.Features.Appointments.Create;
 
@@ -50,7 +51,7 @@ public sealed class Loader
 
         var userAppointments = await _appointmentRepo.GetByUserIdAsync(command.UserId, ct);
 
-        ctx.BookingSchedule = new BookingSchedule(
+        ctx.AppointmentBooking = new AppointmentBooking(
             storeId: command.StoreId,
             professionalId: command.ProfessionalId,
             storeCalendar: storeCalendar,

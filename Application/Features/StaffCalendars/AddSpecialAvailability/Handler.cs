@@ -21,7 +21,7 @@ public sealed class Handler
 
         var exception = CalendarException.PartialDay(command.Date, ranges);
 
-        _ctx.StaffCalendar.AddException(exception);
+        _ctx.ProfessionalAvailability.SetException(exception);
 
         return Task.CompletedTask;
     }

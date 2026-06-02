@@ -26,7 +26,7 @@ public sealed class Handler
 
     public async Task<int> Handle(Command command, CancellationToken ct)
     {
-        var appointment = _ctx.BookingSchedule.Book(
+        var appointment = _ctx.AppointmentBooking.Book(
             userId: command.UserId,
             offeringId: command.OfferingId,
             startAt: command.StartAt,

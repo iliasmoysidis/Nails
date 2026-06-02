@@ -1,9 +1,10 @@
+using Domain.Entities;
 using Domain.Exceptions;
 using Domain.ValueObjects.Calendar;
 
-namespace Domain.Entities;
+namespace Domain.Services;
 
-public class ProfessionalEmployment
+public class ProfessionalAvailability
 {
     public int StoreId { get; }
     public int ProfessionalId { get; }
@@ -13,17 +14,16 @@ public class ProfessionalEmployment
 
     private readonly ProfessionalSchedule _professionalSchedule;
 
-    public ProfessionalEmployment(
+    public ProfessionalAvailability(
         StoreCalendar storeCalendar,
-        StaffCalendar staffCalendar,
-        ProfessionalSchedule professionalSchedule
+        ProfessionalSchedule professionalSchedule,
+        int storeId
     )
     {
+        var staffCalendar = professionalSchedule.GetCalendar(storeId);
+
         if (staffCalendar.StoreId != storeCalendar.StoreId)
             throw new InvariantException("Calendar mismatch.");
-
-        if (staffCalendar.ProfessionalId != professionalSchedule.ProfessionalId)
-            throw new InvariantException("Professional mismatch.");
 
         StoreId = storeCalendar.StoreId;
         ProfessionalId = staffCalendar.ProfessionalId;

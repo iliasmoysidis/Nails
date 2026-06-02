@@ -1,14 +1,15 @@
+using Domain.Entities;
 using Domain.Exceptions;
 
-namespace Domain.Entities;
+namespace Domain.Services;
 
-public class StoreCapabilities
+public class StoreAssignments
 {
     public Staff Staff { get; }
     public StoreCatalog StoreCatalog { get; }
     public Assignments Assignments { get; }
 
-    public StoreCapabilities(
+    public StoreAssignments(
         Staff staff,
         StoreCatalog storeCatalog,
         Assignments assignments

@@ -1,7 +1,7 @@
 using Application.Abstractions.Authorization;
 using Application.Guards;
 
-namespace Application.Features.Staffs.RemoveOwner;
+namespace Application.Features.Staffs.TerminateEmployment;
 
 public sealed class Authorizer
     : IAuthorizer<Command>

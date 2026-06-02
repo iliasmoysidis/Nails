@@ -38,6 +38,14 @@ public class ProfessionalSchedule
             throw new NotFoundException("Calendar not found.");
     }
 
+    internal StaffCalendar GetCalendar(int storeId)
+    {
+        var calendar = _calendars.GetValueOrDefault(storeId)
+            ?? throw new NotFoundException("Calendar not found.");
+
+        return calendar;
+    }
+
     public bool IsWorkingAtStore(int storeId, UtcDateTime startAt, UtcDateTime endAt)
     {
         var calendar = GetCalendar(storeId);
@@ -90,14 +98,6 @@ public class ProfessionalSchedule
         }
 
         return schedule;
-    }
-
-    private StaffCalendar GetCalendar(int storeId)
-    {
-        var calendar = _calendars.GetValueOrDefault(storeId)
-            ?? throw new NotFoundException("Calendar not found.");
-
-        return calendar;
     }
 
     private void EnsureCalendarBelongsToProfessional(StaffCalendar calendar)

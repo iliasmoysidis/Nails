@@ -1,6 +1,8 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
+using Domain.Entities;
+using Domain.Services;
 
 namespace Application.Features.StaffCalendars.AddVacation;
 
@@ -9,15 +11,18 @@ public sealed class Loader
         Command,
         Context>
 {
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
+    private readonly IProfessionalScheduleRepository _professionalScheduleRepo;
     private readonly IStaffRepository _staffRepo;
-    private readonly IStaffCalendarRepository _staffCalendarRepo;
 
     public Loader(
-        IStaffRepository staffRepo,
-        IStaffCalendarRepository staffCalendarRepo)
+        IStoreCalendarRepository storeCalendarRepo,
+        IProfessionalScheduleRepository professionalScheduleRepo,
+        IStaffRepository staffRepo)
     {
+        _storeCalendarRepo = storeCalendarRepo;
+        _professionalScheduleRepo = professionalScheduleRepo;
         _staffRepo = staffRepo;
-        _staffCalendarRepo = staffCalendarRepo;
     }
 
     public async Task PopulateAsync(
@@ -25,16 +30,16 @@ public sealed class Loader
         Context ctx,
         CancellationToken ct)
     {
+        var storeCalendar = await _storeCalendarRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store calendar not found.");
+
+        var professionalSchedule = await _professionalScheduleRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional schedule not found.");
+
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
-        var calendar = await _staffCalendarRepo.GetAsync(
-            command.StoreId,
-            command.ProfessionalId,
-            ct)
-            ?? throw new ApplicationLayerNotFoundException("Staff calendar not found.");
-
+        ctx.ProfessionalAvailability = new ProfessionalAvailability(storeCalendar, professionalSchedule, command.StoreId);
         ctx.Staff = staff;
-        ctx.StaffCalendar = calendar;
     }
 }

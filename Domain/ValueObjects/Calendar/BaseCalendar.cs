@@ -8,18 +8,18 @@ public abstract class BaseCalendar
     protected static readonly IReadOnlyCollection<TimeRange> EmptyRanges
         = Array.Empty<TimeRange>();
 
-    internal void SetWorkingDay(WorkingDay day)
+    protected void SetWorkingDay(WorkingDay day)
     {
         _workingDays[day.Day] = day;
     }
 
-    internal void SetException(CalendarException exception)
+    protected void SetException(CalendarException exception)
         => _exceptions[exception.Date] = exception;
 
-    internal void SetDayOff(DayOfWeek day)
+    protected void SetDayOff(DayOfWeek day)
         => _workingDays[day] = WorkingDay.DayOff(day);
 
-    internal void RemoveException(DateOnly date)
+    protected void RemoveException(DateOnly date)
         => _exceptions.Remove(date);
 
     public IReadOnlyCollection<WorkingDay> GetWorkingDays()
