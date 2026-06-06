@@ -34,6 +34,16 @@ public class StaffCalendar : BaseCalendar
         RemoveException(date);
     }
 
+    public void SetWorkingHours(WorkingDay workingDay)
+    {
+        SetWorkingDay(workingDay);
+    }
+
+    public void RestDay(DayOfWeek day)
+    {
+        SetDayOff(day);
+    }
+
     public bool IsAvailable(UtcDateTime startAt, UtcDateTime endAt)
     {
         if (endAt <= startAt || startAt.Date != endAt.Date)

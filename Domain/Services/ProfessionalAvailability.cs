@@ -4,60 +4,55 @@ using Domain.ValueObjects.Calendar;
 
 namespace Domain.Services;
 
-public class ProfessionalAvailability
+public sealed class ProfessionalAvailability
 {
-    public int StoreId { get; }
-    public int ProfessionalId { get; }
-
-    public StoreCalendar StoreCalendar { get; }
-    public StaffCalendar StaffCalendar { get; }
-
+    private readonly Store _store;
+    private readonly StoreCalendar _storeCalendar;
+    private readonly StaffCalendar _staffCalendar;
     private readonly ProfessionalSchedule _professionalSchedule;
 
     public ProfessionalAvailability(
+        Store store,
         StoreCalendar storeCalendar,
-        ProfessionalSchedule professionalSchedule,
-        int storeId
+        ProfessionalSchedule professionalSchedule
     )
     {
-        var staffCalendar = professionalSchedule.GetCalendar(storeId);
+        var staffCalendar = professionalSchedule.GetCalendar(store.Id);
 
-        if (staffCalendar.StoreId != storeCalendar.StoreId)
-            throw new InvariantException("Calendar mismatch.");
+        ValidateComposition(store, storeCalendar, staffCalendar);
 
-        StoreId = storeCalendar.StoreId;
-        ProfessionalId = staffCalendar.ProfessionalId;
-        StoreCalendar = storeCalendar;
-        StaffCalendar = staffCalendar;
+        _store = store;
+        _storeCalendar = storeCalendar;
+        _staffCalendar = staffCalendar;
         _professionalSchedule = professionalSchedule;
     }
 
     public void SetWorkingDay(WorkingDay workingDay)
     {
+        _store.EnsureOpen();
         EnsureFitsStoreHours(workingDay);
-
         EnsureNoProfessionalConflicts(workingDay);
-
-        StaffCalendar.SetWorkingDay(workingDay);
+        _staffCalendar.SetWorkingHours(workingDay);
     }
 
     public void SetException(CalendarException exception)
     {
+        _store.EnsureOpen();
         EnsureFitsStoreHours(exception);
-
         EnsureNoProfessionalConflicts(exception);
-
-        StaffCalendar.SetException(exception);
+        _staffCalendar.SetSpecialAvailability(exception);
     }
 
     public void SetDayOff(DayOfWeek day)
     {
-        StaffCalendar.SetDayOff(day);
+        _store.EnsureOpen();
+        _staffCalendar.RestDay(day);
     }
 
     public void RemoveException(DateOnly date)
     {
-        StaffCalendar.RemoveException(date);
+        _store.EnsureOpen();
+        _staffCalendar.RemoveSpecialAvailability(date);
     }
 
     private void EnsureFitsStoreHours(
@@ -68,9 +63,7 @@ public class ProfessionalAvailability
 
         foreach (var range in workingDay.TimeRanges)
         {
-            if (!StoreCalendar.IsWithinWeeklyStoreHours(
-                workingDay.Day,
-                range))
+            if (!_storeCalendar.IsWithinWeeklyStoreHours(workingDay.Day, range))
             {
                 throw new InvariantException(
                     "Working schedule must fit within store hours.");
@@ -86,18 +79,33 @@ public class ProfessionalAvailability
 
         foreach (var range in exception.TimeRanges)
         {
-            if (!StoreCalendar.IsWithinStoreHours(exception.Date, range))
+            if (!_storeCalendar.IsWithinStoreHours(exception.Date, range))
                 throw new InvariantException("Special availability must fit within store hours.");
         }
     }
 
     private void EnsureNoProfessionalConflicts(WorkingDay workingDay)
     {
-        _professionalSchedule.EnsureWorkingDayDoesNotConflict(StoreId, workingDay);
+        _professionalSchedule.EnsureWorkingDayDoesNotConflict(_store.Id, workingDay);
     }
 
     private void EnsureNoProfessionalConflicts(CalendarException exception)
     {
-        _professionalSchedule.EnsureExceptionDoesNotConflict(StoreId, exception);
+        _professionalSchedule.EnsureExceptionDoesNotConflict(_store.Id, exception);
+    }
+
+    private void ValidateComposition(
+        Store store,
+        StoreCalendar storeCalendar,
+        StaffCalendar staffCalendar
+    )
+    {
+        if (storeCalendar.StoreId != store.Id)
+            throw new InvariantException(
+                "Store calendar does not belong to this store.");
+
+        if (staffCalendar.StoreId != store.Id)
+            throw new InvariantException("Staff calendar does not belong to this store.");
+
     }
 }

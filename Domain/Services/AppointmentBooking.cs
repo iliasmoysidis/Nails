@@ -9,19 +9,17 @@ namespace Domain.Services;
 
 public class AppointmentBooking
 {
-    public int StoreId { get; }
-    public int ProfessionalId { get; }
-
-    public StoreCalendar StoreCalendar { get; }
-    public StaffCalendar StaffCalendar { get; }
-    public StoreCatalog StoreCatalog { get; }
-    public Assignments Assignments { get; }
+    private readonly Store _store;
+    private readonly StoreCalendar _storeCalendar;
+    private readonly StaffCalendar _staffCalendar;
+    private readonly StoreCatalog _storeCatalog;
+    private readonly Assignments _assignments;
 
     private readonly List<Appointment> _appointments = [];
+    private int ProfessionalId => _staffCalendar.ProfessionalId;
 
     public AppointmentBooking(
-        int storeId,
-        int professionalId,
+        Store store,
         StoreCalendar storeCalendar,
         StaffCalendar staffCalendar,
         StoreCatalog storeCatalog,
@@ -29,39 +27,21 @@ public class AppointmentBooking
         IReadOnlyCollection<Appointment> appointments
     )
     {
-        if (storeCalendar.StoreId != storeId)
-            throw new InvariantException("Store calendar does not belong to this store.");
+        ValidateComposition(
+            store,
+            storeCalendar,
+            staffCalendar,
+            storeCatalog,
+            assignments
+        );
 
-        if (staffCalendar.StoreId != storeId)
-            throw new InvariantException("Staff calendar does not belong to this store.");
+        _store = store;
+        _storeCalendar = storeCalendar;
+        _staffCalendar = staffCalendar;
+        _storeCatalog = storeCatalog;
+        _assignments = assignments;
 
-        if (staffCalendar.ProfessionalId != professionalId)
-            throw new InvariantException("Staff calendar does not belong to this professional.");
-
-        if (storeCatalog.StoreId != storeId)
-            throw new InvariantException("Store catalog does not belong to this store.");
-
-        if (assignments.StoreId != storeId)
-            throw new InvariantException("Assignments do not belong to this store.");
-
-        StoreId = storeId;
-        ProfessionalId = professionalId;
-
-        StoreCalendar = storeCalendar;
-        StaffCalendar = staffCalendar;
-        StoreCatalog = storeCatalog;
-        Assignments = assignments;
-
-        foreach (var appointment in appointments)
-        {
-            if (appointment.StoreId != storeId)
-                throw new InvariantException("Appointment does not belong to this store.");
-
-            if (appointment.ProfessionalId != professionalId)
-                throw new InvariantException("Appointment does not belong to this professional.");
-
-            _appointments.Add(appointment);
-        }
+        LoadAppointments(appointments);
     }
 
     public Appointment Book(
@@ -72,9 +52,10 @@ public class AppointmentBooking
         IClock clock
     )
     {
+        _store.EnsureOpen();
         EnsureProfessionalOffersService(offeringId);
 
-        var offering = StoreCatalog.GetOffering(offeringId);
+        var offering = _storeCatalog.GetOffering(offeringId);
         var endAt = startAt.Add(offering.Duration.Value);
 
         EnsureAvailability(startAt, endAt);
@@ -83,7 +64,7 @@ public class AppointmentBooking
             userId: userId,
             professionalId: ProfessionalId,
             offeringId: offeringId,
-            storeId: StoreId,
+            storeId: _store.Id,
             startAt: startAt,
             duration: offering.Duration,
             price: offering.Price,
@@ -98,7 +79,7 @@ public class AppointmentBooking
 
     private void EnsureProfessionalOffersService(int offeringId)
     {
-        if (!Assignments.IsAssigned(ProfessionalId, offeringId))
+        if (!_assignments.IsAssigned(ProfessionalId, offeringId))
             throw new InvariantException("Professional does not provide this service.");
     }
 
@@ -106,16 +87,50 @@ public class AppointmentBooking
     {
         var range = new TimeRange(startAt.TimeOfDay, endAt.TimeOfDay);
 
-        if (!StoreCalendar.IsWithinStoreHours(startAt.Date, range))
+        if (!_storeCalendar.IsWithinStoreHours(startAt.Date, range))
             throw new InvariantException("Store is closed during the selected time.");
 
-        if (!StaffCalendar.IsAvailable(startAt, endAt))
+        if (!_staffCalendar.IsAvailable(startAt, endAt))
             throw new InvariantException("Professional is not available during the selected time.");
 
         foreach (var appointment in _appointments)
         {
             if (appointment.ConflictsWith(startAt, endAt))
                 throw new InvariantException("Professional already has an appointment during this time.");
+        }
+    }
+
+    private void ValidateComposition(
+        Store store,
+        StoreCalendar storeCalendar,
+        StaffCalendar staffCalendar,
+        StoreCatalog storeCatalog,
+        Assignments assignments
+    )
+    {
+        if (storeCalendar.StoreId != store.Id)
+            throw new InvariantException("Store calendar does not belong to this store.");
+
+        if (staffCalendar.StoreId != store.Id)
+            throw new InvariantException("Staff calendar does not belong to this store.");
+
+        if (storeCatalog.StoreId != store.Id)
+            throw new InvariantException("Store catalog does not belong to this store.");
+
+        if (assignments.StoreId != store.Id)
+            throw new InvariantException("Assignments do not belong to this store.");
+
+    }
+
+    private void LoadAppointments(IReadOnlyCollection<Appointment> appointments)
+    {
+        foreach (var appointment in appointments)
+        {
+            if (appointment.StoreId != _store.Id)
+                throw new InvariantException("Appointment does not belong to this store.");
+
+            if (appointment.ProfessionalId != ProfessionalId)
+                throw new InvariantException("Appointment does not belong to this professional.");
         }
     }
 }

@@ -91,10 +91,7 @@ public class ProfessionalSchedule
 
         foreach (var calendar in calendars)
         {
-            if (calendar.ProfessionalId != professionalId)
-                throw new InvariantException("Calendar does not belong to this professional");
-
-            schedule._calendars.Add(calendar.StoreId, calendar);
+            schedule.AddCalendar(calendar);
         }
 
         return schedule;

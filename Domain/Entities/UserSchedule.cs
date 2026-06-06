@@ -23,11 +23,8 @@ public class UserSchedule
 
     public void Add(Appointment appointment)
     {
-        if (appointment.UserId != UserId)
-            throw new InvariantException("Appointment does not belong to this user.");
-
+        EnsureBelongsToUser(appointment);
         EnsureAvailable(appointment.StartAt, appointment.EndAt);
-
         _appointments.Add(appointment);
     }
 
@@ -38,5 +35,11 @@ public class UserSchedule
             if (appointment.ConflictsWith(startAt, endAt))
                 throw new InvariantException("User already has an appointment during this time.");
         }
+    }
+
+    private void EnsureBelongsToUser(Appointment appointment)
+    {
+        if (appointment.UserId != UserId)
+            throw new InvariantException("Appointment does not belong to this user.");
     }
 }

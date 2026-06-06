@@ -6,44 +6,32 @@ namespace Domain.Services;
 
 public sealed class EmploymentTermination
 {
-    public int StoreId { get; }
-    public int ProfessionalId { get; }
-
+    private readonly Store _store;
     private readonly Staff _staff;
     private readonly Assignments _assignments;
     private readonly ProfessionalSchedule _professionalSchedule;
     private readonly IReadOnlyCollection<Appointment> _appointments;
 
+    private int ProfessionalId => _professionalSchedule.ProfessionalId;
+    private int StoreId => _store.Id;
+
     public EmploymentTermination(
-        int storeId,
-        int professionalId,
+        Store store,
         Staff staff,
         Assignments assignments,
         ProfessionalSchedule professionalSchedule,
         IReadOnlyCollection<Appointment> appointments
     )
     {
-        if (staff.StoreId != storeId)
-            throw new InvariantException("Staff does not belong to this store");
+        ValidateComposition(
+            store,
+            staff,
+            assignments,
+            professionalSchedule,
+            appointments
+        );
 
-        if (assignments.StoreId != storeId)
-            throw new InvariantException("Assignments do not belong to this store.");
-
-        if (professionalSchedule.ProfessionalId != professionalId)
-            throw new InvariantException("Schedule does not belong to this professional.");
-
-        foreach (var appointment in appointments)
-        {
-            if (appointment.StoreId != storeId)
-                throw new InvariantException("Appointment does not belong to this store.");
-
-            if (appointment.ProfessionalId != professionalId)
-                throw new InvariantException("Appointment does not belong to this professional.");
-        }
-
-        StoreId = storeId;
-        ProfessionalId = professionalId;
-
+        _store = store;
         _staff = staff;
         _assignments = assignments;
         _professionalSchedule = professionalSchedule;
@@ -52,6 +40,7 @@ public sealed class EmploymentTermination
 
     public void Terminate(IClock clock)
     {
+        _store.EnsureOpen();
         _staff.RemoveFromStaff(ProfessionalId);
         _assignments.RemoveByProfessional(ProfessionalId);
         _professionalSchedule.RemoveCalendar(StoreId);
@@ -62,6 +51,33 @@ public sealed class EmploymentTermination
                 continue;
 
             appointment.Cancel(clock, "Professional left the store.");
+        }
+    }
+
+    private void ValidateComposition(
+        Store store,
+        Staff staff,
+        Assignments assignments,
+        ProfessionalSchedule professionalSchedule,
+        IReadOnlyCollection<Appointment> appointments
+    )
+    {
+        if (staff.StoreId != store.Id)
+            throw new InvariantException("Staff does not belong to this store");
+
+        if (assignments.StoreId != store.Id)
+            throw new InvariantException("Assignments do not belong to this store.");
+
+        if (!staff.IsStaff(professionalSchedule.ProfessionalId))
+            throw new InvariantException("Professional does not belong to this store.");
+
+        foreach (var appointment in appointments)
+        {
+            if (appointment.StoreId != store.Id)
+                throw new InvariantException("Appointment does not belong to this store.");
+
+            if (appointment.ProfessionalId != professionalSchedule.ProfessionalId)
+                throw new InvariantException("Appointment does not belong to this professional.");
         }
     }
 }
