@@ -20,7 +20,7 @@ public sealed class Handler
         var offering = _ctx.Catalog.GetOffering(command.OfferingId);
 
         _ctx.Catalog.UpdateOffering(
-            offeringId: command.OfferingId,
+            offeringId: offering.Id,
             name: ToName(command.Name),
             price: ToPrice(command.Price, offering.Price.Currency),
             duration: ToDuration(command.DurationMinutes),

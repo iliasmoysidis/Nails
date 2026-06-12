@@ -14,5 +14,9 @@ public interface IAppointmentRepository
 
     Task<IReadOnlyCollection<Appointment>> GetUpcomingByStoreIdAndProfessionalId(int storeId, int professionalId, CancellationToken ct);
 
+    Task<IReadOnlyCollection<Appointment>> GetUpcomingByProfessionalIdAsync(int professionalId, CancellationToken ct);
+
+    Task<IReadOnlyCollection<Appointment>> GetUpcomingByUserIdAsync(int userId, CancellationToken ct);
+
     Task AddAsync(Appointment appointment, CancellationToken ct);
 }

@@ -30,7 +30,7 @@ public sealed class Handler
             nationalNumber: command.PhoneNumber
         );
 
-        if (await _repo.ExistsAsync(email, phone, ct))
+        if (await _repo.ExistsActiveAsync(email, phone, ct))
             throw new ApplicationLayerValidationException("User with the same email or phone is already registered.");
 
         var user = User.Create(

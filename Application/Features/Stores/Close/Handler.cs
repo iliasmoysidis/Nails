@@ -20,7 +20,7 @@ public sealed class Handler
 
     public Task Handle(Command command, CancellationToken ct)
     {
-        _ctx.Store.Close(_clock);
+        _ctx.StoreClosure.Close(_clock);
 
         return Task.CompletedTask;
     }

@@ -9,6 +9,8 @@ namespace Application.Features.Appointments.Create;
 public sealed class Loader
     : IRequestContextLoader<Command, Context>
 {
+    private readonly IUserRepository _userRepo;
+    private readonly IStoreRepository _storeRepo;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
@@ -16,13 +18,17 @@ public sealed class Loader
     private readonly IAssignmentsRepository _assignmentsRepo;
 
     public Loader(
-    IStoreCatalogRepository storeCatalogRepo,
-    IStaffCalendarRepository staffCalendarRepo,
-    IStoreCalendarRepository storeCalendarRepo,
-    IAssignmentsRepository assignmentsRepo,
-    IAppointmentRepository appointmentRepo
+        IUserRepository userRepo,
+        IStoreRepository storeRepo,
+        IStoreCatalogRepository storeCatalogRepo,
+        IStaffCalendarRepository staffCalendarRepo,
+        IStoreCalendarRepository storeCalendarRepo,
+        IAssignmentsRepository assignmentsRepo,
+        IAppointmentRepository appointmentRepo
     )
     {
+        _userRepo = userRepo;
+        _storeRepo = storeRepo;
         _storeCatalogRepo = storeCatalogRepo;
         _staffCalendarRepo = staffCalendarRepo;
         _storeCalendarRepo = storeCalendarRepo;
@@ -35,6 +41,12 @@ public sealed class Loader
         Context ctx,
         CancellationToken ct)
     {
+        var user = await _userRepo.GetByIdAsync(command.UserId, ct)
+            ?? throw new ApplicationLayerNotFoundException("User not found.");
+
+        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store not found");
+
         var storeCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
 
@@ -47,13 +59,14 @@ public sealed class Loader
         var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found");
 
-        var professionalAppointments = await _appointmentRepo.GetByProfessionalIdAsync(command.ProfessionalId, ct);
+        var professionalAppointments = await _appointmentRepo.GetUpcomingByProfessionalIdAsync(command.ProfessionalId, ct);
 
         var userAppointments = await _appointmentRepo.GetByUserIdAsync(command.UserId, ct);
 
+        ctx.User = user;
+
         ctx.AppointmentBooking = new AppointmentBooking(
-            storeId: command.StoreId,
-            professionalId: command.ProfessionalId,
+            store: store,
             storeCalendar: storeCalendar,
             staffCalendar: staffCalendar,
             storeCatalog: storeCatalog,
@@ -62,7 +75,7 @@ public sealed class Loader
         );
 
         ctx.UserSchedule = new UserSchedule(
-            userId: command.UserId,
+            userId: user.Id,
             appointments: userAppointments
         );
     }

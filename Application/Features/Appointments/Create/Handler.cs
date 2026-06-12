@@ -34,6 +34,7 @@ public sealed class Handler
             clock: _clock
         );
 
+        _ctx.User.EnsureActive();
         _ctx.UserSchedule.Add(appointment);
 
         await _repo.AddAsync(appointment, ct);

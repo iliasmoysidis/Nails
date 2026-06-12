@@ -1,4 +1,7 @@
+using Domain.Exceptions;
+using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -8,6 +11,8 @@ public class User
     public FullName FullName { get; private set; }
     public Email Email { get; private set; }
     public Phone Phone { get; private set; }
+    public bool IsDeleted { get; private set; }
+    public UtcDateTime? DeletedAt { get; private set; }
 
     private User(
         FullName fullName,
@@ -18,6 +23,9 @@ public class User
         FullName = fullName;
         Email = email;
         Phone = phone;
+
+        IsDeleted = false;
+        DeletedAt = null;
     }
 
     public static User Create(FullName fullName, Email email, Phone phone)
@@ -28,8 +36,17 @@ public class User
 
     public void UpdatePersonalInfo(FullName? fullName = null, Phone? phone = null)
     {
+        EnsureActive();
         TryUpdateName(fullName);
         TryUpdatePhone(phone);
+    }
+
+    public void Delete(IClock clock)
+    {
+        EnsureActive();
+
+        IsDeleted = true;
+        DeletedAt = clock.Now;
     }
 
     private void TryUpdateName(FullName? fullName)
@@ -42,5 +59,11 @@ public class User
     {
         if (phone is null || phone == Phone) return;
         Phone = phone;
+    }
+
+    public void EnsureActive()
+    {
+        if (IsDeleted)
+            throw new InvariantException("User is deleted.");
     }
 }

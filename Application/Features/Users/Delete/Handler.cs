@@ -1,5 +1,4 @@
-using Application.Abstractions.Repositories;
-using Application.Exceptions;
+using Domain.Interfaces;
 using MediatR;
 
 namespace Application.Features.Users.Delete;
@@ -7,18 +6,19 @@ namespace Application.Features.Users.Delete;
 public sealed class Handler
     : IRequestHandler<Command>
 {
-    private readonly IUserRepository _repo;
+    private readonly Context _ctx;
+    private readonly IClock _clock;
 
-    public Handler(IUserRepository repo)
+    public Handler(Context ctx, IClock clock)
     {
-        _repo = repo;
+        _ctx = ctx;
+        _clock = clock;
     }
 
-    public async Task Handle(Command command, CancellationToken ct)
+    public Task Handle(Command command, CancellationToken ct)
     {
-        var isDeleted = await _repo.DeleteAsync(command.UserId, ct);
+        _ctx.UserDeletion.Delete(_clock);
 
-        if (!isDeleted)
-            throw new ApplicationLayerNotFoundException("User not found.");
+        return Task.CompletedTask;
     }
 }

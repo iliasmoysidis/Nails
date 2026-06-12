@@ -7,4 +7,5 @@ public sealed class Context
 {
     public AppointmentBooking AppointmentBooking { get; set; } = default!;
     public UserSchedule UserSchedule { get; set; } = default!;
+    public User User { get; set; } = null!;
 }

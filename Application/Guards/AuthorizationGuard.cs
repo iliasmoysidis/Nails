@@ -58,31 +58,6 @@ public sealed class AuthorizationGuard
         throw Forbidden("Not allowed to modify appointment.");
     }
 
-    public void EnsureCanViewAppointment(AppointmentDetailsDTO appointment, Staff staff)
-    {
-        if (_context.IsUser && ActorId == appointment.UserId)
-            return;
-
-        if (_context.IsProfessional && staff.IsOwner(ActorId))
-            return;
-
-        if (_context.IsProfessional && ActorId == appointment.ProfessionalId)
-            return;
-
-        throw Forbidden("Not allowed to view appointment.");
-    }
-
-    public void EnsureCanViewStoreProfessionalCalendar(int professionalId, Staff staff)
-    {
-        if (staff.IsOwner(ActorId))
-            return;
-
-        if (ActorId == professionalId)
-            return;
-
-        throw Forbidden("Not allowed to view professional calendar.");
-    }
-
     private static ApplicationLayerForbiddenException Forbidden(string message)
         => new(message);
 }

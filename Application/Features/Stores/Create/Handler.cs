@@ -1,5 +1,6 @@
 using Application.Abstractions.Repositories;
 using Domain.Entities;
+using Domain.Services;
 using Domain.ValueObjects.Identity;
 using Domain.ValueObjects.Store;
 using MediatR;
@@ -11,14 +12,23 @@ public sealed class Handler
 {
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
+    private readonly IStoreCatalogRepository _storeCatalogRepo;
+    private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly IStoreCalendarRepository _storeCalendarRepo;
 
     public Handler(
         IStoreRepository storeRepo,
-        IStaffRepository staffRepo
+        IStaffRepository staffRepo,
+        IStoreCatalogRepository storeCatalogRepo,
+        IAssignmentsRepository assignmentsRepo,
+        IStoreCalendarRepository storeCalendarRepo
     )
     {
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
+        _storeCatalogRepo = storeCatalogRepo;
+        _assignmentsRepo = assignmentsRepo;
+        _storeCalendarRepo = storeCalendarRepo;
     }
 
     public async Task<int> Handle(
@@ -53,12 +63,12 @@ public sealed class Handler
 
         await _storeRepo.AddAsync(store, ct);
 
-        var staff = Staff.Create(
-            storeId: store.Id,
-            ownerProfessionalId: command.ProfessionalId
-        );
+        var storeSetup = new StoreSetup(store.Id, command.ProfessionalId);
 
-        await _staffRepo.AddAsync(staff, ct);
+        await _staffRepo.AddAsync(storeSetup.Staff, ct);
+        await _storeCatalogRepo.AddAsync(storeSetup.StoreCatalog, ct);
+        await _assignmentsRepo.AddAsync(storeSetup.Assignments, ct);
+        await _storeCalendarRepo.AddAsync(storeSetup.StoreCalendar, ct);
 
         return store.Id;
     }
