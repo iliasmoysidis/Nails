@@ -35,10 +35,19 @@ public sealed class AuthorizationGuard
 
     public void EnsureOwner(Staff staff)
     {
-
-
         if (!staff.IsOwner(ActorId))
             throw Forbidden("Only store owners can perform this action.");
+    }
+
+    public void EnsureOwnerOrSelf(Staff staff, int id)
+    {
+        if (staff.IsOwner(ActorId))
+            return;
+
+        if (ActorId == id)
+            return;
+
+        throw Forbidden("Only the owner or the account owner can perform this action.");
     }
 
     public void EnsureStaffMember(Staff staff)

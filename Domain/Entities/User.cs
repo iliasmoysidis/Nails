@@ -14,7 +14,7 @@ public class User
     public bool IsDeleted { get; private set; }
     public UtcDateTime? DeletedAt { get; private set; }
 
-    private User(
+    public User(
         FullName fullName,
         Email email,
         Phone phone
@@ -26,12 +26,6 @@ public class User
 
         IsDeleted = false;
         DeletedAt = null;
-    }
-
-    public static User Create(FullName fullName, Email email, Phone phone)
-    {
-        var user = new User(fullName, email, phone);
-        return user;
     }
 
     public void UpdatePersonalInfo(FullName? fullName = null, Phone? phone = null)

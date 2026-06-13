@@ -6,4 +6,6 @@ namespace Application.Features.Assignments.Add;
 public sealed class Context
 {
     public StoreAssignments StoreAssignments { get; set; } = default!;
+
+    public Professional Professional { get; set; } = null!;
 }

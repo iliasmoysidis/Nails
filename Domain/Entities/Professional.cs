@@ -1,4 +1,7 @@
+using Domain.Exceptions;
+using Domain.Interfaces;
 using Domain.ValueObjects.Identity;
+using Domain.ValueObjects.Time;
 
 namespace Domain.Entities;
 
@@ -10,8 +13,10 @@ public class Professional
     public Email Email { get; }
     public Phone Phone { get; private set; }
     public TaxIdentificationNumber TaxIdNumber { get; }
+    public bool IsDeleted { get; private set; }
+    public UtcDateTime? DeletedAt { get; private set; }
 
-    private Professional(
+    public Professional(
         FullName fullName,
         Email email,
         Phone phone,
@@ -21,23 +26,34 @@ public class Professional
         Email = email;
         Phone = phone;
         TaxIdNumber = taxIdNumber;
+        IsDeleted = false;
+        DeletedAt = null;
     }
-
-    public static Professional Create(
-        FullName fullName,
-        Email email,
-        Phone phone,
-        TaxIdentificationNumber taxIdNumber)
-        => new(fullName, email, phone, taxIdNumber);
 
     public void UpdatePersonalInfo(
         FullName? fullName = null,
         Phone? phone = null)
     {
+        EnsureActive();
+
         if (fullName != null && fullName != FullName)
             FullName = fullName;
 
         if (phone != null && phone != Phone)
             Phone = phone;
+    }
+
+    public void Delete(IClock clock)
+    {
+        EnsureActive();
+
+        IsDeleted = true;
+        DeletedAt = clock.Now;
+    }
+
+    public void EnsureActive()
+    {
+        if (IsDeleted)
+            throw new InvariantException("Professional is deleted.");
     }
 }

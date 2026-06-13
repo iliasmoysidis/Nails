@@ -6,12 +6,14 @@ namespace Domain.Services;
 
 public sealed class ProfessionalAvailability
 {
+    private readonly Professional _professional;
     private readonly Store _store;
     private readonly StoreCalendar _storeCalendar;
     private readonly StaffCalendar _staffCalendar;
     private readonly ProfessionalSchedule _professionalSchedule;
 
     public ProfessionalAvailability(
+        Professional professional,
         Store store,
         StoreCalendar storeCalendar,
         ProfessionalSchedule professionalSchedule
@@ -19,8 +21,9 @@ public sealed class ProfessionalAvailability
     {
         var staffCalendar = professionalSchedule.GetCalendar(store.Id);
 
-        ValidateComposition(store, storeCalendar, staffCalendar);
+        ValidateComposition(professional, store, storeCalendar, staffCalendar);
 
+        _professional = professional;
         _store = store;
         _storeCalendar = storeCalendar;
         _staffCalendar = staffCalendar;
@@ -29,29 +32,37 @@ public sealed class ProfessionalAvailability
 
     public void SetWorkingDay(WorkingDay workingDay)
     {
+        _professional.EnsureActive();
         _store.EnsureOpen();
         EnsureFitsStoreHours(workingDay);
         EnsureNoProfessionalConflicts(workingDay);
+
         _staffCalendar.SetWorkingHours(workingDay);
     }
 
     public void SetException(CalendarException exception)
     {
+        _professional.EnsureActive();
         _store.EnsureOpen();
         EnsureFitsStoreHours(exception);
         EnsureNoProfessionalConflicts(exception);
+
         _staffCalendar.SetSpecialAvailability(exception);
     }
 
     public void SetDayOff(DayOfWeek day)
     {
+        _professional.EnsureActive();
         _store.EnsureOpen();
+
         _staffCalendar.RestDay(day);
     }
 
     public void RemoveException(DateOnly date)
     {
+        _professional.EnsureActive();
         _store.EnsureOpen();
+
         _staffCalendar.RemoveSpecialAvailability(date);
     }
 
@@ -95,6 +106,7 @@ public sealed class ProfessionalAvailability
     }
 
     private void ValidateComposition(
+        Professional professional,
         Store store,
         StoreCalendar storeCalendar,
         StaffCalendar staffCalendar
@@ -107,5 +119,7 @@ public sealed class ProfessionalAvailability
         if (staffCalendar.StoreId != store.Id)
             throw new InvariantException("Staff calendar does not belong to this store.");
 
+        if (staffCalendar.ProfessionalId != professional.Id)
+            throw new InvariantException("Staff calendar does not belong to professional.");
     }
 }

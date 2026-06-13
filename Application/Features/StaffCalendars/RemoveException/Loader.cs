@@ -1,7 +1,6 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Entities;
 using Domain.Services;
 
 namespace Application.Features.StaffCalendars.RemoveException;
@@ -11,15 +10,22 @@ public sealed class Loader
         Command,
         Context>
 {
+    private readonly IProfessionalRepository _professionalRepo;
+    private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IProfessionalScheduleRepository _professionalScheduleRepo;
 
     public Loader(
+        IProfessionalRepository professionalRepo,
+        IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IStoreCalendarRepository storeCalendarRepo,
-        IProfessionalScheduleRepository professionalScheduleRepo)
+        IProfessionalScheduleRepository professionalScheduleRepo
+    )
     {
+        _professionalRepo = professionalRepo;
+        _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _storeCalendarRepo = storeCalendarRepo;
         _professionalScheduleRepo = professionalScheduleRepo;
@@ -30,6 +36,12 @@ public sealed class Loader
         Context ctx,
         CancellationToken ct)
     {
+        var professional = await _professionalRepo.GetByIdAsync(command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional not found.");
+
+        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store not found.");
+
         var staff = await _staffRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Staff not found.");
 
@@ -43,9 +55,10 @@ public sealed class Loader
         ctx.Staff = staff;
 
         ctx.ProfessionalAvailability = new ProfessionalAvailability(
-            storeCalendar,
-            professionalSchedule,
-            command.StoreId
+            professional: professional,
+            store: store,
+            storeCalendar: storeCalendar,
+            professionalSchedule: professionalSchedule
         );
     }
 }

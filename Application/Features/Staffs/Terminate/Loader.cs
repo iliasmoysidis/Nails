@@ -3,24 +3,28 @@ using Application.Abstractions.Repositories;
 using Application.Exceptions;
 using Domain.Services;
 
-namespace Application.Features.Staffs.TerminateEmployment;
+namespace Application.Features.Staffs.Terminate;
 
 public sealed class Loader
     : IRequestContextLoader<
         Command,
         Context>
 {
+    private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IAssignmentsRepository _assignmentsRepo;
     private readonly IProfessionalScheduleRepository _professionalScheduleRepo;
     private readonly IAppointmentRepository _appointmentRepo;
 
     public Loader(
+        IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IAssignmentsRepository assignmentsRepo,
         IProfessionalScheduleRepository professionalScheduleRepo,
-        IAppointmentRepository appointmentRepo)
+        IAppointmentRepository appointmentRepo
+    )
     {
+        _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _assignmentsRepo = assignmentsRepo;
         _professionalScheduleRepo = professionalScheduleRepo;
@@ -33,6 +37,9 @@ public sealed class Loader
         Context ctx,
         CancellationToken ct)
     {
+        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Store not found.");
+
         var staff = await _staffRepo.GetByStoreIdAsync(
             command.StoreId,
             ct)
@@ -59,8 +66,7 @@ public sealed class Loader
         ctx.Staff = staff;
 
         ctx.EmploymentTermination = new EmploymentTermination(
-            storeId: command.StoreId,
-            professionalId: command.ProfessionalId,
+            store: store,
             staff: staff,
             assignments: assignments,
             professionalSchedule: professionalSchedule,

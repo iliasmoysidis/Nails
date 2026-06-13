@@ -11,6 +11,7 @@ public sealed class Loader
 {
     private readonly IUserRepository _userRepo;
     private readonly IStoreRepository _storeRepo;
+    private readonly IProfessionalRepository _professionalRepo;
     private readonly IAppointmentRepository _appointmentRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IStaffCalendarRepository _staffCalendarRepo;
@@ -20,6 +21,7 @@ public sealed class Loader
     public Loader(
         IUserRepository userRepo,
         IStoreRepository storeRepo,
+        IProfessionalRepository professionalRepo,
         IStoreCatalogRepository storeCatalogRepo,
         IStaffCalendarRepository staffCalendarRepo,
         IStoreCalendarRepository storeCalendarRepo,
@@ -29,6 +31,7 @@ public sealed class Loader
     {
         _userRepo = userRepo;
         _storeRepo = storeRepo;
+        _professionalRepo = professionalRepo;
         _storeCatalogRepo = storeCatalogRepo;
         _staffCalendarRepo = staffCalendarRepo;
         _storeCalendarRepo = storeCalendarRepo;
@@ -46,6 +49,9 @@ public sealed class Loader
 
         var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found");
+
+        var professional = await _professionalRepo.GetByIdAsync(command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional not found.");
 
         var storeCatalog = await _storeCatalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
@@ -66,6 +72,7 @@ public sealed class Loader
         ctx.User = user;
 
         ctx.AppointmentBooking = new AppointmentBooking(
+            professional: professional,
             store: store,
             storeCalendar: storeCalendar,
             staffCalendar: staffCalendar,

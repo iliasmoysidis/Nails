@@ -1,7 +1,5 @@
 using Domain.Enums;
-using Domain.Events;
 using Domain.Exceptions;
-using Domain.Interfaces;
 
 namespace Domain.Entities;
 
@@ -30,20 +28,12 @@ public class Staff : Entity
         return staff;
     }
 
-    public void RemoveProfessional(int professionalId, IClock clock)
+    public void RemoveProfessional(int professionalId)
     {
         if (!IsStaff(professionalId))
             throw new StateException("Professional is not part of the store's staff.");
 
         RemoveFromStaff(professionalId);
-
-        RaiseDomainEvent(
-            new ProfessionalLeftStoreDomainEvent(
-                StoreId: StoreId,
-                ProfessionalId: professionalId,
-                OccurredAt: clock.Now
-            )
-        );
     }
 
     public bool IsStaff(int professionalId)

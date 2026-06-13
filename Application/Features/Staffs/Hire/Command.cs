@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Application.Features.Staffs.TerminateEmployment;
+namespace Application.Features.Staffs.Hire;
 
 public sealed record Command(
     int StoreId,

@@ -9,18 +9,21 @@ namespace Application.Features.Assignments.Remove;
 public sealed class Loader
     : IRequestContextLoader<Command, Context>
 {
+    private readonly IProfessionalRepository _professionalRepo;
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCatalogRepository _catalogRepo;
     private readonly IAssignmentsRepository _assignmentsRepo;
 
     public Loader(
+        IProfessionalRepository professionalRepo,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IStoreCatalogRepository catalogRepo,
         IAssignmentsRepository assignmentsRepo
     )
     {
+        _professionalRepo = professionalRepo;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _catalogRepo = catalogRepo;
@@ -30,8 +33,12 @@ public sealed class Loader
     public async Task PopulateAsync(
         Command command,
         Context ctx,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
+        var professional = await _professionalRepo.GetByIdAsync(command.ProfessionalId, ct)
+            ?? throw new ApplicationLayerNotFoundException("Professional not found.");
+
         var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store not found.");
 
@@ -45,6 +52,7 @@ public sealed class Loader
             ?? throw new ApplicationLayerNotFoundException("Assignments not found.");
 
         ctx.StoreAssignments = new StoreAssignments(
+            professional: professional,
             store: store,
             staff: staff,
             storeCatalog: catalog,

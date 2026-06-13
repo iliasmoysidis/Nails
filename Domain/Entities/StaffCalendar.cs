@@ -10,14 +10,11 @@ public class StaffCalendar : BaseCalendar
 
     private StaffCalendar() { }
 
-    private StaffCalendar(int storeId, int professionalId)
+    public StaffCalendar(int storeId, int professionalId)
     {
         StoreId = storeId;
         ProfessionalId = professionalId;
     }
-
-    public static StaffCalendar Create(int storeId, int professionalId)
-        => new(storeId, professionalId);
 
     public void AddVacation(DateOnly date)
     {

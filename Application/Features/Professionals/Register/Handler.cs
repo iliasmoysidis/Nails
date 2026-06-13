@@ -27,7 +27,7 @@ public sealed class Handler
 
         await EnsureNotExists(email, phone, taxId, ct);
 
-        var professional = Professional.Create(
+        var professional = new Professional(
             fullName: fullName,
             email: email,
             phone: phone,

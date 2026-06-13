@@ -1,7 +1,7 @@
 using Application.Abstractions.Authorization;
 using Application.Guards;
 
-namespace Application.Features.Staffs.AddEmployee;
+namespace Application.Features.Staffs.Hire;
 
 public sealed class Authorizer
     : IAuthorizer<Command>

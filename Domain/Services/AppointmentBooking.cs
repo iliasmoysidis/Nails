@@ -9,6 +9,7 @@ namespace Domain.Services;
 
 public class AppointmentBooking
 {
+    private readonly Professional _professional;
     private readonly Store _store;
     private readonly StoreCalendar _storeCalendar;
     private readonly StaffCalendar _staffCalendar;
@@ -16,9 +17,9 @@ public class AppointmentBooking
     private readonly Assignments _assignments;
 
     private readonly List<Appointment> _appointments = [];
-    private int ProfessionalId => _staffCalendar.ProfessionalId;
 
     public AppointmentBooking(
+        Professional professional,
         Store store,
         StoreCalendar storeCalendar,
         StaffCalendar staffCalendar,
@@ -28,6 +29,7 @@ public class AppointmentBooking
     )
     {
         ValidateComposition(
+            professional,
             store,
             storeCalendar,
             staffCalendar,
@@ -35,6 +37,7 @@ public class AppointmentBooking
             assignments
         );
 
+        _professional = professional;
         _store = store;
         _storeCalendar = storeCalendar;
         _staffCalendar = staffCalendar;
@@ -53,6 +56,7 @@ public class AppointmentBooking
     )
     {
         _store.EnsureOpen();
+        _professional.EnsureActive();
         EnsureProfessionalOffersService(offeringId);
 
         var offering = _storeCatalog.GetOffering(offeringId);
@@ -62,7 +66,7 @@ public class AppointmentBooking
 
         var appointment = Appointment.Create(
             userId: userId,
-            professionalId: ProfessionalId,
+            professionalId: _professional.Id,
             offeringId: offeringId,
             storeId: _store.Id,
             startAt: startAt,
@@ -79,7 +83,7 @@ public class AppointmentBooking
 
     private void EnsureProfessionalOffersService(int offeringId)
     {
-        if (!_assignments.IsAssigned(ProfessionalId, offeringId))
+        if (!_assignments.IsAssigned(_professional.Id, offeringId))
             throw new InvariantException("Professional does not provide this service.");
     }
 
@@ -101,6 +105,7 @@ public class AppointmentBooking
     }
 
     private void ValidateComposition(
+        Professional professional,
         Store store,
         StoreCalendar storeCalendar,
         StaffCalendar staffCalendar,
@@ -113,6 +118,9 @@ public class AppointmentBooking
 
         if (staffCalendar.StoreId != store.Id)
             throw new InvariantException("Staff calendar does not belong to this store.");
+
+        if (staffCalendar.ProfessionalId != professional.Id)
+            throw new InvariantException("Professional does not belong to the store.");
 
         if (storeCatalog.StoreId != store.Id)
             throw new InvariantException("Store catalog does not belong to this store.");
@@ -129,8 +137,10 @@ public class AppointmentBooking
             if (appointment.StoreId != _store.Id)
                 throw new InvariantException("Appointment does not belong to this store.");
 
-            if (appointment.ProfessionalId != ProfessionalId)
+            if (appointment.ProfessionalId != _professional.Id)
                 throw new InvariantException("Appointment does not belong to this professional.");
+
+            _appointments.Add(appointment);
         }
     }
 }

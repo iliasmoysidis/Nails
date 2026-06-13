@@ -1,5 +1,4 @@
-using Application.Abstractions.Repositories;
-using Application.Exceptions;
+using Domain.Interfaces;
 using MediatR;
 
 namespace Application.Features.Professionals.Delete;
@@ -7,18 +6,19 @@ namespace Application.Features.Professionals.Delete;
 public sealed class Handler
     : IRequestHandler<Command>
 {
-    private readonly IProfessionalRepository _repo;
+    private readonly Context _ctx;
+    private readonly IClock _clock;
 
-    public Handler(IProfessionalRepository repo)
+    public Handler(Context ctx, IClock clock)
     {
-        _repo = repo;
+        _ctx = ctx;
+        _clock = clock;
     }
 
-    public async Task Handle(Command command, CancellationToken ct)
+    public Task Handle(Command command, CancellationToken ct)
     {
-        var isDeleted = await _repo.DeleteAsync(command.ProfessionalId, ct);
+        _ctx.ProfessionalDeletion.Delete(_clock);
 
-        if (!isDeleted)
-            throw new ApplicationLayerNotFoundException("Professional not found.");
+        return Task.CompletedTask;
     }
 }

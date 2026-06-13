@@ -1,18 +1,15 @@
-using Domain.Interfaces;
 using MediatR;
 
-namespace Application.Features.Staffs.TerminateEmployment;
+namespace Application.Features.Staffs.Hire;
 
 public sealed class Handler
     : IRequestHandler<Command>
 {
     private readonly Context _ctx;
-    private readonly IClock _clock;
 
-    public Handler(Context ctx, IClock clock)
+    public Handler(Context ctx)
     {
         _ctx = ctx;
-        _clock = clock;
     }
 
     public Task Handle(
@@ -20,7 +17,7 @@ public sealed class Handler
         CancellationToken ct
     )
     {
-        _ctx.EmploymentTermination.Terminate(_clock);
+        _ctx.EmploymentCreation.Hire();
 
         return Task.CompletedTask;
     }

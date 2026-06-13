@@ -1,7 +1,7 @@
 using Application.Abstractions.Authorization;
 using Application.Guards;
 
-namespace Application.Features.Staffs.TerminateEmployment;
+namespace Application.Features.Staffs.Terminate;
 
 public sealed class Authorizer
     : IAuthorizer<Command>
@@ -21,7 +21,8 @@ public sealed class Authorizer
         Command request,
         CancellationToken ct)
     {
-        _auth.EnsureOwner(_ctx.Staff);
+        _auth.EnsureOwnerOrSelf(_ctx.Staff, request.ProfessionalId);
+
         return Task.CompletedTask;
     }
 }

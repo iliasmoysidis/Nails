@@ -1,7 +1,7 @@
 using Domain.Entities;
 using Domain.Services;
 
-namespace Application.Features.Staffs.TerminateEmployment;
+namespace Application.Features.Staffs.Terminate;
 
 public sealed class Context
 {

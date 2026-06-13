@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Application.Features.Professionals.LeaveStore;
+namespace Application.Features.Staffs.Terminate;
 
 public sealed record Command(
     int StoreId,

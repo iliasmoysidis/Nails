@@ -14,7 +14,7 @@ public sealed class Handler
 
     public Task Handle(Command command, CancellationToken ct)
     {
-        _ctx.StoreAssignments.Remove(command.ProfessionalId, command.OfferingIds);
+        _ctx.StoreAssignments.Remove(command.OfferingIds);
 
         return Task.CompletedTask;
     }
