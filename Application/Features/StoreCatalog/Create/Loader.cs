@@ -1,6 +1,8 @@
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
+using Domain.Exceptions;
+using Domain.Services;
 
 namespace Application.Features.Offerings.Create;
 
@@ -9,13 +11,17 @@ public sealed class Loader
 {
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCatalogRepository _catalogRepo;
+    private readonly IStoreRepository _storeRepo;
 
     public Loader(
         IStaffRepository staffRepo,
-        IStoreCatalogRepository catalogRepo)
+        IStoreCatalogRepository catalogRepo,
+        IStoreRepository storeRepo
+    )
     {
         _staffRepo = staffRepo;
         _catalogRepo = catalogRepo;
+        _storeRepo = storeRepo;
     }
 
     public async Task PopulateAsync(
@@ -29,7 +35,10 @@ public sealed class Loader
         var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found.");
 
+        var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)
+            ?? throw new InvariantException("Store not found.");
+
         ctx.Staff = staff;
-        ctx.Catalog = catalog;
+        ctx.StoreOfferings = new StoreOfferings(store, catalog);
     }
 }

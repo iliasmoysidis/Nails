@@ -14,9 +14,7 @@ public sealed class Handler
 
     public Task Handle(Command command, CancellationToken ct)
     {
-        _ctx.Assignments.RemoveByOffering(command.OfferingId);
-
-        _ctx.Catalog.RemoveOffering(command.OfferingId);
+        _ctx.StoreOfferingRemoval.RemoveOffering(command.OfferingId);
 
         return Task.CompletedTask;
     }

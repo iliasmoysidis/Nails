@@ -21,6 +21,7 @@ public sealed class Loader
     )
     {
         _staffRepo = staffRepo;
+        _storeRepo = storeRepo;
         _storeCalendarRepo = storeCalendarRepo;
     }
 
