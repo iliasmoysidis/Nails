@@ -15,8 +15,8 @@ public sealed class StoreSetup
     )
     {
         Staff = Staff.Create(storeId, ownerProfessionalId);
-        StoreCatalog = StoreCatalog.Create(storeId);
-        Assignments = Assignments.Create(storeId);
-        StoreCalendar = StoreCalendar.Create(storeId);
+        StoreCatalog = new StoreCatalog(storeId);
+        Assignments = new Assignments(storeId);
+        StoreCalendar = new StoreCalendar(storeId);
     }
 }

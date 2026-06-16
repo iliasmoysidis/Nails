@@ -14,13 +14,10 @@ public class StoreCatalog
 
     private StoreCatalog() { }
 
-    private StoreCatalog(int storeId)
+    public StoreCatalog(int storeId)
     {
         StoreId = storeId;
     }
-
-    public static StoreCatalog Create(int storeId)
-        => new(storeId);
 
     public Offering AddOffering(
         OfferingName name,

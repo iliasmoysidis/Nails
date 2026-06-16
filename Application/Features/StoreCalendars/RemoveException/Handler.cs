@@ -16,7 +16,7 @@ public sealed class Handler
         Command command,
         CancellationToken ct)
     {
-        _ctx.StoreCalendar.RemoveSpecialOpeningHours(command.Date);
+        _ctx.StoreAvailability.RemoveSpecialOpeningHours(command.Date);
 
         return Task.CompletedTask;
     }

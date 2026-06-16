@@ -9,13 +9,10 @@ public class StoreCalendar : BaseCalendar
 
     private StoreCalendar() { }
 
-    private StoreCalendar(int storeId)
+    public StoreCalendar(int storeId)
     {
         StoreId = storeId;
     }
-
-    public static StoreCalendar Create(int storeId)
-        => new(storeId);
 
     public void AddHoliday(DateOnly date)
     {

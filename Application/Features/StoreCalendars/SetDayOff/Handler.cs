@@ -16,7 +16,7 @@ public sealed class Handler
         Command command,
         CancellationToken ct)
     {
-        _ctx.StoreCalendar.CloseDay(command.Day);
+        _ctx.StoreAvailability.CloseDay(command.Day);
 
         return Task.CompletedTask;
     }

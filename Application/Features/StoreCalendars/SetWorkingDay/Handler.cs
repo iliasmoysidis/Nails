@@ -21,7 +21,7 @@ public sealed class Handler
             .Select(r => new TimeRange(r.Start, r.End))
             .ToList();
 
-        _ctx.StoreCalendar.SetOpeningHours(command.Day, ranges);
+        _ctx.StoreAvailability.SetOpeningHours(command.Day, ranges);
 
         return Task.CompletedTask;
     }

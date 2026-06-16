@@ -11,13 +11,10 @@ public class Assignments
 
     private Assignments() { }
 
-    private Assignments(int storeId)
+    public Assignments(int storeId)
     {
         StoreId = storeId;
     }
-
-    public static Assignments Create(int storeId)
-        => new(storeId);
 
     internal void Add(int professionalId, int offeringId)
     {

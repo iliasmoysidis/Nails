@@ -1,4 +1,3 @@
-using Domain.ValueObjects.Calendar;
 using MediatR;
 
 namespace Application.Features.StoreCalendars.AddHoliday;
@@ -18,7 +17,7 @@ public sealed class Handler
         CancellationToken ct
     )
     {
-        _ctx.StoreCalendar.AddHoliday(command.Date);
+        _ctx.StoreAvailability.AddHoliday(command.Date);
 
         return Task.CompletedTask;
     }
