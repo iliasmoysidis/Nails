@@ -26,6 +26,8 @@ public sealed class Handler
 
     public async Task<int> Handle(Command command, CancellationToken ct)
     {
+        _ctx.User.EnsureActive();
+
         var appointment = _ctx.AppointmentBooking.Book(
             userId: command.UserId,
             offeringId: command.OfferingId,
@@ -34,7 +36,6 @@ public sealed class Handler
             clock: _clock
         );
 
-        _ctx.User.EnsureActive();
         _ctx.UserSchedule.Add(appointment);
 
         await _repo.AddAsync(appointment, ct);

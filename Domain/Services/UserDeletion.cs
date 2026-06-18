@@ -19,6 +19,8 @@ public sealed class UserDeletion
 
     public void Delete(IClock clock)
     {
+        _user.EnsureActive();
+
         foreach (var appointment in _appointments)
         {
             if (appointment.IsTerminal)
@@ -26,6 +28,8 @@ public sealed class UserDeletion
 
             appointment.Cancel(clock, "User account deleted.");
         }
+
+        _user.Delete(clock);
     }
 
     private static void ValidateComposition(User user, IReadOnlyCollection<Appointment> appointments)
