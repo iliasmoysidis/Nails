@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Appointments;
 
 namespace Application.Abstractions.Repositories;
 

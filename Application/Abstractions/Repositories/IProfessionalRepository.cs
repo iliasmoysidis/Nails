@@ -1,5 +1,5 @@
-using Domain.Entities;
-using Domain.ValueObjects.Identity;
+using Domain.Professionals;
+using Domain.Common.ValueObjects;
 
 namespace Application.Abstractions.Repositories;
 

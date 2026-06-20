@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Roster;
 
 namespace Application.Features.Staffs.AddOwner;
 

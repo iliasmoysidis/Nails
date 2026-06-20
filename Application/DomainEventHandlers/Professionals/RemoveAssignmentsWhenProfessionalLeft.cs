@@ -1,5 +1,5 @@
+using Domain.Professionals.Events;
 using Application.Abstractions.Repositories;
-using Domain.Events;
 using MediatR;
 
 namespace Application.DomainEventHandlers.Professionals;

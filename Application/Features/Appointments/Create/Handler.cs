@@ -1,7 +1,10 @@
 
+using Domain.UserSchedules;
+using Domain.Appointments.Services;
+using Domain.Appointments.ValueObjects;
+using Domain.Users;
+using Domain.Common;
 using Application.Abstractions.Repositories;
-using Domain.Interfaces;
-using Domain.ValueObjects.Appointments;
 using MediatR;
 
 namespace Application.Features.Appointments.Create;

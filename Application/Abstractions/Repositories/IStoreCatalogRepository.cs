@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Catalog;
 
 namespace Application.Abstractions.Repositories;
 

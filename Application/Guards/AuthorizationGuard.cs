@@ -1,7 +1,10 @@
+using Domain.Roster;
+using Domain.Appointments;
+using Domain.Professionals;
+using Domain.Users;
 using Application.Contexts;
 using Application.DTO.Appointment;
 using Application.Exceptions;
-using Domain.Entities;
 
 namespace Application.Guards;
 

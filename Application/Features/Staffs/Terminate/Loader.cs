@@ -1,7 +1,10 @@
+using Domain.Roster;
+using Domain.Professionals;
+using Domain.Roster.Services;
+using Domain.Stores;
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Services;
 
 namespace Application.Features.Staffs.Terminate;
 
@@ -30,7 +33,6 @@ public sealed class Loader
         _professionalScheduleRepo = professionalScheduleRepo;
         _appointmentRepo = appointmentRepo;
     }
-
 
     public async Task PopulateAsync(
         Command command,

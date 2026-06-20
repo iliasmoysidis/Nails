@@ -1,7 +1,6 @@
-using Domain.Enums;
+using Domain.Roster.EnumObjects;
 
 namespace Infrastructure.Entities;
-
 
 public class StaffRoleEntity
 {

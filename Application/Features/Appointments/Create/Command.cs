@@ -1,4 +1,4 @@
-using Domain.ValueObjects.Time;
+using Domain.Common.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Appointments.Create;

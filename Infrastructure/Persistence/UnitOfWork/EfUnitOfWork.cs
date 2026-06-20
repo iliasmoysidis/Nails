@@ -1,6 +1,6 @@
+using Domain.Common;
 using Application.Abstractions.Events;
 using Application.Abstractions.UnitOfWork;
-using Domain.Entities;
 
 namespace Infrastructure.Persistence;
 

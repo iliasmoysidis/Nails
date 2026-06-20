@@ -1,4 +1,5 @@
-using Domain.Entities;
+using Domain.Roster;
+using Domain.Appointments;
 
 namespace Application.Features.Appointments.Complete;
 

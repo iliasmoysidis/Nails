@@ -1,4 +1,5 @@
-using Domain.Interfaces;
+using Domain.Appointments;
+using Domain.Common;
 using MediatR;
 
 namespace Application.Features.Appointments.Confirm;

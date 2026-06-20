@@ -1,4 +1,5 @@
-using Domain.Interfaces;
+using Domain.Stores.Services;
+using Domain.Common;
 using MediatR;
 
 namespace Application.Features.Stores.Close;

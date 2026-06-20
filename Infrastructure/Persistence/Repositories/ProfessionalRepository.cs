@@ -1,6 +1,6 @@
+using Domain.Professionals;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
-using Domain.ValueObjects.Identity;
+using Domain.Common.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;

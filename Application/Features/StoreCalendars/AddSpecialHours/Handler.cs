@@ -1,4 +1,4 @@
-using Domain.ValueObjects.Calendar;
+using Domain.Common.ValueObjects.Calendar;
 using MediatR;
 
 namespace Application.Features.StoreCalendars.AddSpecialHours;

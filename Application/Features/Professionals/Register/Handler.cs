@@ -1,8 +1,8 @@
+using Domain.Professionals;
 using MediatR;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Entities;
-using Domain.ValueObjects.Identity;
+using Domain.Common.ValueObjects;
 
 namespace Application.Features.Professionals.Register;
 

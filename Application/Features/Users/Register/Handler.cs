@@ -1,7 +1,7 @@
+using Domain.Users;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Entities;
-using Domain.ValueObjects.Identity;
+using Domain.Common.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Users.Register;

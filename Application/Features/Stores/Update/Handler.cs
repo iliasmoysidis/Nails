@@ -1,5 +1,5 @@
-using Domain.ValueObjects.Identity;
-using Domain.ValueObjects.Store;
+using Domain.Common.ValueObjects;
+using Domain.Stores.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Stores.Update;

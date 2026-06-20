@@ -1,5 +1,5 @@
+using Domain.Stores;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;

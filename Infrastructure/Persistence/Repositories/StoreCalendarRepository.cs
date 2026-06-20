@@ -1,6 +1,6 @@
+using Domain.Calendar;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
-using Domain.ValueObjects.Calendar;
+using Domain.Common.ValueObjects.Calendar;
 using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 

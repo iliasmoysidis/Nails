@@ -3,7 +3,6 @@ using Application.Guards;
 
 namespace Application.Features.Appointments.Confirm;
 
-
 public sealed class Authorizer
     : IAuthorizer<Command>
 {

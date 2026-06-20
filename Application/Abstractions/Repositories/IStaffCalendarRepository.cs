@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Schedule.Entities;
 
 namespace Application.Abstractions.Repositories;
 

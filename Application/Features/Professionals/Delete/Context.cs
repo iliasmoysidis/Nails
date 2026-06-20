@@ -1,4 +1,4 @@
-using Domain.Services;
+using Domain.Professionals.Services;
 
 namespace Application.Features.Professionals.Delete;
 

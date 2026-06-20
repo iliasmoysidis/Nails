@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Professionals;
 
 namespace Application.Features.Professionals.Update;
 

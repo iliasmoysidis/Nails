@@ -1,4 +1,5 @@
-using Domain.Interfaces;
+using Domain.Professionals.Services;
+using Domain.Common;
 using MediatR;
 
 namespace Application.Features.Professionals.Delete;

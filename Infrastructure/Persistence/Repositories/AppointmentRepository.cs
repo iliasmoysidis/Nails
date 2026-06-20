@@ -1,6 +1,6 @@
+using Domain.Appointments;
+using Domain.Appointments.EnumObjects;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

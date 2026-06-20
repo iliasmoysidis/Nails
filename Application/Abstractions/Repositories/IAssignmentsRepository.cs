@@ -1,10 +1,10 @@
-using Domain.Entities;
+using Domain.Assignments;
 
 namespace Application.Abstractions.Repositories;
 
 public interface IAssignmentsRepository
 {
-    Task<Assignments?> GetByStoreIdAsync(int storeId, CancellationToken ct);
+    Task<AssignmentRegistry?> GetByStoreIdAsync(int storeId, CancellationToken ct);
 
-    Task AddAsync(Assignments assignments, CancellationToken ct);
+    Task AddAsync(AssignmentRegistry assignments, CancellationToken ct);
 }

@@ -1,4 +1,5 @@
-using Domain.Entities;
+using Domain.Roster;
+using Domain.Stores;
 
 namespace Application.Features.Stores.Update;
 

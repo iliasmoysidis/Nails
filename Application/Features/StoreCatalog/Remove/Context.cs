@@ -1,5 +1,5 @@
-using Domain.Entities;
-using Domain.Services;
+using Domain.Roster;
+using Domain.Catalog.Services;
 
 namespace Application.Features.Offerings.Delete;
 

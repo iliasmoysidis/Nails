@@ -1,7 +1,10 @@
+using Domain.Roster;
+using Domain.Professionals;
+using Domain.Stores.Services;
+using Domain.Stores;
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Services;
 
 namespace Application.Features.Assignments.Add;
 

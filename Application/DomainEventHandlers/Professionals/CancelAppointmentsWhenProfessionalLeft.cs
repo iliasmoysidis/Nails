@@ -1,6 +1,7 @@
+using Domain.Professionals.Events;
+using Domain.Professionals;
+using Domain.Common;
 using Application.Abstractions.Repositories;
-using Domain.Events;
-using Domain.Interfaces;
 using MediatR;
 
 namespace Application.DomainEventHandlers.Professionals;

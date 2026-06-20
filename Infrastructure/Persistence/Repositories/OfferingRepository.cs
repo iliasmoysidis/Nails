@@ -1,5 +1,5 @@
+using Domain.Catalog.Entities;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
 
 namespace Infrastructure.Persistence.Repositories;
 

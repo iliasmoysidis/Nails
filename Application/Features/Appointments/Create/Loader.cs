@@ -1,8 +1,11 @@
+using Domain.UserSchedules;
+using Domain.Appointments.Services;
+using Domain.Professionals;
+using Domain.Stores;
+using Domain.Users;
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Entities;
-using Domain.Services;
 
 namespace Application.Features.Appointments.Create;
 

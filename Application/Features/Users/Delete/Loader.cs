@@ -1,8 +1,8 @@
+using Domain.Users.Services;
+using Domain.Users;
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Services;
-
 
 namespace Application.Features.Users.Delete;
 

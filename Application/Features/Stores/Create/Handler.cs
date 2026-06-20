@@ -1,8 +1,11 @@
+using Domain.Catalog;
+using Domain.Roster;
+using Domain.Calendar;
+using Domain.Stores.Services;
+using Domain.Stores;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
-using Domain.Services;
-using Domain.ValueObjects.Identity;
-using Domain.ValueObjects.Store;
+using Domain.Common.ValueObjects;
+using Domain.Stores.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Stores.Create;

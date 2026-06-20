@@ -1,4 +1,4 @@
-using Domain.Interfaces;
+using Domain.Common;
 using MediatR;
 
 namespace Application.Features.Staffs.Terminate;

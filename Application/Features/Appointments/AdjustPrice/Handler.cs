@@ -1,4 +1,4 @@
-using Domain.ValueObjects.Finance;
+using Domain.Common.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Appointments.AdjustPrice;

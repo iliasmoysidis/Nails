@@ -1,6 +1,6 @@
+using Domain.Roster;
+using Domain.Roster.EnumObjects;
 using Application.Abstractions.Repositories;
-using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 

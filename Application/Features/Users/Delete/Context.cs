@@ -1,4 +1,4 @@
-using Domain.Services;
+using Domain.Users.Services;
 
 namespace Application.Features.Users.Delete;
 

@@ -1,5 +1,5 @@
-using Domain.Entities;
-using Domain.Services;
+using Domain.Schedule.Services;
+using Domain.Roster;
 
 namespace Application.Features.StaffCalendars.AddVacation;
 

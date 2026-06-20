@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Professionals;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

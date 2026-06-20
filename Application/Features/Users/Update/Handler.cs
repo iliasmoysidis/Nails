@@ -1,5 +1,6 @@
-using Domain.Interfaces;
-using Domain.ValueObjects.Identity;
+using Domain.Users;
+using Domain.Common;
+using Domain.Common.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Users.Update;

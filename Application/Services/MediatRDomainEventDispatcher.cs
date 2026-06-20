@@ -1,5 +1,5 @@
+using Domain.Common;
 using Application.Abstractions.Events;
-using Domain.Interfaces;
 using MediatR;
 
 namespace Application.Services;

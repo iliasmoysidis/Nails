@@ -1,5 +1,5 @@
-using Domain.Entities;
-using Domain.Services;
+using Domain.Roster;
+using Domain.Roster.Services;
 
 namespace Application.Features.Staffs.Terminate;
 

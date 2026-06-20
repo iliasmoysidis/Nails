@@ -1,5 +1,5 @@
-using Domain.Entities;
-using Domain.Services;
+using Domain.Roster;
+using Domain.Stores.Services;
 
 namespace Application.Features.Stores.Close;
 

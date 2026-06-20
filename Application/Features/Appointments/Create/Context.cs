@@ -1,5 +1,6 @@
-using Domain.Entities;
-using Domain.Services;
+using Domain.UserSchedules;
+using Domain.Appointments.Services;
+using Domain.Users;
 
 namespace Application.Features.Appointments.Create;
 

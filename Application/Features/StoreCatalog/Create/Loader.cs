@@ -1,8 +1,10 @@
+using Domain.Roster;
+using Domain.Catalog.Services;
+using Domain.Stores;
 using Application.Abstractions.Context;
 using Application.Abstractions.Repositories;
 using Application.Exceptions;
-using Domain.Exceptions;
-using Domain.Services;
+using Domain.Common.Exceptions;
 
 namespace Application.Features.Offerings.Create;
 

@@ -1,5 +1,5 @@
-using Domain.Entities;
-using Domain.ValueObjects.Time;
+using Domain.Appointments;
+using Domain.Common.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

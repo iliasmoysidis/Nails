@@ -1,4 +1,4 @@
-using Domain.ValueObjects.Identity;
+using Domain.Common.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Professionals.Update;
