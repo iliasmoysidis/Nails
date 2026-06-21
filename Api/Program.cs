@@ -1,8 +1,7 @@
-using Application.Abstractions.Events;
-using Application.Commands.Stores;
-using Application.Pipelines.Command;
-using Application.Pipelines.Query;
-using Application.Services;
+using Application.Common.Abstractions.Events;
+using Application.Common.Pipelines.Command;
+using Application.Common.Pipelines.Query;
+using Application.Common.Services;
 using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);

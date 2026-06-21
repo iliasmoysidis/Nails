@@ -1,0 +1,23 @@
+using MediatR;
+
+namespace Application.Calendar.RemoveException;
+
+public sealed class Handler
+    : IRequestHandler<Command>
+{
+    private readonly Context _ctx;
+
+    public Handler(Context ctx)
+    {
+        _ctx = ctx;
+    }
+
+    public Task Handle(
+        Command command,
+        CancellationToken ct)
+    {
+        _ctx.StoreAvailability.RemoveSpecialOpeningHours(command.Date);
+
+        return Task.CompletedTask;
+    }
+}
