@@ -60,7 +60,7 @@ public sealed class Handler
             command.PhoneNumber
         );
 
-        var store = Store.Create(
+        var store = new Store(
             name: StoreName.Create(command.Name),
             address: address,
             taxIdNumber: taxId,

@@ -15,7 +15,7 @@ public class Offering
     public Duration Duration { get; private set; }
     public Description Description { get; private set; }
 
-    private Offering(
+    public Offering(
         int storeId,
         OfferingName name,
         Money price,
@@ -28,14 +28,6 @@ public class Offering
         Duration = duration;
         Description = description;
     }
-
-    public static Offering Create(
-        int storeId,
-        OfferingName name,
-        Money price,
-        Duration duration,
-        Description description)
-        => new(storeId, name, price, duration, description);
 
     public void UpdateDetails(
         OfferingName? name = null,

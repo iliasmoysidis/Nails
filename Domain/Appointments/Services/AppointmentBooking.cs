@@ -65,7 +65,7 @@ public class AppointmentBooking
         EnsureProfessionalOffersService(offeringId);
 
         var offering = _storeCatalog.GetOffering(offeringId);
-        var endAt = startAt.Add(offering.Duration.Value);
+        var endAt = startAt.AddMinutes(offering.Duration.Value);
 
         EnsureAvailability(startAt, endAt);
 

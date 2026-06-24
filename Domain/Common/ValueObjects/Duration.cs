@@ -4,11 +4,11 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record Duration
 {
-    public TimeSpan Value { get; }
+    public int Value { get; }
 
-    private Duration(TimeSpan value)
+    private Duration(int minutes)
     {
-        Value = value;
+        Value = minutes;
     }
 
     public static Duration FromMinutes(int minutes)
@@ -22,17 +22,9 @@ public sealed record Duration
         if (minutes > 8 * 60)
             throw new ValidationException("Duration cannot exceed 8 hours.");
 
-        return new Duration(TimeSpan.FromMinutes(minutes));
-    }
-
-    public static Duration FromTimeSpan(TimeSpan value)
-    {
-        if (value.TotalMinutes % 1 != 0)
-            throw new ValidationException("Duration must be whole minutes");
-
-        return FromMinutes((int)value.TotalMinutes);
+        return new Duration(minutes);
     }
 
     public override string ToString()
-        => $"{Value.TotalMinutes} minutes";
+        => $"{Value} minutes";
 }

@@ -16,7 +16,7 @@ public class Appointment
 
     public UtcDateTime StartAt { get; }
     public Duration Duration { get; }
-    public UtcDateTime EndAt => StartAt.Add(Duration.Value);
+    public UtcDateTime EndAt => StartAt.AddMinutes(Duration.Value);
 
     public Money Price { get; private set; }
     public Notes Notes { get; private set; }

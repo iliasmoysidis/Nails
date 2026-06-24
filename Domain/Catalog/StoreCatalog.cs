@@ -27,7 +27,7 @@ public class StoreCatalog
     {
         EnsureNameIsUnique(name);
 
-        var offering = Offering.Create(
+        var offering = new Offering(
             StoreId,
             name,
             price,

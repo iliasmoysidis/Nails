@@ -19,7 +19,7 @@ public class Store : Entity
     public bool IsClosed { get; private set; }
     public UtcDateTime? ClosedAt { get; private set; }
 
-    private Store(
+    public Store(
         StoreName name,
         Address address,
         TaxIdentificationNumber taxIdNumber,
@@ -35,14 +35,6 @@ public class Store : Entity
         IsClosed = false;
         ClosedAt = null;
     }
-
-    public static Store Create(
-        StoreName name,
-        Address address,
-        TaxIdentificationNumber taxIdNumber,
-        Email email,
-        Phone phone)
-        => new(name, address, taxIdNumber, email, phone);
 
     public void Close(IClock clock)
     {

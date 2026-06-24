@@ -18,9 +18,6 @@ public class ProfessionalSchedule
         ProfessionalId = professionalId;
     }
 
-    public static ProfessionalSchedule Create(int professionalId)
-        => new(professionalId);
-
     public void AddCalendar(StaffCalendar calendar)
     {
         EnsureCalendarBelongsToProfessional(calendar);
