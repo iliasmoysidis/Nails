@@ -10,6 +10,4 @@ public interface IProfessionalRepository
     Task<bool> ExistsAsync(Email email, Phone phone, TaxIdentificationNumber taxIdNumber, CancellationToken ct);
 
     Task AddAsync(Professional professional, CancellationToken ct);
-
-    Task<bool> DeleteAsync(int professionalId, CancellationToken ct);
 }

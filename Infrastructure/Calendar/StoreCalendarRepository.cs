@@ -23,14 +23,4 @@ public sealed class StoreCalendarRepository : IStoreCalendarRepository
     {
         return await _context.StoreCalendars.FirstOrDefaultAsync(c => c.StoreId == storeId, ct);
     }
-
-    public async Task RemoveAsync(int storeId, CancellationToken ct)
-    {
-        var calendar = await GetByIdAsync(storeId, ct);
-
-        if (calendar is null)
-            return;
-
-        _context.StoreCalendars.Remove(calendar);
-    }
 }

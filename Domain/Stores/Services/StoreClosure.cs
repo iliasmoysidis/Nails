@@ -2,8 +2,6 @@ using Domain.Schedule;
 using Domain.Roster;
 using Domain.Assignments;
 using Domain.Appointments;
-using Domain.Professionals;
-using Domain.Stores;
 using Domain.Common;
 using Domain.Common.Exceptions;
 

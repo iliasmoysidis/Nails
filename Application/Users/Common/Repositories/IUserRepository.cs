@@ -10,6 +10,4 @@ public interface IUserRepository
     Task<bool> ExistsAsync(Email email, Phone phone, CancellationToken ct);
 
     Task AddAsync(User user, CancellationToken ct);
-
-    Task<bool> DeleteAsync(int userId, CancellationToken ct);
 }

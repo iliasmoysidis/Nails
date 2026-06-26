@@ -8,40 +8,27 @@ namespace Infrastructure.Users;
 
 public sealed class UserRepository : IUserRepository
 {
-    private readonly AppDbContext _db;
+    private readonly AppDbContext _context;
 
-    public UserRepository(AppDbContext db)
+    public UserRepository(AppDbContext context)
     {
-        _db = db;
+        _context = context;
     }
 
     public async Task AddAsync(User user, CancellationToken ct)
     {
-        await _db.Users.AddAsync(user, ct);
-    }
-
-    public async Task<bool> DeleteAsync(int userId, CancellationToken ct)
-    {
-        var affected = await _db.Users
-            .Where(x => x.Id == userId)
-            .ExecuteDeleteAsync(ct);
-
-        return affected > 0;
+        await _context.Users.AddAsync(user, ct);
     }
 
     public async Task<bool> ExistsAsync(Email email, Phone phone, CancellationToken ct)
     {
-        return await _db.Users
-            .Where(x => x.Email.Value == email.Value ||
-                (x.Phone.CountryCode == phone.CountryCode &&
-                x.Phone.NationalNumber == phone.NationalNumber
-                )
-            ).AnyAsync(ct);
+        return await _context.Users
+            .Where(x => x.Email == email || x.Phone == phone)
+            .AnyAsync(ct);
     }
 
     public async Task<User?> GetByIdAsync(int userId, CancellationToken ct)
     {
-        return await _db.Users.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == userId, ct);
+        return await _context.Users.FirstOrDefaultAsync(x => x.Id == userId, ct);
     }
 }

@@ -8,47 +8,29 @@ namespace Infrastructure.Professionals;
 
 public sealed class ProfessionalRepository : IProfessionalRepository
 {
-    private readonly AppDbContext _db;
+    private readonly AppDbContext _context;
 
-    public ProfessionalRepository(AppDbContext db)
+    public ProfessionalRepository(AppDbContext context)
     {
-        _db = db;
+        _context = context;
     }
 
     public async Task AddAsync(Professional professional, CancellationToken ct)
     {
-        await _db.Professionals.AddAsync(professional, ct);
-    }
-
-    public async Task<bool> DeleteAsync(int professionalId, CancellationToken ct)
-    {
-        var affectedRows = await _db.Professionals.Where(p => p.Id == professionalId)
-            .ExecuteDeleteAsync(ct);
-        return affectedRows > 0;
+        await _context.Professionals.AddAsync(professional, ct);
     }
 
     public async Task<bool> ExistsAsync(Email email, Phone phone, TaxIdentificationNumber taxIdNumber, CancellationToken ct)
     {
 
-        return await _db.Professionals
-        .AsNoTracking()
-        .AnyAsync(
-            p =>
-            p.Email.Value == email.Value ||
-            (
-                p.Phone.CountryCode == phone.CountryCode &&
-                p.Phone.Value == phone.Value
-            ) ||
-            (
-                p.TaxIdNumber.CountryCode == taxIdNumber.CountryCode &&
-                p.TaxIdNumber.Value == taxIdNumber.Value
-            ),
-        ct
-        );
+        return await _context.Professionals.AnyAsync(p => p.Email == email ||
+        p.Phone == phone ||
+        p.TaxIdNumber == taxIdNumber,
+        ct);
     }
 
     public async Task<Professional?> GetByIdAsync(int professionalId, CancellationToken ct)
     {
-        return await _db.Professionals.FindAsync([professionalId], ct);
+        return await _context.Professionals.FirstOrDefaultAsync(p => p.Id == professionalId, ct);
     }
 }
