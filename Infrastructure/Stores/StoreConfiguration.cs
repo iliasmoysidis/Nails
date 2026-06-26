@@ -1,4 +1,7 @@
+
+using Domain.Common.ValueObjects;
 using Domain.Stores;
+using Domain.Stores.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,68 +11,116 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
 {
     public void Configure(EntityTypeBuilder<Store> builder)
     {
+        builder.ToTable("Stores");
+
         builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id)
+            .ValueGeneratedOnAdd();
 
         builder.OwnsOne(x => x.Name, n =>
         {
             n.Property(x => x.Value)
+                .HasColumnName("StoreName")
+                .HasMaxLength(StoreName.MaxLength)
                 .IsRequired();
         });
 
-        builder.OwnsOne(x => x.Address, a =>
+        builder.OwnsOne(x => x.Address, address =>
         {
-            a.Property(x => x.Street)
+
+            address.Property(x => x.Street)
                 .HasColumnName("Street")
+                .HasMaxLength(Address.StreetMaxLength)
                 .IsRequired();
 
-            a.Property(x => x.City)
+            address.Property(x => x.City)
                 .HasColumnName("City")
+                .HasMaxLength(Address.CityMaxLength)
                 .IsRequired();
 
-            a.Property(x => x.PostalCode)
+            address.Property(x => x.PostalCode)
                 .HasColumnName("PostalCode")
+                .HasMaxLength(Address.PostalCodeMaxLength)
                 .IsRequired();
 
-            a.Property(x => x.State)
+            address.Property(x => x.State)
                 .HasColumnName("State")
+                .HasMaxLength(Address.StateMaxLength)
                 .IsRequired();
 
-            a.Property(x => x.CountryCode)
+            address.Property(x => x.CountryCode)
                 .HasColumnName("CountryCode")
+                .HasMaxLength(Address.CountryCodeMaxLength)
                 .IsRequired();
         });
 
-        builder.OwnsOne(x => x.TaxIdNumber, t =>
+        builder.OwnsOne(x => x.TaxIdNumber, taxIdNumber =>
         {
-            t.Property(x => x.CountryCode)
+            taxIdNumber.Property(x => x.CountryCode)
                 .HasColumnName("TaxCountryCode")
+                .HasMaxLength(TaxIdentificationNumber.CountryCodeMaxLength)
                 .IsRequired();
 
-            t.Property(x => x.Value)
+            taxIdNumber.Property(x => x.Value)
                 .HasColumnName("TaxIdNumber")
+                .HasMaxLength(TaxIdentificationNumber.TaxIdNumberMaxLength)
                 .IsRequired();
         });
 
-        builder.OwnsOne(x => x.Email, e =>
+        builder.OwnsOne(x => x.Email, email =>
         {
-            e.Property(x => x.Value)
+            email.Property(x => x.Value)
                 .HasColumnName("Email")
+                .HasMaxLength(Email.MaxLength)
                 .IsRequired();
         });
 
-        builder.OwnsOne(x => x.Phone, p =>
+        builder.OwnsOne(x => x.Phone, phone =>
         {
-            p.Property(x => x.CountryCode)
+            phone.Property(x => x.CountryCode)
                 .HasColumnName("PhoneCountryCode")
+                .HasMaxLength(Phone.CountryCodeMaxLength)
                 .IsRequired();
 
-            p.Property(x => x.NationalNumber)
+            phone.Property(x => x.NationalNumber)
                 .HasColumnName("PhoneNationalNumber")
+                .HasMaxLength(Phone.NationalNumberMaxLength)
                 .IsRequired();
         });
+
+        builder.Property(x => x.IsClosed)
+            .IsRequired();
+
+        builder.OwnsOne(x => x.ClosedAt, closedAt =>
+        {
+            closedAt.Property(x => x.Value)
+                .HasColumnName("ClosedAt")
+                .HasColumnType("datetime2");
+        });
+
+        builder.Navigation(x => x.Name)
+            .IsRequired();
+
+        builder.Navigation(x => x.Address)
+            .IsRequired();
+
+        builder.Navigation(x => x.TaxIdNumber)
+            .IsRequired();
+
+        builder.Navigation(x => x.Email)
+            .IsRequired();
+
+        builder.Navigation(x => x.Phone)
+            .IsRequired();
 
         builder.HasIndex("Email").IsUnique();
 
-        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber").IsUnique();
+        builder.HasIndex("TaxCountryCode", "TaxIdNumber")
+            .IsUnique();
+
+        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber")
+            .IsUnique();
+
     }
 }

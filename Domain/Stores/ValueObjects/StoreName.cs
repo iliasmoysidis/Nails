@@ -4,7 +4,7 @@ namespace Domain.Stores.ValueObjects;
 
 public sealed record StoreName : BaseName
 {
-    private const int MaxLength = 100;
+    public const int MaxLength = 100;
 
     private StoreName(string value) : base(value, MaxLength, "Store") { }
 

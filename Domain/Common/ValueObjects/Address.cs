@@ -5,6 +5,12 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record Address
 {
+    public const int StreetMaxLength = 200;
+    public const int CityMaxLength = 100;
+    public const int PostalCodeMaxLength = 20;
+    public const int StateMaxLength = 100;
+    public const int CountryCodeMaxLength = 20;
+
     public string Street { get; }
     public string City { get; }
     public string PostalCode { get; }
@@ -53,20 +59,23 @@ public sealed record Address
         countryCode = countryCode.Trim().ToUpperInvariant();
         state = state.Trim();
 
-        if (street.Length > 200)
-            throw new ValidationException("Street cannot exceed 200 characters.");
+        if (street.Length > StreetMaxLength)
+            throw new ValidationException($"Street cannot exceed {StreetMaxLength} characters.");
 
-        if (city.Length > 100)
-            throw new ValidationException("City cannot exceed 100 characters.");
+        if (city.Length > CityMaxLength)
+            throw new ValidationException($"City cannot exceed {CityMaxLength} characters.");
 
-        if (postalCode.Length > 20)
-            throw new ValidationException("Postal code cannot exceed 20 characters.");
+        if (postalCode.Length > PostalCodeMaxLength)
+            throw new ValidationException($"Postal code cannot exceed {PostalCodeMaxLength} characters.");
 
         if (!Regex.IsMatch(countryCode, @"^[A-Z]{2}$"))
             throw new ValidationException("Country code must be a valid ISO-3166 alpha-2 code.");
 
-        if (state.Length > 100)
-            throw new ValidationException("State cannot exceed 100 characters.");
+        if (state.Length > StateMaxLength)
+            throw new ValidationException($"State cannot exceed {StateMaxLength} characters.");
+
+        if (countryCode.Length > CountryCodeMaxLength)
+            throw new ValidationException($"Country code cannot exceed {CountryCodeMaxLength} characters.");
 
         return new Address(
             street,

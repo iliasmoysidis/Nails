@@ -37,15 +37,29 @@ public sealed class ProfessionalConfiguration : IEntityTypeConfiguration<Profess
                 .IsRequired();
         });
 
+        builder.OwnsOne(x => x.Phone, phone =>
+        {
+            phone.Property(x => x.CountryCode)
+                .HasColumnName("PhoneCountryCode")
+                .HasMaxLength(Phone.CountryCodeMaxLength)
+                .IsRequired();
+
+            phone.Property(x => x.NationalNumber)
+                .HasColumnName("PhoneNationalNumber")
+                .HasMaxLength(Phone.NationalNumberMaxLength)
+                .IsRequired();
+        });
+
         builder.OwnsOne(x => x.TaxIdNumber, taxIdNumber =>
         {
             taxIdNumber.Property(x => x.CountryCode)
                 .HasColumnName("TaxCountryCode")
-                .HasMaxLength(TaxIdentificationNumber.MaxLength)
+                .HasMaxLength(TaxIdentificationNumber.CountryCodeMaxLength)
                 .IsRequired();
 
             taxIdNumber.Property(x => x.Value)
                 .HasColumnName("TaxIdNumber")
+                .HasMaxLength(TaxIdentificationNumber.TaxIdNumberMaxLength)
                 .IsRequired();
         });
 
@@ -73,6 +87,9 @@ public sealed class ProfessionalConfiguration : IEntityTypeConfiguration<Profess
             .IsRequired();
 
         builder.HasIndex("Email")
+            .IsUnique();
+
+        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber")
             .IsUnique();
 
         builder.HasIndex("TaxCountryCode", "TaxIdNumber")

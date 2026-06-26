@@ -5,7 +5,8 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record Phone
 {
-    public const int MaxLength = 20;
+    public const int CountryCodeMaxLength = 5;
+    public const int NationalNumberMaxLength = 50;
 
     public string CountryCode { get; }
     public string NationalNumber { get; }
@@ -23,6 +24,8 @@ public sealed record Phone
         if (string.IsNullOrWhiteSpace(countryCode))
             throw new ValidationException("Country code is required.");
 
+        countryCode = countryCode.Trim();
+
         if (!countryCode.StartsWith("+"))
             throw new ValidationException("Country code must start with '+'.");
 
@@ -32,13 +35,16 @@ public sealed record Phone
         if (string.IsNullOrWhiteSpace(nationalNumber))
             throw new ValidationException("Phone number is required.");
 
+        nationalNumber = nationalNumber.Trim();
+
         if (!Regex.IsMatch(nationalNumber, @"^\d+$"))
             throw new ValidationException("Phone number must contain digits only.");
 
-        var combinedLength = countryCode.Length + nationalNumber.Length;
+        if (countryCode.Length > CountryCodeMaxLength)
+            throw new ValidationException($"Country code cannot exceed {CountryCodeMaxLength} characters.");
 
-        if (combinedLength > MaxLength)
-            throw new ValidationException($"Phone number cannot exceed {MaxLength} characters.");
+        if (nationalNumber.Length > NationalNumberMaxLength)
+            throw new ValidationException($"National number cannot exceed {NationalNumberMaxLength} digits.");
 
         return new Phone(countryCode, nationalNumber);
     }

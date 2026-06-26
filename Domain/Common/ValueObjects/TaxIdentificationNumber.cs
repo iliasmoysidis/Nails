@@ -5,7 +5,8 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record TaxIdentificationNumber
 {
-    public const int MaxLength = 30;
+    public const int CountryCodeMaxLength = 30;
+    public const int TaxIdNumberMaxLength = 50;
 
     public string CountryCode { get; }
     public string Value { get; }
@@ -23,6 +24,9 @@ public sealed record TaxIdentificationNumber
 
         countryCode = countryCode.Trim().ToUpperInvariant();
 
+        if (countryCode.Length > CountryCodeMaxLength)
+            throw new ValidationException($"Country code cannot exceed {CountryCodeMaxLength} characters.");
+
         if (!Regex.IsMatch(countryCode, @"^[A-Z]{2}$"))
             throw new ValidationException("Country code must be a valid ISO-3166 alpha-2 code.");
 
@@ -31,8 +35,8 @@ public sealed record TaxIdentificationNumber
 
         value = value.Trim().ToUpperInvariant();
 
-        if (countryCode.Length + value.Length > MaxLength)
-            throw new ValidationException("Tax identification number cannot exceed 30 characters.");
+        if (value.Length > TaxIdNumberMaxLength)
+            throw new ValidationException($"Tax id number cannot exceed {TaxIdNumberMaxLength} digits.");
 
         if (!Regex.IsMatch(value, @"^[A-Z0-9\-]+$"))
             throw new ValidationException("Tax identification number contains invalid characters.");
