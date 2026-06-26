@@ -8,8 +8,8 @@ namespace Domain.Schedule;
 public class ProfessionalSchedule
 {
     public int ProfessionalId { get; }
-    private readonly Dictionary<int, StaffCalendar> _calendars = [];
-    public IReadOnlyCollection<StaffCalendar> Calendars => _calendars.Values;
+    private readonly List<StaffCalendar> _calendars = [];
+    public IReadOnlyCollection<StaffCalendar> Calendars => _calendars.AsReadOnly();
 
     private ProfessionalSchedule() { }
 
@@ -22,23 +22,25 @@ public class ProfessionalSchedule
     {
         EnsureCalendarBelongsToProfessional(calendar);
 
-        if (_calendars.ContainsKey(calendar.StoreId))
+        if (_calendars.Any(c => c.StoreId == calendar.StoreId))
             throw new InvariantException("Professional already has a calendar for this store.");
 
         EnsureCalendarDoesNotConflict(calendar);
 
-        _calendars.Add(calendar.StoreId, calendar);
+        _calendars.Add(calendar);
     }
 
     public void RemoveCalendar(int storeId)
     {
-        if (!_calendars.Remove(storeId))
-            throw new NotFoundException("Calendar not found.");
+        var calendar = _calendars.FirstOrDefault(c => c.StoreId == storeId)
+            ?? throw new NotFoundException("Calendar not found.");
+
+        _calendars.Remove(calendar);
     }
 
     internal StaffCalendar GetCalendar(int storeId)
     {
-        var calendar = _calendars.GetValueOrDefault(storeId)
+        var calendar = _calendars.FirstOrDefault(c => c.StoreId == storeId)
             ?? throw new NotFoundException("Calendar not found.");
 
         return calendar;
@@ -56,7 +58,7 @@ public class ProfessionalSchedule
         if (workingDay.IsDayOff)
             return;
 
-        foreach (var calendar in _calendars.Values)
+        foreach (var calendar in _calendars)
         {
             if (calendar.StoreId == storeId)
                 continue;
@@ -73,7 +75,7 @@ public class ProfessionalSchedule
         if (exception.IsDayOff)
             return;
 
-        foreach (var calendar in _calendars.Values)
+        foreach (var calendar in _calendars)
         {
             if (calendar.StoreId == storeId)
                 continue;

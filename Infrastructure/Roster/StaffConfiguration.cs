@@ -1,6 +1,5 @@
 using Domain.Professionals;
 using Domain.Roster;
-using Domain.Roster.EnumObjects;
 using Domain.Roster.ValueObjects;
 using Domain.Stores;
 using Microsoft.EntityFrameworkCore;

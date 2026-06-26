@@ -4,6 +4,7 @@ public abstract class BaseCalendar
 {
     protected readonly List<WorkingDay> _workingDays = new();
     public IReadOnlyCollection<WorkingDay> WorkingDays => _workingDays.AsReadOnly();
+    
     protected readonly List<CalendarException> _exceptions = new();
     public IReadOnlyCollection<CalendarException> Exceptions => _exceptions.AsReadOnly();
 
