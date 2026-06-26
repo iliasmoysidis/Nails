@@ -16,11 +16,11 @@ public sealed class AssignmentsRepository : IAssignmentsRepository
 
     public async Task<AssignmentRegistry?> GetByStoreIdAsync(int storeId, CancellationToken ct)
     {
-        return await _db.Assignments.FirstOrDefaultAsync(x => x.StoreId == storeId, ct);
+        return await _db.AssignmentRegistries.FirstOrDefaultAsync(x => x.StoreId == storeId, ct);
     }
 
     public async Task AddAsync(AssignmentRegistry assignments, CancellationToken ct)
     {
-        await _db.Assignments.AddAsync(assignments, ct);
+        await _db.AssignmentRegistries.AddAsync(assignments, ct);
     }
 }

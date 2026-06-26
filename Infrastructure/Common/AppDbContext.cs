@@ -14,15 +14,14 @@ namespace Infrastructure.Common;
 public sealed class AppDbContext : DbContext
 {
     public DbSet<Appointment> Appointments => Set<Appointment>();
-    public DbSet<Store> Stores => Set<Store>();
-    public DbSet<Professional> Professionals => Set<Professional>();
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Staff> Staff => Set<Staff>();
-    public DbSet<AssignmentRegistry> Assignments => Set<AssignmentRegistry>();
-    public DbSet<ProfessionalSchedule> ProfessionalSchedules => Set<ProfessionalSchedule>();
+    public DbSet<AssignmentRegistry> AssignmentRegistries => Set<AssignmentRegistry>();
     public DbSet<StoreCalendar> StoreCalendars => Set<StoreCalendar>();
     public DbSet<StoreCatalog> StoreCatalogs => Set<StoreCatalog>();
-
+    public DbSet<Professional> Professionals => Set<Professional>();
+    public DbSet<Staff> Staff => Set<Staff>();
+    public DbSet<ProfessionalSchedule> ProfessionalSchedules => Set<ProfessionalSchedule>();
+    public DbSet<Store> Stores => Set<Store>();
+    public DbSet<User> Users => Set<User>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
