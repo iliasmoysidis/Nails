@@ -7,25 +7,20 @@ namespace Infrastructure.Catalog;
 
 public sealed class StoreCatalogRepository : IStoreCatalogRepository
 {
-    private readonly AppDbContext _db;
+    private readonly AppDbContext _context;
 
-    public StoreCatalogRepository(AppDbContext db)
+    public StoreCatalogRepository(AppDbContext context)
     {
-        _db = db;
+        _context = context;
+    }
+
+    public async Task AddAsync(StoreCatalog catalog, CancellationToken ct)
+    {
+        await _context.StoreCatalogs.AddAsync(catalog, ct);
     }
 
     public async Task<StoreCatalog?> GetByIdAsync(int storeId, CancellationToken ct)
     {
-        var offerings = await _db.Offerings
-            .Where(o => o.StoreId == storeId)
-            .ToListAsync();
-
-        if (!offerings.Any())
-            return null;
-
-        return StoreCatalog.Rehydrate(
-            storeId: storeId,
-            offerings: offerings
-        );
+        return await _context.StoreCatalogs.FirstOrDefaultAsync(c => c.StoreId == storeId, ct);
     }
 }
