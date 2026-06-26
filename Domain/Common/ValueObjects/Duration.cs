@@ -4,11 +4,11 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record Duration
 {
-    public int Value { get; }
+    public int Minutes { get; }
 
     private Duration(int minutes)
     {
-        Value = minutes;
+        Minutes = minutes;
     }
 
     public static Duration FromMinutes(int minutes)
@@ -26,5 +26,5 @@ public sealed record Duration
     }
 
     public override string ToString()
-        => $"{Value} minutes";
+        => $"{Minutes} minutes";
 }

@@ -1,14 +1,13 @@
-using Infrastructure.Assignments;
-using Infrastructure.Calendar;
-using Infrastructure.Roster;
-using Infrastructure.Schedule;
 using Domain.Roster;
-using Domain.Catalog.Entities;
 using Domain.Appointments;
 using Domain.Professionals;
 using Domain.Stores;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
+using Domain.Assignments;
+using Domain.Schedule;
+using Domain.Calendar;
+using Domain.Catalog;
 
 namespace Infrastructure.Common;
 
@@ -16,18 +15,14 @@ public sealed class AppDbContext : DbContext
 {
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<Store> Stores => Set<Store>();
-    public DbSet<Offering> Offerings => Set<Offering>();
     public DbSet<Professional> Professionals => Set<Professional>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<Staff> Staff => Set<Staff>();
+    public DbSet<AssignmentRegistry> Assignments => Set<AssignmentRegistry>();
+    public DbSet<ProfessionalSchedule> ProfessionalSchedules => Set<ProfessionalSchedule>();
+    public DbSet<StoreCalendar> StoreCalendars => Set<StoreCalendar>();
+    public DbSet<StoreCatalog> StoreCatalogs => Set<StoreCatalog>();
 
-    public DbSet<AssignmentEntity> Assignments => Set<AssignmentEntity>();
-    public DbSet<StaffEntity> Staff => Set<StaffEntity>();
-    public DbSet<StaffMemberEntity> StaffMembers => Set<StaffMemberEntity>();
-    public DbSet<StaffRoleEntity> StaffRoles => Set<StaffRoleEntity>();
-    public DbSet<StaffCalendarWorkingRangeEntity> StaffCalendarWorkingRanges => Set<StaffCalendarWorkingRangeEntity>();
-    public DbSet<StaffCalendarExceptionEntity> StaffCalendarExceptions => Set<StaffCalendarExceptionEntity>();
-    public DbSet<StoreCalendarWorkingRangeEntity> StoreCalendarWorkingRanges => Set<StoreCalendarWorkingRangeEntity>();
-    public DbSet<StoreCalendarExceptionEntity> StoreCalendarExceptions => Set<StoreCalendarExceptionEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

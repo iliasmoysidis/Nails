@@ -1,6 +1,8 @@
 using Domain.Appointments;
 using Domain.Appointments.ValueObjects;
-using Domain.Common.ValueObjects;
+using Domain.Professionals;
+using Domain.Stores;
+using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,24 +16,44 @@ public sealed class AppointmentConfiguration
         builder.ToTable("Appointments");
 
         builder.HasKey(x => x.Id);
+
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
+
         builder.Property(x => x.UserId).IsRequired();
+
         builder.Property(x => x.ProfessionalId).IsRequired();
+
         builder.Property(x => x.OfferingId).IsRequired();
+
         builder.Property(x => x.StoreId).IsRequired();
 
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(x => x.StartAt)
-            .HasConversion(
-                v => v.Value,
-                v => UtcDateTime.FromUtc(
-                    DateTime.SpecifyKind(v, DateTimeKind.Utc)))
-            .HasColumnType("datetime2")
-            .IsRequired();
+        builder.HasOne<Professional>()
+            .WithMany()
+            .HasForeignKey(x => x.ProfessionalId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Store>()
+            .WithMany()
+            .HasForeignKey(x => x.StoreId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.OwnsOne(x => x.StartAt, startAt =>
+        {
+            startAt.Property(x => x.Value)
+                .HasColumnName("StartAt")
+                .HasColumnType("datetime2")
+                .IsRequired();
+        });
+
 
         builder.OwnsOne(x => x.Duration, duration =>
         {
-            duration.Property(x => x.Value)
+            duration.Property(x => x.Minutes)
                 .HasColumnName("DurationMinutes")
                 .IsRequired();
         });
@@ -40,18 +62,13 @@ public sealed class AppointmentConfiguration
             .HasConversion<int>()
             .IsRequired();
 
-        builder.Property(x => x.CanceledAt)
-            .HasConversion(
-                v => v.HasValue
-                    ? v.Value.Value
-                    : (DateTime?)null,
-                v => v.HasValue
-                    ? UtcDateTime.FromUtc(
-                        DateTime.SpecifyKind(
-                            v.Value,
-                            DateTimeKind.Utc))
-                    : null)
-            .HasColumnType("datetime2");
+        builder.OwnsOne(x => x.CanceledAt, canceledAt =>
+        {
+            canceledAt.Property(x => x.Value)
+                .HasColumnName("CanceledAt")
+                .HasColumnType("datetime2");
+        });
+
 
         builder.OwnsOne(x => x.Price, money =>
         {
@@ -74,6 +91,9 @@ public sealed class AppointmentConfiguration
                 .IsRequired();
         });
 
+        builder.Navigation(x => x.StartAt)
+            .IsRequired();
+
         builder.Navigation(x => x.Duration)
             .IsRequired();
 
@@ -89,12 +109,11 @@ public sealed class AppointmentConfiguration
 
         builder.HasIndex(x => x.StoreId);
 
-        builder.HasIndex(x => x.StartAt);
+        builder.HasIndex("StartAt");
 
-        builder.HasIndex(x => new
-        {
-            x.ProfessionalId,
-            x.StartAt
-        });
+        builder.HasIndex(
+            nameof(Appointment.ProfessionalId),
+            "StartAt"
+        );
     }
 }

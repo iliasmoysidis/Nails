@@ -2,7 +2,7 @@ using Domain.Common.Exceptions;
 
 namespace Domain.Common.ValueObjects;
 
-public readonly struct UtcDateTime : IComparable<UtcDateTime>, IEquatable<UtcDateTime>
+public sealed record UtcDateTime : IComparable<UtcDateTime>
 {
     public DateTime Value { get; }
 
@@ -41,8 +41,8 @@ public readonly struct UtcDateTime : IComparable<UtcDateTime>, IEquatable<UtcDat
     public int Minute => Value.Minute;
     public int Second => Value.Second;
 
-    public int CompareTo(UtcDateTime other)
-        => Value.CompareTo(other.Value);
+    public int CompareTo(UtcDateTime? other)
+        => other is null ? 1 : Value.CompareTo(other.Value);
 
     public static TimeSpan operator -(UtcDateTime a, UtcDateTime b)
         => a.Value - b.Value;
@@ -51,25 +51,12 @@ public readonly struct UtcDateTime : IComparable<UtcDateTime>, IEquatable<UtcDat
     public static bool operator <(UtcDateTime a, UtcDateTime b) => a.Value < b.Value;
     public static bool operator >=(UtcDateTime a, UtcDateTime b) => a.Value >= b.Value;
     public static bool operator <=(UtcDateTime a, UtcDateTime b) => a.Value <= b.Value;
-    public static bool operator ==(UtcDateTime a, UtcDateTime b)
-        => a.Value == b.Value;
-    public static bool operator !=(UtcDateTime a, UtcDateTime b)
-        => a.Value != b.Value;
 
     public bool IsBefore(UtcDateTime other)
         => Value < other.Value;
 
     public bool IsAfter(UtcDateTime other)
         => Value > other.Value;
-
-    public bool Equals(UtcDateTime other)
-        => Value == other.Value;
-
-    public override bool Equals(object? obj)
-        => obj is UtcDateTime other && Value == other.Value;
-
-    public override int GetHashCode()
-        => Value.GetHashCode();
 
     public override string ToString()
         => Value.ToString("O");

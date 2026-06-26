@@ -57,7 +57,9 @@ public class StaffCalendar : BaseCalendar
         if (day.IsDayOff)
             return false;
 
-        if (!_workingDays.TryGetValue(day.Day, out var existing) || existing.IsDayOff)
+        var existing = _workingDays.FirstOrDefault(d => d.Day == day.Day);
+
+        if (existing is null || existing.IsDayOff)
             return false;
 
         return TimeRange.AnyOverlap(existing.TimeRanges, day.TimeRanges);

@@ -16,15 +16,11 @@ public sealed class AssignmentsRepository : IAssignmentsRepository
 
     public async Task<AssignmentRegistry?> GetByStoreIdAsync(int storeId, CancellationToken ct)
     {
-        var rows = await _db.Assignments.Where(a => a.StoreId == storeId).ToListAsync(ct);
+        return await _db.Assignments.FirstOrDefaultAsync(x => x.StoreId == storeId, ct);
+    }
 
-        var assignmets = AssignmentRegistry.Create(storeId);
-
-        foreach (var row in rows)
-        {
-            assignmets.Add(row.ProfessionalId, row.OfferingId);
-        }
-
-        return assignmets;
+    public async Task AddAsync(AssignmentRegistry assignments, CancellationToken ct)
+    {
+        await _db.Assignments.AddAsync(assignments, ct);
     }
 }

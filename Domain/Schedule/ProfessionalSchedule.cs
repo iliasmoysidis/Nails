@@ -103,12 +103,12 @@ public class ProfessionalSchedule
 
     private void EnsureCalendarDoesNotConflict(StaffCalendar calendar)
     {
-        foreach (var workingDay in calendar.GetWorkingDays())
+        foreach (var workingDay in calendar.WorkingDays)
         {
             EnsureWorkingDayDoesNotConflict(calendar.StoreId, workingDay);
         }
 
-        foreach (var exception in calendar.GetExceptions())
+        foreach (var exception in calendar.Exceptions)
         {
             EnsureExceptionDoesNotConflict(calendar.StoreId, exception);
         }

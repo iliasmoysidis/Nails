@@ -56,10 +56,9 @@ public class StoreCalendar : BaseCalendar
 
     public bool IsWithinWeeklyStoreHours(DayOfWeek day, TimeRange range)
     {
-        if (!_workingDays.TryGetValue(day, out var workingDay))
-            return false;
+        var workingDay = _workingDays.FirstOrDefault(d => d.Day == day);
 
-        if (workingDay.IsDayOff)
+        if (workingDay is null || workingDay.IsDayOff)
             return false;
 
         return workingDay.TimeRanges.Any(r =>

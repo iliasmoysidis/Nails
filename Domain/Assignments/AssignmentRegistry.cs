@@ -8,12 +8,21 @@ public class AssignmentRegistry
     public int StoreId { get; }
 
     private readonly HashSet<Assignment> _assignments = new();
-
-    private AssignmentRegistry() { }
+    public IReadOnlyCollection<Assignment> Assignments => _assignments;
 
     public AssignmentRegistry(int storeId)
     {
         StoreId = storeId;
+    }
+
+    public static AssignmentRegistry Rehydrate(int storeId, IEnumerable<Assignment> assignments)
+    {
+        var registry = new AssignmentRegistry(storeId);
+
+        foreach (var assignment in assignments)
+            registry._assignments.Add(assignment);
+
+        return registry;
     }
 
     internal void Add(int professionalId, int offeringId)
