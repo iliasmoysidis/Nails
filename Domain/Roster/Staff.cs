@@ -10,7 +10,7 @@ public class Staff : Entity
     public int StoreId { get; }
 
     private readonly List<StaffMember> _members = new();
-    public IReadOnlyCollection<StaffMember> Members => _members;
+    public IReadOnlyCollection<StaffMember> Members => _members.AsReadOnly();
 
     private Staff() { }
 
