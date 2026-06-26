@@ -121,6 +121,5 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
 
         builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber")
             .IsUnique();
-
     }
 }

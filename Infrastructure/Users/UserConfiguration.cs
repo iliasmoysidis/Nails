@@ -1,3 +1,4 @@
+using Domain.Common.ValueObjects;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,39 +9,69 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        builder.ToTable("Users");
+
         builder.HasKey(x => x.Id);
 
-        builder.OwnsOne(x => x.FullName, f =>
+        builder.Property(x => x.Id)
+            .ValueGeneratedOnAdd();
+
+        builder.OwnsOne(x => x.FullName, fullName =>
         {
-            f.Property(x => x.FirstName)
+            fullName.Property(x => x.FirstName)
                 .HasColumnName("FirstName")
+                .HasMaxLength(FullName.MaxLength)
                 .IsRequired();
 
-            f.Property(x => x.LastName)
+            fullName.Property(x => x.LastName)
                 .HasColumnName("LastName")
+                .HasMaxLength(FullName.MaxLength)
                 .IsRequired();
         });
 
-        builder.OwnsOne(x => x.Email, e =>
+        builder.OwnsOne(x => x.Email, email =>
         {
-            e.Property(x => x.Value)
+            email.Property(x => x.Value)
                 .HasColumnName("Email")
+                .HasMaxLength(Email.MaxLength)
                 .IsRequired();
         });
 
-        builder.OwnsOne(x => x.Phone, p =>
+        builder.OwnsOne(x => x.Phone, phone =>
         {
-            p.Property(x => x.CountryCode)
+            phone.Property(x => x.CountryCode)
                 .HasColumnName("PhoneCountryCode")
+                .HasMaxLength(Phone.CountryCodeMaxLength)
                 .IsRequired();
 
-            p.Property(x => x.NationalNumber)
+            phone.Property(x => x.NationalNumber)
                 .HasColumnName("PhoneNationalNumber")
+                .HasMaxLength(Phone.NationalNumberMaxLength)
                 .IsRequired();
         });
+
+        builder.Property(x => x.IsDeleted)
+            .IsRequired();
+
+        builder.OwnsOne(x => x.DeletedAt, deletedAt =>
+        {
+            deletedAt.Property(x => x.Value)
+                .HasColumnName("DeletedAt")
+                .HasColumnType("datetime2");
+        });
+
+        builder.Navigation(x => x.FullName)
+            .IsRequired();
+
+        builder.Navigation(x => x.Email)
+            .IsRequired();
+
+        builder.Navigation(x => x.Phone)
+            .IsRequired();
 
         builder.HasIndex("Email").IsUnique();
 
-        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber").IsUnique();
+        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber")
+            .IsUnique();
     }
 }
