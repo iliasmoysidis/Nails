@@ -4,7 +4,7 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record FullName
 {
-    private const int MaxLength = 100;
+    public const int MaxLength = 100;
 
     public string FirstName { get; }
     public string LastName { get; }

@@ -5,7 +5,7 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record TaxIdentificationNumber
 {
-    private const int MaxLength = 30;
+    public const int MaxLength = 30;
 
     public string CountryCode { get; }
     public string Value { get; }

@@ -1,3 +1,4 @@
+using Domain.Common.ValueObjects;
 using Domain.Professionals;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,23 +9,73 @@ public sealed class ProfessionalConfiguration : IEntityTypeConfiguration<Profess
 {
     public void Configure(EntityTypeBuilder<Professional> builder)
     {
+        builder.ToTable("Professionals");
+
         builder.HasKey(x => x.Id);
 
-        builder.OwnsOne(x => x.FullName, f =>
+        builder.Property(x => x.Id)
+            .ValueGeneratedOnAdd();
+
+        builder.OwnsOne(x => x.FullName, fullName =>
         {
-            f.Property(x => x.FirstName);
-            f.Property(x => x.LastName);
+            fullName.Property(x => x.FirstName)
+                .HasColumnName("FirstName")
+                .HasMaxLength(FullName.MaxLength)
+                .IsRequired();
+
+            fullName.Property(x => x.LastName)
+                .HasColumnName("LastName")
+                .HasMaxLength(FullName.MaxLength)
+                .IsRequired();
         });
 
-        builder.OwnsOne(x => x.Email, e =>
+        builder.OwnsOne(x => x.Email, email =>
         {
-            e.Property(x => x.Value);
+            email.Property(x => x.Value)
+                .HasColumnName("Email")
+                .HasMaxLength(Email.MaxLength)
+                .IsRequired();
         });
 
-        builder.OwnsOne(x => x.TaxIdNumber, t =>
+        builder.OwnsOne(x => x.TaxIdNumber, taxIdNumber =>
         {
-            t.Property(x => x.CountryCode);
-            t.Property(x => x.Value);
+            taxIdNumber.Property(x => x.CountryCode)
+                .HasColumnName("TaxCountryCode")
+                .HasMaxLength(TaxIdentificationNumber.MaxLength)
+                .IsRequired();
+
+            taxIdNumber.Property(x => x.Value)
+                .HasColumnName("TaxIdNumber")
+                .IsRequired();
         });
+
+        builder.Property(x => x.IsDeleted)
+            .IsRequired();
+
+        builder.OwnsOne(x => x.DeletedAt, deletedAt =>
+        {
+            deletedAt.Property(x => x.Value)
+                .HasColumnName("DeletedAt")
+                .HasColumnType("datetime2")
+                .IsRequired();
+        });
+
+        builder.Navigation(x => x.FullName)
+            .IsRequired();
+
+        builder.Navigation(x => x.Email)
+            .IsRequired();
+
+        builder.Navigation(x => x.Phone)
+            .IsRequired();
+
+        builder.Navigation(x => x.TaxIdNumber)
+            .IsRequired();
+
+        builder.HasIndex("Email")
+            .IsUnique();
+
+        builder.HasIndex("TaxCountryCode", "TaxIdNumber")
+            .IsUnique();
     }
 }

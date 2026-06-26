@@ -4,6 +4,8 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record Email
 {
+    public const int MaxLength = 320;
+
     public string Value { get; }
 
     private Email(string value)
@@ -17,6 +19,9 @@ public sealed record Email
             throw new ValidationException("Email cannot be empty.");
 
         value = value.Trim().ToLowerInvariant();
+
+        if (value.Length > MaxLength)
+            throw new ValidationException($"Email cannot exceed {MaxLength} characters.");
 
         if (!IsValid(value))
             throw new ValidationException("Invalid email address.");

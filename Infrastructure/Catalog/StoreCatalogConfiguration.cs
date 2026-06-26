@@ -20,30 +20,34 @@ public sealed class StoreCatalogConfiguration : IEntityTypeConfiguration<StoreCa
         builder.HasOne<Store>()
             .WithOne()
             .HasForeignKey<StoreCatalog>(x => x.StoreId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.OwnsMany(x => x.Offerings, offerings =>
         {
             offerings.ToTable("Offerings");
+
             offerings.HasKey(x => x.Id);
-            offerings.Property(x => x.Id).ValueGeneratedOnAdd();
-            offerings.WithOwner().HasForeignKey("StoreId");
+
+            offerings.Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+
+            offerings.WithOwner()
+                .HasForeignKey("StoreId");
 
             offerings.OwnsOne(x => x.Name, name =>
             {
                 name.Property(x => x.Value)
                     .HasColumnName("Name")
-                    .HasMaxLength(200)
+                    .HasMaxLength(OfferingName.MaxLength)
                     .IsRequired();
             });
 
-            offerings.Property(x => x.Duration)
-                .HasConversion(
-                    v => v.Minutes,
-                    v => Duration.FromMinutes(v)
-                )
-                .HasColumnName("DurationMinutes")
-                .IsRequired();
+            offerings.OwnsOne(x => x.Duration, duration =>
+            {
+                duration.Property(x => x.Minutes)
+                    .HasColumnName("DurationMinutes")
+                    .IsRequired();
+            });
 
             offerings.OwnsOne(x => x.Price, money =>
             {
@@ -67,8 +71,21 @@ public sealed class StoreCatalogConfiguration : IEntityTypeConfiguration<StoreCa
             });
 
             offerings.HasIndex("StoreId", "Name").IsUnique();
+
+            offerings.Navigation(x => x.Name)
+                .IsRequired();
+
+            offerings.Navigation(x => x.Price)
+                .IsRequired();
+
+            offerings.Navigation(x => x.Description)
+                .IsRequired();
+
+            offerings.Navigation(x => x.Duration)
+                .IsRequired();
         });
 
-        builder.Navigation(x => x.Offerings).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(x => x.Offerings)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

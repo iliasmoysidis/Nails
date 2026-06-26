@@ -10,7 +10,7 @@ public class StoreCatalog
     public int StoreId { get; }
 
     private readonly List<Offering> _offerings = new();
-    public IReadOnlyCollection<Offering> Offerings => _offerings;
+    public IReadOnlyCollection<Offering> Offerings => _offerings.AsReadOnly();
 
     private StoreCatalog() { }
 
