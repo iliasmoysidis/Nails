@@ -4,6 +4,8 @@ namespace Domain.Common.ValueObjects;
 
 public sealed record Duration
 {
+    public const int SchedulingGranuleMinutes = 15;
+
     public int Minutes { get; }
 
     private Duration(int minutes)
@@ -16,8 +18,8 @@ public sealed record Duration
         if (minutes <= 0)
             throw new ValidationException("Duration must be positive.");
 
-        if (minutes % 15 != 0)
-            throw new ValidationException("Duration must be in 15-minute increments.");
+        if (minutes % SchedulingGranuleMinutes != 0)
+            throw new ValidationException($"Duration must be in {SchedulingGranuleMinutes}-minute increments.");
 
         if (minutes > 8 * 60)
             throw new ValidationException("Duration cannot exceed 8 hours.");

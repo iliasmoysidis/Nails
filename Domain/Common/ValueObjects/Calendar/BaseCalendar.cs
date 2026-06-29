@@ -4,7 +4,7 @@ public abstract class BaseCalendar
 {
     protected readonly List<WorkingDay> _workingDays = new();
     public IReadOnlyCollection<WorkingDay> WorkingDays => _workingDays.AsReadOnly();
-    
+
     protected readonly List<CalendarException> _exceptions = new();
     public IReadOnlyCollection<CalendarException> Exceptions => _exceptions.AsReadOnly();
 
@@ -29,7 +29,7 @@ public abstract class BaseCalendar
     protected void RemoveException(DateOnly date)
         => _exceptions.RemoveAll(e => e.Date == date);
 
-    protected IReadOnlyCollection<TimeRange> ResolveTimeRanges(DateOnly date)
+    public IReadOnlyCollection<TimeRange> ResolveTimeRanges(DateOnly date)
     {
         var exception = _exceptions.FirstOrDefault(e => e.Date == date);
         if (exception is not null)
