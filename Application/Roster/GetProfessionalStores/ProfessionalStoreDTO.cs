@@ -3,8 +3,7 @@ namespace Application.Roster.GetProfessionalStores;
 public sealed record ProfessionalStoreDTO(
     int StoreId,
     string StoreName,
-    string City,
-    string CountryCode,
+    string Address,
     bool IsOwner,
     bool IsEmployee
 );
