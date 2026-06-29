@@ -75,7 +75,14 @@ public sealed class AppointmentQueries : IAppointmentQueries
         ).FirstOrDefaultAsync(ct);
     }
 
-    public async Task<PagedResult<AppointmentListItemDTO>> GetProfessionalAppointmentsAsync(int professionalId, DateOnly? from, DateOnly? to, int? page, int? pageSize, CancellationToken ct)
+    public async Task<PagedResult<AppointmentListItemDTO>> GetProfessionalAppointmentsAsync(
+        int professionalId,
+        DateOnly? from,
+        DateOnly? to,
+        int? page,
+        int? pageSize,
+        CancellationToken ct
+    )
     {
         var query = AppointmentListQuery(from, to)
             .Where(a => a.ProfessionalId == professionalId);
@@ -87,7 +94,8 @@ public sealed class AppointmentQueries : IAppointmentQueries
         if (page.HasValue && pageSize.HasValue)
         {
             var offset = (page.Value - 1) * pageSize.Value;
-            items = await query.Skip(offset)
+            items = await query
+                .Skip(offset)
                 .Take(pageSize.Value)
                 .ToListAsync(ct);
         }
@@ -116,7 +124,8 @@ public sealed class AppointmentQueries : IAppointmentQueries
         if (page.HasValue && pageSize.HasValue)
         {
             var offset = (page.Value - 1) * pageSize.Value;
-            items = await query.Skip(offset)
+            items = await query
+                .Skip(offset)
                 .Take(pageSize.Value)
                 .ToListAsync(ct);
         }
