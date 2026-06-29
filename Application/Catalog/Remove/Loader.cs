@@ -15,19 +15,19 @@ public sealed class Loader
 {
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCatalogRepository _catalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly IAssignmentRegistryRepository _assignmentRegistryRepo;
     private readonly IStoreRepository _storeRepo;
 
     public Loader(
         IStaffRepository staffRepo,
         IStoreCatalogRepository catalogRepo,
-        IAssignmentsRepository assignmentsRepo,
+        IAssignmentRegistryRepository assignmentRegistryRepo,
         IStoreRepository storeRepo
     )
     {
         _staffRepo = staffRepo;
         _catalogRepo = catalogRepo;
-        _assignmentsRepo = assignmentsRepo;
+        _assignmentRegistryRepo = assignmentRegistryRepo;
         _storeRepo = storeRepo;
     }
 
@@ -42,7 +42,7 @@ public sealed class Loader
         var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found");
 
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _assignmentRegistryRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found.");
 
         var store = await _storeRepo.GetByIdAsync(command.StoreId, ct)

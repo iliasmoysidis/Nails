@@ -2,7 +2,7 @@ using Domain.Assignments;
 
 namespace Application.Assignments.Common.Repositories;
 
-public interface IAssignmentsRepository
+public interface IAssignmentRegistryRepository
 {
     Task<AssignmentRegistry?> GetByStoreIdAsync(int storeId, CancellationToken ct);
 

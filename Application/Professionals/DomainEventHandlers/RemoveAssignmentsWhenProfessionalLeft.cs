@@ -7,9 +7,9 @@ namespace Application.Professionals.DomainEventHandlers;
 public sealed class RemoveAssignmentsWhenProfessionalLeft
     : INotificationHandler<ProfessionalLeftStoreDomainEvent>
 {
-    private readonly IAssignmentsRepository _repo;
+    private readonly IAssignmentRegistryRepository _repo;
 
-    public RemoveAssignmentsWhenProfessionalLeft(IAssignmentsRepository repo)
+    public RemoveAssignmentsWhenProfessionalLeft(IAssignmentRegistryRepository repo)
     {
         _repo = repo;
     }

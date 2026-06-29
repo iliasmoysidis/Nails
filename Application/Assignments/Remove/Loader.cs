@@ -19,21 +19,21 @@ public sealed class Loader
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCatalogRepository _catalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly IAssignmentRegistryRepository _assignmentRegistryRepo;
 
     public Loader(
         IProfessionalRepository professionalRepo,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IStoreCatalogRepository catalogRepo,
-        IAssignmentsRepository assignmentsRepo
+        IAssignmentRegistryRepository assignmentRegistryRepo
     )
     {
         _professionalRepo = professionalRepo;
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _catalogRepo = catalogRepo;
-        _assignmentsRepo = assignmentsRepo;
+        _assignmentRegistryRepo = assignmentRegistryRepo;
     }
 
     public async Task PopulateAsync(
@@ -54,7 +54,7 @@ public sealed class Loader
         var catalog = await _catalogRepo.GetByIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Store catalog not found.");
 
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _assignmentRegistryRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found.");
 
         ctx.StoreAssignments = new StoreAssignments(

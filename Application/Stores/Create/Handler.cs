@@ -20,21 +20,21 @@ public sealed class Handler
     private readonly IStoreRepository _storeRepo;
     private readonly IStaffRepository _staffRepo;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly IAssignmentRegistryRepository _assignmentRegistryRepo;
     private readonly IStoreCalendarRepository _storeCalendarRepo;
 
     public Handler(
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
         IStoreCatalogRepository storeCatalogRepo,
-        IAssignmentsRepository assignmentsRepo,
+        IAssignmentRegistryRepository assignmentRegistryRepo,
         IStoreCalendarRepository storeCalendarRepo
     )
     {
         _storeRepo = storeRepo;
         _staffRepo = staffRepo;
         _storeCatalogRepo = storeCatalogRepo;
-        _assignmentsRepo = assignmentsRepo;
+        _assignmentRegistryRepo = assignmentRegistryRepo;
         _storeCalendarRepo = storeCalendarRepo;
     }
 
@@ -74,7 +74,7 @@ public sealed class Handler
 
         await _staffRepo.AddAsync(storeSetup.Staff, ct);
         await _storeCatalogRepo.AddAsync(storeSetup.StoreCatalog, ct);
-        await _assignmentsRepo.AddAsync(storeSetup.Assignments, ct);
+        await _assignmentRegistryRepo.AddAsync(storeSetup.Assignments, ct);
         await _storeCalendarRepo.AddAsync(storeSetup.StoreCalendar, ct);
 
         return store.Id;

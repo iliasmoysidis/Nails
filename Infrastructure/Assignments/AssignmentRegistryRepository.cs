@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Assignments;
 
-public sealed class AssignmentsRepository : IAssignmentsRepository
+public sealed class AssignmentRegistryRepository : IAssignmentRegistryRepository
 {
     private readonly AppDbContext _db;
 
-    public AssignmentsRepository(AppDbContext db)
+    public AssignmentRegistryRepository(AppDbContext db)
     {
         _db = db;
     }

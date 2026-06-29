@@ -26,7 +26,7 @@ public sealed class Loader
     private readonly IStoreCalendarRepository _storeCalendarRepo;
     private readonly IProfessionalScheduleRepository _professionalScheduleRepo;
     private readonly IStoreCatalogRepository _storeCatalogRepo;
-    private readonly IAssignmentsRepository _assignmentsRepo;
+    private readonly IAssignmentRegistryRepository _assignmentRegistryRepo;
 
     public Loader(
         IUserRepository userRepo,
@@ -35,7 +35,7 @@ public sealed class Loader
         IStoreCatalogRepository storeCatalogRepo,
         IProfessionalScheduleRepository professionalScheduleRepo,
         IStoreCalendarRepository storeCalendarRepo,
-        IAssignmentsRepository assignmentsRepo,
+        IAssignmentRegistryRepository assignmentRegistryRepo,
         IAppointmentRepository appointmentRepo
     )
     {
@@ -45,7 +45,7 @@ public sealed class Loader
         _storeCatalogRepo = storeCatalogRepo;
         _professionalScheduleRepo = professionalScheduleRepo;
         _storeCalendarRepo = storeCalendarRepo;
-        _assignmentsRepo = assignmentsRepo;
+        _assignmentRegistryRepo = assignmentRegistryRepo;
         _appointmentRepo = appointmentRepo;
     }
 
@@ -75,7 +75,7 @@ public sealed class Loader
         var staffCalendar = professionalSchedule.Calendars.FirstOrDefault(c => c.StoreId == command.StoreId)
             ?? throw new ApplicationLayerNotFoundException("Professional calendar not found");
 
-        var assignments = await _assignmentsRepo.GetByStoreIdAsync(command.StoreId, ct)
+        var assignments = await _assignmentRegistryRepo.GetByStoreIdAsync(command.StoreId, ct)
             ?? throw new ApplicationLayerNotFoundException("Assignments not found");
 
         var professionalAppointments = await _appointmentRepo.GetUpcomingByProfessionalIdAsync(command.ProfessionalId, ct);
