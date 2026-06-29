@@ -1,5 +1,6 @@
 using Application.Appointments.GetDetails;
 using Application.Appointments.Common.DTO;
+using Application.Common.DTO;
 
 namespace Application.Appointments.Common.Queries;
 
@@ -7,24 +8,30 @@ public interface IAppointmentQueries
 {
     Task<AppointmentDetailsDTO?> GetAppointmentDetailsAsync(int appointmentId, CancellationToken ct);
 
-    Task<IReadOnlyCollection<AppointmentListItemDTO>> GetProfessionalAppointmentsAsync(
+    Task<PagedResult<AppointmentListItemDTO>> GetProfessionalAppointmentsAsync(
         int professionalId,
-        DateOnly from,
-        DateOnly to,
+        DateOnly? from,
+        DateOnly? to,
+        int? page,
+        int? pageSize,
         CancellationToken ct
     );
 
-    Task<IReadOnlyCollection<AppointmentListItemDTO>> GetUserAppointmentsAsync(
+    Task<PagedResult<AppointmentListItemDTO>> GetUserAppointmentsAsync(
         int userId,
-        DateOnly from,
-        DateOnly to,
+        DateOnly? from,
+        DateOnly? to,
+        int? page,
+        int? pageSize,
         CancellationToken ct
     );
 
-    Task<IReadOnlyCollection<AppointmentListItemDTO>> GetStoreAppointmentsAsync(
+    Task<PagedResult<AppointmentListItemDTO>> GetStoreAppointmentsAsync(
         int storeId,
-        DateOnly from,
-        DateOnly to,
+        DateOnly? from,
+        DateOnly? to,
+        int? page,
+        int? pageSize,
         CancellationToken ct
     );
 }
