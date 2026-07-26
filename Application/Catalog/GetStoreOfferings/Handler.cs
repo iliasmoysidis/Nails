@@ -1,6 +1,5 @@
 using Application.Catalog.Common.DTO;
 using Application.Catalog.Common.Queries;
-using Application.Catalog;
 
 namespace Application.Catalog.GetStoreOfferings;
 

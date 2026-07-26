@@ -4,5 +4,7 @@ public sealed record Query(
     int StoreId,
     int ProfessionalId,
     DateOnly From,
-    DateOnly To
+    DateOnly To,
+    int? Page,
+    int? Limit
 );

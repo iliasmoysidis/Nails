@@ -1,5 +1,6 @@
 using Application.Roster.Common.Repositories;
 using Domain.Roster;
+using Domain.Roster.EnumObjects;
 using Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,5 +23,21 @@ public sealed class StaffRepository : IStaffRepository
     public async Task<Staff?> GetByStoreIdAsync(int storeId, CancellationToken ct)
     {
         return await _context.Staff.FirstOrDefaultAsync(s => s.StoreId == storeId, ct);
+    }
+
+    public async Task<bool> IsOwnerAsync(int storeId, int professionalid, CancellationToken ct)
+    {
+        return await _context.Staff
+            .Where(s => s.StoreId == storeId)
+            .SelectMany(s => s.Members)
+            .AnyAsync(m => m.ProfessionalId == professionalid && m.HasRole(StaffRole.Owner));
+    }
+
+    public async Task<bool> IsStaffMemberAsync(int storeId, int professionalid, CancellationToken ct)
+    {
+        return await _context.Staff
+            .Where(s => s.StoreId == storeId)
+            .SelectMany(s => s.Members)
+            .AnyAsync(m => m.ProfessionalId == professionalid, ct);
     }
 }

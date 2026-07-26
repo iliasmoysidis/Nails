@@ -1,3 +1,4 @@
+using Application.Common.DTO;
 using Application.Roster.Common.Queries;
 
 namespace Application.Roster.GetStoreStaff;
@@ -11,8 +12,13 @@ public sealed class Handler
         _queries = queries;
     }
 
-    public async Task<IReadOnlyCollection<StaffMemberDTO>> Handle(Query query, CancellationToken ct)
+    public async Task<PagedResult<StaffMemberDTO>> Handle(Query query, CancellationToken ct)
     {
-        return await _queries.GetStoreStaffAsync(query.StoreId, ct);
+        return await _queries.GetStoreStaffAsync(
+            storeId: query.StoreId,
+            page: query.Page,
+            limit: query.Limit,
+            ct: ct
+        );
     }
 }

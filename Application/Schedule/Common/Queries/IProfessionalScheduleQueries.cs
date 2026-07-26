@@ -1,3 +1,4 @@
+using Application.Common.DTO;
 using Application.Schedule.GetExceptions;
 using Application.Schedule.GetWeeklySchedule;
 
@@ -11,11 +12,13 @@ public interface IProfessionalScheduleQueries
         CancellationToken ct
     );
 
-    Task<IReadOnlyCollection<StaffCalendarExceptionDTO>> GetExceptionsAsync(
+    Task<PagedResult<StaffCalendarExceptionDTO>> GetExceptionsAsync(
         int storeId,
         int professionalId,
         DateOnly from,
         DateOnly to,
+        int? page,
+        int? limit,
         CancellationToken ct
     );
 }

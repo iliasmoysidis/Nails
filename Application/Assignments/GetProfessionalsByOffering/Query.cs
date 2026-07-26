@@ -1,3 +1,8 @@
 namespace Application.Assignments.GetProfessionalsByOffering;
 
-public sealed record Query(int StoreId, int OfferingId);
+public sealed record Query(
+    int StoreId,
+    int OfferingId,
+    int? Page,
+    int? Limit
+);

@@ -18,7 +18,13 @@ public sealed class StoreCalendarQueries : IStoreCalendarQueries
         _context = context;
     }
 
-    public async Task<IReadOnlyCollection<AvailableSlotDTO>> GetAvailableSlotsAsync(int storeId, int professionalId, int offeringId, DateOnly date, CancellationToken ct)
+    public async Task<IReadOnlyCollection<AvailableSlotDTO>> GetAvailableSlotsAsync(
+        int storeId,
+        int professionalId,
+        int offeringId,
+        DateOnly date,
+        CancellationToken ct
+    )
     {
         var schedule = await _context.ProfessionalSchedules
             .AsNoTracking()
@@ -92,7 +98,13 @@ public sealed class StoreCalendarQueries : IStoreCalendarQueries
         return slots;
     }
 
-    public async Task<IReadOnlyCollection<CalendarDayDTO>> GetProfessionalCalendarAsync(int storeId, int professionalId, DateOnly from, DateOnly to, CancellationToken ct)
+    public async Task<IReadOnlyCollection<CalendarDayDTO>> GetProfessionalCalendarAsync(
+        int storeId,
+        int professionalId,
+        DateOnly from,
+        DateOnly to,
+        CancellationToken ct
+    )
     {
         var schedule = await _context.ProfessionalSchedules
             .AsNoTracking()

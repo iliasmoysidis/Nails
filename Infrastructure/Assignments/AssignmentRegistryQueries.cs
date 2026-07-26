@@ -2,7 +2,8 @@ using Application.Assignments.Common.Queries;
 using Application.Assignments.GetProfessionalsByOffering;
 using Application.Assignments.GetOfferingsByProfessional;
 using Infrastructure.Common;
-using Microsoft.EntityFrameworkCore;
+using Application.Common.DTO;
+using Infrastructure.Common.Extensions;
 
 namespace Infrastructure.Assignments;
 
@@ -15,7 +16,13 @@ public sealed class AssignmentRegistryQueries : IAssignmentRegistryQueries
         _context = context;
     }
 
-    public async Task<IReadOnlyCollection<ProfessionalSummaryDTO>> GetProfessionalsByOfferingAsync(int storeId, int offeringId, CancellationToken ct)
+    public async Task<PagedResult<ProfessionalSummaryDTO>> GetProfessionalsByOfferingAsync(
+        int storeId,
+        int offeringId,
+        int? page,
+        int? limit,
+        CancellationToken ct
+    )
     {
         return await (
             from registry in _context.AssignmentRegistries
@@ -34,10 +41,16 @@ public sealed class AssignmentRegistryQueries : IAssignmentRegistryQueries
                 professional.Email.Value,
                 professional.Phone.ToString()
             )
-        ).ToListAsync(ct);
+        ).ToPagedResultAsync(page, limit, ct);
     }
 
-    public async Task<IReadOnlyCollection<OfferingSummaryDTO>> GetOfferingsByProfessionalAsync(int storeId, int professionalId, CancellationToken ct)
+    public async Task<PagedResult<OfferingSummaryDTO>> GetOfferingsByProfessionalAsync(
+        int storeId,
+        int professionalId,
+        int? page,
+        int? limit,
+        CancellationToken ct
+    )
     {
         return await (
             from registry in _context.AssignmentRegistries
@@ -60,6 +73,6 @@ public sealed class AssignmentRegistryQueries : IAssignmentRegistryQueries
                 offering.Price.Currency,
                 offering.Duration.Minutes
             )
-        ).ToListAsync(ct);
+        ).ToPagedResultAsync(page, limit, ct);
     }
 }

@@ -1,8 +1,10 @@
+using Application.Common.DTO;
 using Application.Roster.Common.Queries;
 using Application.Roster.GetProfessionalStores;
 using Application.Roster.GetStoreStaff;
 using Domain.Roster.EnumObjects;
 using Infrastructure.Common;
+using Infrastructure.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Roster;
@@ -39,7 +41,12 @@ public sealed class StaffQueries : IStaffQueries
         ).ToListAsync(ct);
     }
 
-    public async Task<IReadOnlyCollection<StaffMemberDTO>> GetStoreStaffAsync(int storeId, CancellationToken ct)
+    public async Task<PagedResult<StaffMemberDTO>> GetStoreStaffAsync(
+        int storeId,
+        int? page,
+        int? limit,
+        CancellationToken ct
+    )
     {
         return await (
             from staff in _context.Staff
@@ -60,16 +67,6 @@ public sealed class StaffQueries : IStaffQueries
                 member.Roles.Any(r => r.Role == StaffRole.Owner),
                 member.Roles.Any(r => r.Role == StaffRole.Employee)
             )
-        ).ToListAsync(ct);
-    }
-
-    public Task<bool> IsOwnerAsync(int storeId, int professionalid, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> IsStaffMemberAsync(int storeId, int professionalid, CancellationToken ct)
-    {
-        throw new NotImplementedException();
+        ).ToPagedResultAsync(page, limit, ct);
     }
 }

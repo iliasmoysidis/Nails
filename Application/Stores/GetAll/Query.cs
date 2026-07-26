@@ -1,3 +1,3 @@
 namespace Application.Stores.GetAll;
 
-public sealed record Query();
+public sealed record Query(int? Page, int? Limit);

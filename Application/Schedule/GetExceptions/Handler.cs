@@ -1,3 +1,4 @@
+using Application.Common.DTO;
 using Application.Schedule.Common.Queries;
 
 namespace Application.Schedule.GetExceptions;
@@ -11,7 +12,7 @@ public sealed class Handler
         _queries = queries;
     }
 
-    public async Task<IReadOnlyCollection<StaffCalendarExceptionDTO>> Handle(
+    public async Task<PagedResult<StaffCalendarExceptionDTO>> Handle(
         Query query,
         CancellationToken ct
     )
@@ -21,6 +22,8 @@ public sealed class Handler
             professionalId: query.ProfessionalId,
             from: query.From,
             to: query.To,
+            page: query.Page,
+            limit: query.Limit,
             ct: ct
         );
     }

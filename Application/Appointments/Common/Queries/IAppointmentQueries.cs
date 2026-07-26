@@ -13,7 +13,7 @@ public interface IAppointmentQueries
         DateOnly? from,
         DateOnly? to,
         int? page,
-        int? pageSize,
+        int? limit,
         CancellationToken ct
     );
 
@@ -22,7 +22,7 @@ public interface IAppointmentQueries
         DateOnly? from,
         DateOnly? to,
         int? page,
-        int? pageSize,
+        int? limit,
         CancellationToken ct
     );
 
@@ -31,7 +31,7 @@ public interface IAppointmentQueries
         DateOnly? from,
         DateOnly? to,
         int? page,
-        int? pageSize,
+        int? limit,
         CancellationToken ct
     );
 }

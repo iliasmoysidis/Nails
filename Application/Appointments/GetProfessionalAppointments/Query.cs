@@ -3,5 +3,7 @@ namespace Application.Appointments.GetProfessionalAppointments;
 public sealed record Query(
     int ProfessionalId,
     DateOnly From,
-    DateOnly To
+    DateOnly To,
+    int? Page,
+    int? Limit
 );

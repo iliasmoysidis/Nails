@@ -1,18 +1,19 @@
 using Application.Stores.GetDetails;
-using Application.Stores.GetSummary;
 using Application.Stores.Common.DTO;
+using Application.Common.DTO;
 
 namespace Application.Stores.Common.Queries;
 
 public interface IStoreQueries
 {
     Task<StoreDetailsDTO?> GetStoreDetailsAsync(int storeId, CancellationToken ct);
-    Task<IReadOnlyCollection<StoreListItemDTO>> GetAllStoresAsync(CancellationToken ct);
-    Task<IReadOnlyCollection<StoreListItemDTO>> SearchStoresAsync(
+    Task<PagedResult<StoreListItemDTO>> GetStoresAsync(int? page, int? limit, CancellationToken ct);
+    Task<PagedResult<StoreListItemDTO>> SearchStoresAsync(
         string? name,
         string? city,
         string? countryCode,
+        int? page,
+        int? limit,
         CancellationToken ct
     );
-    Task<StoreSummaryDTO?> GetStoreSummaryAsync(int storeId, CancellationToken ct);
 }

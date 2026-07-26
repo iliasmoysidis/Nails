@@ -3,6 +3,7 @@ using Application.Professionals.Common.Queries;
 using Application.Professionals.GetDetails;
 using Application.Professionals.Search;
 using Infrastructure.Common;
+using Infrastructure.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Professionals;
@@ -36,7 +37,7 @@ public sealed class ProfessionalQueries : IProfessionalQueries
         string? email,
         string? phone,
         int? page,
-        int? pageSize,
+        int? limit,
         CancellationToken ct
     )
     {
@@ -59,8 +60,7 @@ public sealed class ProfessionalQueries : IProfessionalQueries
             query = query.Where(p => EF.Functions.ILike(p.Phone.ToString(), $"%{phone}%"));
         }
 
-        var totalCount = await query.CountAsync(ct);
-        var projection = query
+        return await query
             .OrderBy(p => p.FullName.ToString())
             .Select(p =>
                 new ProfessionalSearchResultDTO(
@@ -69,29 +69,7 @@ public sealed class ProfessionalQueries : IProfessionalQueries
                     p.Email.ToString(),
                     p.Phone.ToString()
                 )
-            );
-
-        IReadOnlyCollection<ProfessionalSearchResultDTO> professionals;
-
-        if (page.HasValue && pageSize.HasValue)
-        {
-            var offset = (page.Value - 1) * pageSize.Value;
-            professionals = await projection
-            .Skip(offset)
-            .Take(pageSize.Value)
-            .ToListAsync(ct);
-
-        }
-        else
-        {
-            professionals = await projection.ToListAsync(ct);
-        }
-
-        return new PagedResult<ProfessionalSearchResultDTO>(
-            professionals,
-            page ?? 1,
-            pageSize ?? totalCount,
-            totalCount
-        );
+            )
+            .ToPagedResultAsync(page, limit, ct);
     }
 }

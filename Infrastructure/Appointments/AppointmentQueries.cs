@@ -3,6 +3,7 @@ using Application.Appointments.Common.Queries;
 using Application.Appointments.GetDetails;
 using Application.Common.DTO;
 using Infrastructure.Common;
+using Infrastructure.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Appointments;
@@ -80,95 +81,34 @@ public sealed class AppointmentQueries : IAppointmentQueries
         DateOnly? from,
         DateOnly? to,
         int? page,
-        int? pageSize,
+        int? limit,
         CancellationToken ct
     )
     {
-        var query = AppointmentListQuery(from, to)
-            .Where(a => a.ProfessionalId == professionalId);
-
-        var totalCount = await query.CountAsync(ct);
-
-        IReadOnlyCollection<AppointmentListItemDTO> items;
-
-        if (page.HasValue && pageSize.HasValue)
-        {
-            var offset = (page.Value - 1) * pageSize.Value;
-            items = await query
-                .Skip(offset)
-                .Take(pageSize.Value)
-                .ToListAsync(ct);
-        }
-        else
-        {
-            items = await query.ToListAsync(ct);
-        }
-
-        return new PagedResult<AppointmentListItemDTO>(
-            items,
-            page ?? 1,
-            pageSize ?? totalCount,
-            totalCount
-        );
+        return await AppointmentListQuery(from, to)
+            .Where(a => a.ProfessionalId == professionalId)
+            .ToPagedResultAsync(page, limit, ct);
     }
 
-    public async Task<PagedResult<AppointmentListItemDTO>> GetStoreAppointmentsAsync(int storeId, DateOnly? from, DateOnly? to, int? page, int? pageSize, CancellationToken ct)
+    public async Task<PagedResult<AppointmentListItemDTO>> GetStoreAppointmentsAsync(
+        int storeId,
+        DateOnly? from,
+        DateOnly? to,
+        int? page,
+        int? limit,
+        CancellationToken ct
+    )
     {
-        var query = AppointmentListQuery(from, to)
-            .Where(a => a.StoreId == storeId);
-
-        var totalCount = await query.CountAsync(ct);
-
-        IReadOnlyCollection<AppointmentListItemDTO> items;
-
-        if (page.HasValue && pageSize.HasValue)
-        {
-            var offset = (page.Value - 1) * pageSize.Value;
-            items = await query
-                .Skip(offset)
-                .Take(pageSize.Value)
-                .ToListAsync(ct);
-        }
-        else
-        {
-            items = await query.ToListAsync(ct);
-        }
-
-        return new PagedResult<AppointmentListItemDTO>(
-            items,
-            page ?? 1,
-            pageSize ?? totalCount,
-            totalCount
-        );
+        return await AppointmentListQuery(from, to)
+            .Where(a => a.StoreId == storeId)
+            .ToPagedResultAsync(page, limit, ct);
     }
 
-    public async Task<PagedResult<AppointmentListItemDTO>> GetUserAppointmentsAsync(int userId, DateOnly? from, DateOnly? to, int? page, int? pageSize, CancellationToken ct)
+    public async Task<PagedResult<AppointmentListItemDTO>> GetUserAppointmentsAsync(int userId, DateOnly? from, DateOnly? to, int? page, int? limit, CancellationToken ct)
     {
-        var query = AppointmentListQuery(from, to)
-            .Where(a => a.UserId == userId);
-
-        var totalCount = await query.CountAsync(ct);
-
-        IReadOnlyCollection<AppointmentListItemDTO> items;
-
-        if (page.HasValue && pageSize.HasValue)
-        {
-            var offset = (page.Value - 1) * pageSize.Value;
-            items = await query.Skip(offset)
-                .Take(pageSize.Value)
-                .ToListAsync(ct);
-        }
-        else
-        {
-            items = await query.ToListAsync(ct);
-        }
-
-        return new PagedResult<AppointmentListItemDTO>(
-            items,
-            page ?? 1,
-            pageSize ?? totalCount,
-            totalCount
-        );
+        return await AppointmentListQuery(from, to)
+            .Where(a => a.UserId == userId)
+            .ToPagedResultAsync(page, limit, ct);
     }
 
     private IQueryable<AppointmentListItemDTO> AppointmentListQuery(

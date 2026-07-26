@@ -1,6 +1,5 @@
 using Application.Calendar.Common.DTO;
 using Application.Calendar.Common.Queries;
-using Application.Calendar;
 
 namespace Application.Calendar.GetCalendar;
 

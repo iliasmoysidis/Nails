@@ -1,7 +1,7 @@
-using Application.Roster.Common.Queries;
 using Application.Common.Abstractions.Authorization;
 using Application.Common.Contexts;
 using Application.Common.Exceptions;
+using Application.Roster.Common.Repositories;
 
 namespace Application.Appointments.GetStoreAppointments;
 
@@ -9,23 +9,17 @@ public sealed class Authorizer
     : IAuthorizer<Query>
 {
     private readonly IRequestContext _context;
-    private readonly IStaffQueries _queries;
+    private readonly IStaffRepository _repo;
 
-    public Authorizer(
-        IRequestContext context,
-        IStaffQueries queries
-    )
+    public Authorizer(IRequestContext context, IStaffRepository repo)
     {
         _context = context;
-        _queries = queries;
+        _repo = repo;
     }
 
-    public async Task AuthorizeAsync(
-        Query request,
-        CancellationToken ct
-    )
+    public async Task AuthorizeAsync(Query request, CancellationToken ct)
     {
-        var isStaff = await _queries.IsStaffMemberAsync(
+        var isStaff = await _repo.IsStaffMemberAsync(
             storeId: request.StoreId,
             professionalid: _context.ActorId,
             ct: ct

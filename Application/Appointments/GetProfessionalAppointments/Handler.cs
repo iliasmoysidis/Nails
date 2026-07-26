@@ -1,6 +1,6 @@
 using Application.Appointments.Common.DTO;
 using Application.Appointments.Common.Queries;
-using Application.Appointments;
+using Application.Common.DTO;
 
 namespace Application.Appointments.GetProfessionalAppointments;
 
@@ -15,7 +15,7 @@ public sealed class Handler
         _queries = queries;
     }
 
-    public async Task<IReadOnlyCollection<AppointmentListItemDTO>> Handle(
+    public async Task<PagedResult<AppointmentListItemDTO>> Handle(
         Query query,
         CancellationToken ct
     )
@@ -24,6 +24,8 @@ public sealed class Handler
             professionalId: query.ProfessionalId,
             from: query.From,
             to: query.To,
+            page: query.Page,
+            limit: query.Limit,
             ct
         );
     }

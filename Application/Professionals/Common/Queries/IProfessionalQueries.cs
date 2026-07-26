@@ -13,7 +13,7 @@ public interface IProfessionalQueries
         string? email,
         string? phone,
         int? page,
-        int? pageSize,
+        int? limit,
         CancellationToken ct
     );
 }

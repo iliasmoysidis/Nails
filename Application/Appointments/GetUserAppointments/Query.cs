@@ -3,5 +3,7 @@ namespace Application.Appointments.GetUserAppointments;
 public sealed record Query(
     int UserId,
     DateOnly From,
-    DateOnly To
+    DateOnly To,
+    int? Page,
+    int? Limit
 );

@@ -5,10 +5,6 @@ public sealed record StoreDetailsDTO(
     string Name,
     string Email,
     string Phone,
-    string Street,
-    string City,
-    string PostalCode,
-    string State,
-    string CountryCode,
+    string Address,
     string TaxId
 );

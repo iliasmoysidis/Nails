@@ -2,6 +2,7 @@ using Application.Roster.Common.Queries;
 using Application.Common.Abstractions.Authorization;
 using Application.Common.Contexts;
 using Application.Common.Exceptions;
+using Application.Roster.Common.Repositories;
 
 namespace Application.Appointments.GetDetails;
 
@@ -11,16 +12,19 @@ public sealed class Authorizer
     private readonly IRequestContext _requestContext;
     private readonly Context _queryContext;
     private readonly IStaffQueries _staffQueries;
+    private readonly IStaffRepository _staffRepo;
 
     public Authorizer(
         IRequestContext requestContext,
         Context queryContext,
-        IStaffQueries staffQueries
+        IStaffQueries staffQueries,
+        IStaffRepository staffRepo
     )
     {
         _requestContext = requestContext;
         _queryContext = queryContext;
         _staffQueries = staffQueries;
+        _staffRepo = staffRepo;
     }
 
     public async Task AuthorizeAsync(
@@ -31,13 +35,13 @@ public sealed class Authorizer
         var appointment = _queryContext.Appointment
             ?? throw new InvalidOperationException("Appointment context not loaded.");
 
-        var isStaff = await _staffQueries.IsStaffMemberAsync(
-            storeId: appointment.StoreId,
+        var isStaff = await _staffRepo.IsStaffMemberAsync(
+            storeId: appointment.Store.Id,
             professionalid: _requestContext.ActorId,
             ct: ct
         );
 
-        var isClient = appointment.UserId == _requestContext.ActorId;
+        var isClient = appointment.User.Id == _requestContext.ActorId;
 
         if (!isStaff && !isClient)
             throw new ApplicationLayerForbiddenException("Not allowed to view this appointment.");

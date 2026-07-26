@@ -1,14 +1,10 @@
-
-
 namespace Application.Appointments.GetDetails;
 
 public sealed class Handler
 {
     private readonly Context _context;
 
-    public Handler(
-        Context context
-    )
+    public Handler(Context context)
     {
         _context = context;
     }

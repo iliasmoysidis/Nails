@@ -1,6 +1,6 @@
+using Application.Common.DTO;
 using Application.Stores.Common.DTO;
 using Application.Stores.Common.Queries;
-using Application.Stores;
 
 namespace Application.Stores.GetAll;
 
@@ -13,8 +13,12 @@ public sealed class Handler
         _queries = queries;
     }
 
-    public async Task<IReadOnlyCollection<StoreListItemDTO>> Handle(Query query, CancellationToken ct)
+    public async Task<PagedResult<StoreListItemDTO>> Handle(Query query, CancellationToken ct)
     {
-        return await _queries.GetAllStoresAsync(ct);
+        return await _queries.GetStoresAsync(
+            page: query.Page,
+            limit: query.Limit,
+            ct: ct
+        );
     }
 }
