@@ -60,6 +60,7 @@ public sealed class StoreCalendarQueries : IStoreCalendarQueries
         var nextDay = dayStart.AddDays(1);
 
         var appointments = await _context.Appointments
+            .AsNoTracking()
             .Where(a =>
                 a.StoreId == storeId &&
                 a.ProfessionalId == professionalId &&
