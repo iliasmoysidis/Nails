@@ -1,5 +1,4 @@
 using Domain.Appointments;
-using Domain.Users;
 using Domain.Common;
 using Domain.Common.Exceptions;
 
