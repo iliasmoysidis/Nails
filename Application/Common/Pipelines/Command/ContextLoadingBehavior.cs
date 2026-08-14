@@ -1,6 +1,8 @@
 using Application.Common.Abstractions.Context;
 using MediatR;
 
+namespace Application.Common.Pipelines.Command;
+
 public sealed class ContextLoadingBehavior<TRequest, TResponse, TContext>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
@@ -11,7 +13,8 @@ public sealed class ContextLoadingBehavior<TRequest, TResponse, TContext>
 
     public ContextLoadingBehavior(
         IRequestContextLoader<TRequest, TContext> loader,
-        TContext ctx)
+        TContext ctx
+    )
     {
         _loader = loader;
         _ctx = ctx;
@@ -20,7 +23,8 @@ public sealed class ContextLoadingBehavior<TRequest, TResponse, TContext>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         await _loader.PopulateAsync(request, _ctx, ct);
 
