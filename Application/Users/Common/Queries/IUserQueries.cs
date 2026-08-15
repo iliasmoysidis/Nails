@@ -1,8 +1,8 @@
-using Application.Users.GetProfile;
+using Application.Users.GetDetails;
 
 namespace Application.Users.Common.Queries;
 
 public interface IUserQueries
 {
-    Task<UserProfileDTO?> GetUserProfileAsync(int userId, CancellationToken ct);
+    Task<UserDTO?> GetUserDetailsAsync(int userId, CancellationToken ct);
 }

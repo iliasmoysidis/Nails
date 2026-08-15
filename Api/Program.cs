@@ -1,15 +1,13 @@
 using Api.Common.Auth;
 using Api.Common.Errors;
-using Application.Common.Abstractions.Authorization;
-using Application.Common.Abstractions.Context;
 using Application.Common.Abstractions.Events;
 using Application.Common.Contexts;
+using Application.Common.Guards;
 using Application.Common.Pipelines.Command;
 using Application.Common.Pipelines.Query;
 using Application.Common.Services;
-using Application.Users.Delete;
-using Application.Users.GetProfile;
-using Application.Users.Update;
+using Application.Professionals;
+using Application.Users;
 using Infrastructure.Common;
 using MediatR;
 
@@ -22,6 +20,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IRequestContext, HttpRequestContext>();
+builder.Services.AddScoped<AuthorizationGuard>();
 
 builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -43,15 +42,8 @@ builder.Services.AddMediatR(cfg =>
     }
 );
 
-builder.Services.AddScoped<IAuthorizer<GetUserProfileQuery>, GetUserProfileAuthorizer>();
-
-builder.Services.AddScoped<UpdateUserContext>();
-builder.Services.AddScoped<IAuthorizer<UpdateUserCommand>, UpdateUserAuthorizer>();
-builder.Services.AddScoped<IRequestContextLoader<UpdateUserCommand, UpdateUserContext>, UpdateUserLoader>();
-
-builder.Services.AddScoped<DeleteUserContext>();
-builder.Services.AddScoped<IAuthorizer<DeleteUserCommand>, DeleteUserAuthorizer>();
-builder.Services.AddScoped<IRequestContextLoader<DeleteUserCommand, DeleteUserContext>, DeleteUserLoader>();
+builder.Services.AddUsers();
+builder.Services.AddProfessionals();
 
 var app = builder.Build();
 

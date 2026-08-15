@@ -1,5 +1,5 @@
 using Application.Users.Common.Queries;
-using Application.Users.GetProfile;
+using Application.Users.GetDetails;
 using Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,12 +14,12 @@ public sealed class UserQueries : IUserQueries
         _context = context;
     }
 
-    public async Task<UserProfileDTO?> GetUserProfileAsync(int userId, CancellationToken ct)
+    public async Task<UserDTO?> GetUserDetailsAsync(int userId, CancellationToken ct)
     {
         return await _context.Users
             .Where(u => u.Id == userId)
             .Select(
-                u => new UserProfileDTO(
+                u => new UserDTO(
                     u.Id,
                     u.FullName.ToString(),
                     u.Email.ToString(),

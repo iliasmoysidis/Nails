@@ -1,6 +1,6 @@
 using Api.Users.Requests;
 using Application.Users.Delete;
-using Application.Users.GetProfile;
+using Application.Users.GetDetails;
 using Application.Users.Register;
 using Application.Users.Update;
 using MediatR;
@@ -39,20 +39,20 @@ public sealed class UsersController : ControllerBase
     }
 
     [HttpGet("{userId:int}")]
-    public async Task<IActionResult> GetProfileAsync(
+    public async Task<IActionResult> GetDetailsAsync(
         int userId,
         CancellationToken ct
     )
     {
-        var profile = await _sender.Send(new GetUserProfileQuery(userId), ct);
+        var details = await _sender.Send(new GetUserDetailsQuery(userId), ct);
 
-        return Ok(profile);
+        return Ok(details);
     }
 
     [HttpPatch("{userId:int}")]
     public async Task<IActionResult> UpdateAsync(
         int userId,
-        [FromBody] UpdateUserRequest request,
+        UpdateUserRequest request,
         CancellationToken ct
     )
     {

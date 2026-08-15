@@ -1,7 +1,5 @@
 using Domain.Roster;
 using Domain.Appointments;
-using Domain.Professionals;
-using Domain.Users;
 using Application.Common.Contexts;
 using Application.Common.Exceptions;
 
