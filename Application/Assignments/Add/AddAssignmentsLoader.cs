@@ -3,17 +3,14 @@ using Application.Catalog.Common.Repositories;
 using Application.Professionals.Common.Repositories;
 using Application.Roster.Common.Repositories;
 using Application.Stores.Common.Repositories;
-using Domain.Roster;
-using Domain.Professionals;
 using Domain.Stores.Services;
-using Domain.Stores;
 using Application.Common.Abstractions.Context;
 using Application.Common.Exceptions;
 
 namespace Application.Assignments.Add;
 
-public sealed class AddAssignmentLoader
-    : IRequestContextLoader<AddAssignmentCommand, AddAssignmentContext>
+public sealed class AddAssignmentsLoader
+    : IRequestContextLoader<AddAssignmentsCommand, AddAssignmentsContext>
 {
     private readonly IProfessionalRepository _professionalRepo;
     private readonly IStoreRepository _storeRepo;
@@ -21,7 +18,7 @@ public sealed class AddAssignmentLoader
     private readonly IStoreCatalogRepository _catalogRepo;
     private readonly IAssignmentRegistryRepository _assignmentRegistryRepo;
 
-    public AddAssignmentLoader(
+    public AddAssignmentsLoader(
         IProfessionalRepository professionalRepo,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
@@ -37,8 +34,8 @@ public sealed class AddAssignmentLoader
     }
 
     public async Task PopulateAsync(
-        AddAssignmentCommand command,
-        AddAssignmentContext ctx,
+        AddAssignmentsCommand command,
+        AddAssignmentsContext ctx,
         CancellationToken ct
     )
     {
@@ -64,5 +61,7 @@ public sealed class AddAssignmentLoader
             storeCatalog: catalog,
             assignments: assignments
         );
+
+        ctx.Staff = staff;
     }
 }

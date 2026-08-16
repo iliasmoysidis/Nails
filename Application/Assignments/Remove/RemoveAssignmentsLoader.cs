@@ -12,8 +12,8 @@ using Application.Common.Exceptions;
 
 namespace Application.Assignments.Remove;
 
-public sealed class RemoveAssignmentLoader
-    : IRequestContextLoader<RemoveAssignmentCommand, RemoveAssignmentContext>
+public sealed class RemoveAssignmentsLoader
+    : IRequestContextLoader<RemoveAssignmentsCommand, RemoveAssignmentsContext>
 {
     private readonly IProfessionalRepository _professionalRepo;
     private readonly IStoreRepository _storeRepo;
@@ -21,7 +21,7 @@ public sealed class RemoveAssignmentLoader
     private readonly IStoreCatalogRepository _catalogRepo;
     private readonly IAssignmentRegistryRepository _assignmentRegistryRepo;
 
-    public RemoveAssignmentLoader(
+    public RemoveAssignmentsLoader(
         IProfessionalRepository professionalRepo,
         IStoreRepository storeRepo,
         IStaffRepository staffRepo,
@@ -37,8 +37,8 @@ public sealed class RemoveAssignmentLoader
     }
 
     public async Task PopulateAsync(
-        RemoveAssignmentCommand command,
-        RemoveAssignmentContext ctx,
+        RemoveAssignmentsCommand command,
+        RemoveAssignmentsContext ctx,
         CancellationToken ct
     )
     {
@@ -64,5 +64,7 @@ public sealed class RemoveAssignmentLoader
             storeCatalog: catalog,
             assignments: assignments
         );
+
+        ctx.Staff = staff;
     }
 }

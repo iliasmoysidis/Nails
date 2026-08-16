@@ -1,11 +1,11 @@
-using Domain.Professionals;
+using Domain.Roster;
 using Domain.Stores.Services;
 
 namespace Application.Assignments.Remove;
 
-public sealed class RemoveAssignmentContext
+public sealed class RemoveAssignmentsContext
 {
     public StoreAssignments StoreAssignments { get; set; } = default!;
 
-    public Professional Professional {get; set;} = null!;
+    public Staff Staff { get; set; } = null!;
 }

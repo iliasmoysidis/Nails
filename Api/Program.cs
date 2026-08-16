@@ -1,5 +1,6 @@
 using Api.Common.Auth;
 using Api.Common.Errors;
+using Application.Assignments;
 using Application.Common.Abstractions.Events;
 using Application.Common.Contexts;
 using Application.Common.Guards;
@@ -28,11 +29,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ContextLoadingBehavior<,,>));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(QueryAuthorizationBehavior<,>));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(QueryContextLoadingBehavior<,,>));
 
 builder.Services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
 
@@ -44,6 +43,7 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddUsers();
 builder.Services.AddProfessionals();
+builder.Services.AddAssignments();
 
 var app = builder.Build();
 

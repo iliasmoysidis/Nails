@@ -1,8 +1,8 @@
 using MediatR;
 
-namespace Application.Assignments.Remove;
+namespace Application.Assignments.Add;
 
-public sealed record RemoveAssignmentCommand(
+public sealed record AddAssignmentsCommand(
     int StoreId,
     int ProfessionalId,
     IReadOnlyCollection<int> OfferingIds

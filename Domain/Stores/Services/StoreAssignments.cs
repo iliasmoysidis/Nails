@@ -2,7 +2,6 @@ using Domain.Catalog;
 using Domain.Roster;
 using Domain.Assignments;
 using Domain.Professionals;
-using Domain.Stores;
 using Domain.Common.Exceptions;
 
 namespace Domain.Stores.Services;
