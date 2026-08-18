@@ -2,7 +2,7 @@ using Application.Stores.Common.Repositories;
 using Infrastructure.Common;
 using Domain.Stores;
 using Microsoft.EntityFrameworkCore;
-using Domain.Roster.EnumObjects;
+using Domain.Rosters.EnumObjects;
 
 namespace Infrastructure.Stores;
 

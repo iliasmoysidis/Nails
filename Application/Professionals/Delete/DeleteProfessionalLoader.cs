@@ -1,13 +1,13 @@
 using Application.Appointments.Common.Repositories;
 using Application.Assignments.Common.Repositories;
 using Application.Professionals.Common.Repositories;
-using Application.Roster.Common.Repositories;
-using Application.Schedule.Common.Repositories;
+using Application.Rosters.Common.Repositories;
+using Application.Schedules.Common.Repositories;
 using Application.Stores.Common.Repositories;
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Professionals.Services;
 using Domain.Professionals;
-using Domain.Roster.Services;
+using Domain.Rosters.Services;
 using Domain.Stores;
 using Application.Common.Abstractions.Context;
 using Application.Common.Exceptions;

@@ -1,7 +1,7 @@
-using Domain.Catalog;
-using Domain.Roster;
+using Domain.Catalogs;
+using Domain.Rosters;
 using Domain.Assignments;
-using Domain.Calendar;
+using Domain.Calendars;
 
 namespace Domain.Stores.Services;
 

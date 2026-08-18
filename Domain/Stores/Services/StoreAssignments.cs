@@ -1,5 +1,5 @@
-using Domain.Catalog;
-using Domain.Roster;
+using Domain.Catalogs;
+using Domain.Rosters;
 using Domain.Assignments;
 using Domain.Professionals;
 using Domain.Common.Exceptions;

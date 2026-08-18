@@ -1,11 +1,11 @@
 using Application.Assignments.Common.Repositories;
-using Application.Calendar.Common.Repositories;
-using Application.Catalog.Common.Repositories;
-using Application.Roster.Common.Repositories;
+using Application.Calendars.Common.Repositories;
+using Application.Catalogs.Common.Repositories;
+using Application.Rosters.Common.Repositories;
 using Application.Stores.Common.Repositories;
-using Domain.Catalog;
-using Domain.Roster;
-using Domain.Calendar;
+using Domain.Catalogs;
+using Domain.Rosters;
+using Domain.Calendars;
 using Domain.Stores.Services;
 using Domain.Stores;
 using Domain.Common.ValueObjects;

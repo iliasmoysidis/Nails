@@ -1,4 +1,4 @@
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Appointments;
 
 namespace Application.Appointments.Confirm;

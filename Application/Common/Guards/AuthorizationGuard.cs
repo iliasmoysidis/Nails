@@ -1,4 +1,4 @@
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Appointments;
 using Application.Common.Contexts;
 using Application.Common.Exceptions;

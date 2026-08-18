@@ -1,13 +1,13 @@
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Appointments;
 using Domain.Professionals;
 using Domain.Stores;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Domain.Assignments;
-using Domain.Schedule;
-using Domain.Calendar;
-using Domain.Catalog;
+using Domain.Schedules;
+using Domain.Calendars;
+using Domain.Catalogs;
 
 namespace Infrastructure.Common;
 

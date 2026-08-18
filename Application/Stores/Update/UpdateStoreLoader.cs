@@ -1,4 +1,4 @@
-using Application.Roster.Common.Repositories;
+using Application.Rosters.Common.Repositories;
 using Application.Stores.Common.Repositories;
 using Application.Common.Abstractions.Context;
 using Application.Common.Exceptions;

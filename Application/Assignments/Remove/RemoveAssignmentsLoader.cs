@@ -1,9 +1,9 @@
 using Application.Assignments.Common.Repositories;
-using Application.Catalog.Common.Repositories;
+using Application.Catalogs.Common.Repositories;
 using Application.Professionals.Common.Repositories;
-using Application.Roster.Common.Repositories;
+using Application.Rosters.Common.Repositories;
 using Application.Stores.Common.Repositories;
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Professionals;
 using Domain.Stores.Services;
 using Domain.Stores;

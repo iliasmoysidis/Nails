@@ -1,0 +1,13 @@
+using Domain.Common.ValueObjects;
+
+namespace Domain.Catalogs.ValueObjects;
+
+public sealed record OfferingName : BaseName
+{
+    public const int MaxLength = 200;
+
+    private OfferingName(string value) : base(value, MaxLength, "Service") { }
+
+    public static OfferingName Create(string value)
+        => new(value);
+}

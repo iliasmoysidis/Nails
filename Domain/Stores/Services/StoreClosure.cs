@@ -1,5 +1,5 @@
-using Domain.Schedule;
-using Domain.Roster;
+using Domain.Schedules;
+using Domain.Rosters;
 using Domain.Assignments;
 using Domain.Appointments;
 using Domain.Common;

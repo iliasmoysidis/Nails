@@ -1,8 +1,8 @@
-using Application.Roster.Common.Queries;
+using Application.Rosters.Common.Queries;
 using Application.Common.Abstractions.Authorization;
 using Application.Common.Contexts;
 using Application.Common.Exceptions;
-using Application.Roster.Common.Repositories;
+using Application.Rosters.Common.Repositories;
 
 namespace Application.Appointments.GetDetails;
 

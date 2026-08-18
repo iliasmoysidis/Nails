@@ -1,4 +1,4 @@
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Stores.Services;
 
 namespace Application.Stores.Close;

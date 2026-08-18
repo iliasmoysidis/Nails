@@ -1,9 +1,9 @@
 using Application.Appointments.Common.Repositories;
 using Application.Assignments.Common.Repositories;
-using Application.Calendar.Common.Repositories;
-using Application.Catalog.Common.Repositories;
+using Application.Calendars.Common.Repositories;
+using Application.Catalogs.Common.Repositories;
 using Application.Professionals.Common.Repositories;
-using Application.Schedule.Common.Repositories;
+using Application.Schedules.Common.Repositories;
 using Application.Stores.Common.Repositories;
 using Application.Users.Common.Repositories;
 using Domain.UserSchedules;

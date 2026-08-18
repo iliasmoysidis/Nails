@@ -1,9 +1,9 @@
 using Application.Appointments.Common.Repositories;
 using Application.Assignments.Common.Repositories;
-using Application.Roster.Common.Repositories;
-using Application.Schedule.Common.Repositories;
+using Application.Rosters.Common.Repositories;
+using Application.Schedules.Common.Repositories;
 using Application.Stores.Common.Repositories;
-using Domain.Roster;
+using Domain.Rosters;
 using Domain.Stores.Services;
 using Domain.Stores;
 using Application.Common.Abstractions.Context;

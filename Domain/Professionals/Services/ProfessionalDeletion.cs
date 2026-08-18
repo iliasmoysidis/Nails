@@ -1,4 +1,4 @@
-using Domain.Roster.Services;
+using Domain.Rosters.Services;
 using Domain.Stores;
 using Domain.Common;
 using Domain.Common.Exceptions;

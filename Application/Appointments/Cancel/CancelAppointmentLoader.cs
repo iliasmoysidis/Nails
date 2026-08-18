@@ -1,5 +1,5 @@
 using Application.Appointments.Common.Repositories;
-using Application.Roster.Common.Repositories;
+using Application.Rosters.Common.Repositories;
 using Application.Common.Abstractions.Context;
 using Application.Common.Exceptions;
 

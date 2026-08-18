@@ -1,0 +1,118 @@
+using Domain.Common.Exceptions;
+using Domain.Common.ValueObjects.Calendars;
+using Domain.Common.ValueObjects;
+using Domain.Schedules.Entities;
+
+namespace Domain.Schedules;
+
+public class ProfessionalSchedule
+{
+    public int ProfessionalId { get; }
+    private readonly List<StaffCalendar> _calendars = [];
+    public IReadOnlyCollection<StaffCalendar> Calendars => _calendars.AsReadOnly();
+
+    private ProfessionalSchedule() { }
+
+    private ProfessionalSchedule(int professionalId)
+    {
+        ProfessionalId = professionalId;
+    }
+
+    public void AddCalendar(StaffCalendar calendar)
+    {
+        EnsureCalendarBelongsToProfessional(calendar);
+
+        if (_calendars.Any(c => c.StoreId == calendar.StoreId))
+            throw new InvariantException("Professional already has a calendar for this store.");
+
+        EnsureCalendarDoesNotConflict(calendar);
+
+        _calendars.Add(calendar);
+    }
+
+    public void RemoveCalendar(int storeId)
+    {
+        var calendar = _calendars.FirstOrDefault(c => c.StoreId == storeId)
+            ?? throw new NotFoundException("Calendar not found.");
+
+        _calendars.Remove(calendar);
+    }
+
+    internal StaffCalendar GetCalendar(int storeId)
+    {
+        var calendar = _calendars.FirstOrDefault(c => c.StoreId == storeId)
+            ?? throw new NotFoundException("Calendar not found.");
+
+        return calendar;
+    }
+
+    public bool IsWorkingAtStore(int storeId, UtcDateTime startAt, UtcDateTime endAt)
+    {
+        var calendar = GetCalendar(storeId);
+
+        return calendar.IsAvailable(startAt, endAt);
+    }
+
+    public void EnsureWorkingDayDoesNotConflict(int storeId, WorkingDay workingDay)
+    {
+        if (workingDay.IsDayOff)
+            return;
+
+        foreach (var calendar in _calendars)
+        {
+            if (calendar.StoreId == storeId)
+                continue;
+
+            if (calendar.ConflictsWithWorkingDay(workingDay))
+            {
+                throw new InvariantException("Professional already works for another store during this time.");
+            }
+        }
+    }
+
+    public void EnsureExceptionDoesNotConflict(int storeId, CalendarException exception)
+    {
+        if (exception.IsDayOff)
+            return;
+
+        foreach (var calendar in _calendars)
+        {
+            if (calendar.StoreId == storeId)
+                continue;
+
+            if (calendar.ConflictsWithException(exception))
+                throw new InvariantException("Professional already works for another store during this time.");
+        }
+    }
+
+    public static ProfessionalSchedule Rehydrate(int professionalId, IEnumerable<StaffCalendar> calendars)
+    {
+        var schedule = new ProfessionalSchedule(professionalId);
+
+        foreach (var calendar in calendars)
+        {
+            schedule.AddCalendar(calendar);
+        }
+
+        return schedule;
+    }
+
+    private void EnsureCalendarBelongsToProfessional(StaffCalendar calendar)
+    {
+        if (calendar.ProfessionalId != ProfessionalId)
+            throw new InvariantException("Calendar does not belong to this professional.");
+    }
+
+    private void EnsureCalendarDoesNotConflict(StaffCalendar calendar)
+    {
+        foreach (var workingDay in calendar.WorkingDays)
+        {
+            EnsureWorkingDayDoesNotConflict(calendar.StoreId, workingDay);
+        }
+
+        foreach (var exception in calendar.Exceptions)
+        {
+            EnsureExceptionDoesNotConflict(calendar.StoreId, exception);
+        }
+    }
+}

@@ -1,14 +1,14 @@
-using Domain.Catalog;
+using Domain.Catalogs;
 using Domain.Assignments;
-using Domain.Calendar;
+using Domain.Calendars;
 using Domain.Appointments.ValueObjects;
 using Domain.Professionals;
 using Domain.Stores;
 using Domain.Common;
 using Domain.Common.Exceptions;
 using Domain.Common.ValueObjects;
-using Domain.Common.ValueObjects.Calendar;
-using Domain.Schedule.Entities;
+using Domain.Common.ValueObjects.Calendars;
+using Domain.Schedules.Entities;
 
 namespace Domain.Appointments.Services;
 

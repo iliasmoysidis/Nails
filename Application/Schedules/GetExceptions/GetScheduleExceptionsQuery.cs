@@ -1,0 +1,13 @@
+using Application.Common.DTO;
+using MediatR;
+
+namespace Application.Schedules.GetExceptions;
+
+public sealed record GetScheduleExceptionsQuery(
+    int StoreId,
+    int ProfessionalId,
+    DateOnly From,
+    DateOnly To,
+    int? Page,
+    int? Limit
+) : IRequest<PagedResult<StaffCalendarExceptionDTO>>;
