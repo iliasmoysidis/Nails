@@ -1,4 +1,4 @@
-using Application.Roster.Common.Queries;
+using Application.Roster.Common.Repositories;
 using Application.Common.Abstractions.Authorization;
 using Application.Common.Exceptions;
 
@@ -7,11 +7,11 @@ namespace Application.Schedule.GetExceptions;
 public sealed class GetScheduleExceptionsAuthorizer
     : IAuthorizer<GetScheduleExceptionsQuery>
 {
-    private readonly IStaffQueries _queries;
+    private readonly IStaffRepository _repo;
 
-    public GetScheduleExceptionsAuthorizer(IStaffQueries queries)
+    public GetScheduleExceptionsAuthorizer(IStaffRepository repo)
     {
-        _queries = queries;
+        _repo = repo;
     }
 
     public async Task AuthorizeAsync(
@@ -19,7 +19,7 @@ public sealed class GetScheduleExceptionsAuthorizer
         CancellationToken ct
     )
     {
-        var isStaff = await _queries.IsStaffMemberAsync(
+        var isStaff = await _repo.IsStaffMemberAsync(
             storeId: request.StoreId,
             professionalid: request.ProfessionalId,
             ct: ct

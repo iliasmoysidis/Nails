@@ -1,10 +1,11 @@
+using Application.Common.DTO;
 using Application.Professionals.Common.Queries;
 using MediatR;
 
 namespace Application.Professionals.Search;
 
 public sealed class SearchProfessionalsHandler
-    : IRequestHandler<SearchProfessionalsQuery, IReadOnlyCollection<ProfessionalSearchResultDTO>>
+    : IRequestHandler<SearchProfessionalsQuery, PagedResult<ProfessionalSearchResultDTO>>
 {
     private readonly IProfessionalQueries _queries;
 
@@ -13,13 +14,14 @@ public sealed class SearchProfessionalsHandler
         _queries = queries;
     }
 
-    public async Task<IReadOnlyCollection<ProfessionalSearchResultDTO>> Handle(SearchProfessionalsQuery query, CancellationToken ct)
+    public async Task<PagedResult<ProfessionalSearchResultDTO>> Handle(SearchProfessionalsQuery query, CancellationToken ct)
     {
         return await _queries.SearchProfessionalsAsync(
             name: query.Name,
-            offeringId: query.OfferingId,
-            city: query.City,
-            storeId: query.StoreId,
+            email: query.Email,
+            phone: query.Phone,
+            page: query.Page,
+            limit: query.Limit,
             ct: ct
         );
     }

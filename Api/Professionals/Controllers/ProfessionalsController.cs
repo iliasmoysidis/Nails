@@ -91,9 +91,10 @@ public sealed class ProfessionalsController : ControllerBase
     {
         var query = new SearchProfessionalsQuery(
             request.Name,
-            request.OfferingId,
-            request.City,
-            request.StoreId
+            request.Email,
+            request.Phone,
+            request.Page,
+            request.Limit
         );
 
         var result = await _sender.Send(query, ct);
