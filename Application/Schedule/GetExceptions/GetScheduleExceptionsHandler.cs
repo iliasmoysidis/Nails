@@ -1,9 +1,11 @@
 using Application.Common.DTO;
 using Application.Schedule.Common.Queries;
+using MediatR;
 
 namespace Application.Schedule.GetExceptions;
 
 public sealed class GetScheduleExceptionsHandler
+    : IRequestHandler<GetScheduleExceptionsQuery, PagedResult<StaffCalendarExceptionDTO>>
 {
     private readonly IProfessionalScheduleQueries _queries;
 

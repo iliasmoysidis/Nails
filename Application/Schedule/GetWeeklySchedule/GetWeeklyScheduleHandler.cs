@@ -1,8 +1,10 @@
 using Application.Schedule.Common.Queries;
+using MediatR;
 
 namespace Application.Schedule.GetWeeklySchedule;
 
 public sealed class GetWeeklyScheduleHandler
+    : IRequestHandler<GetWeeklyScheduleQuery, IReadOnlyCollection<StaffWorkingDayDTO>>
 {
     private readonly IProfessionalScheduleQueries _queries;
 

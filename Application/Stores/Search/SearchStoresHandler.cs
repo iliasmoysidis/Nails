@@ -1,10 +1,12 @@
 using Application.Common.DTO;
 using Application.Stores.Common.DTO;
 using Application.Stores.Common.Queries;
+using MediatR;
 
 namespace Application.Stores.Search;
 
 public sealed class SearchStoresHandler
+    : IRequestHandler<SearchStoresQuery, PagedResult<StoreListItemDTO>>
 {
     private readonly IStoreQueries _queries;
 

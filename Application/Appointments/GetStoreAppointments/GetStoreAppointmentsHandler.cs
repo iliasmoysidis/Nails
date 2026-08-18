@@ -1,10 +1,12 @@
 using Application.Appointments.Common.DTO;
 using Application.Appointments.Common.Queries;
 using Application.Common.DTO;
+using MediatR;
 
 namespace Application.Appointments.GetStoreAppointments;
 
 public sealed class GetStoreAppointmentsHandler
+    : IRequestHandler<GetStoreAppointmentsQuery, PagedResult<AppointmentListItemDTO>>
 {
     private readonly IAppointmentQueries _queries;
 

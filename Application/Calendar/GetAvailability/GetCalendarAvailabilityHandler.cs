@@ -1,8 +1,10 @@
 using Application.Calendar.Common.Queries;
+using MediatR;
 
 namespace Application.Calendar.GetAvailability;
 
 public sealed class GetCalendarAvailabilityHandler
+    : IRequestHandler<GetCalendarAvailabilityQuery, IReadOnlyCollection<AvailableSlotDTO>>
 {
     private readonly IStoreCalendarQueries _queries;
 

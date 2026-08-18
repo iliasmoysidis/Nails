@@ -1,9 +1,11 @@
 using Application.Professionals.Common.Queries;
 using Application.Common.Exceptions;
+using MediatR;
 
 namespace Application.Professionals.GetDetails;
 
 public sealed class GetProfessionalDetailsHandler
+    : IRequestHandler<GetProfessionalDetailsQuery, ProfessionalDTO>
 {
     private readonly IProfessionalQueries _queries;
 

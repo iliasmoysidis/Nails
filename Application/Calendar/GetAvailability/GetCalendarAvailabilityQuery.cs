@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Calendar.GetAvailability;
 
 public sealed record GetCalendarAvailabilityQuery(
@@ -5,4 +7,4 @@ public sealed record GetCalendarAvailabilityQuery(
     int ProfessionalId,
     int OfferingId,
     DateOnly Date
-);
+) : IRequest<IReadOnlyCollection<AvailableSlotDTO>>;

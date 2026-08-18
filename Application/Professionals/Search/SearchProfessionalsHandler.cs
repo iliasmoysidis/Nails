@@ -1,8 +1,10 @@
 using Application.Professionals.Common.Queries;
+using MediatR;
 
 namespace Application.Professionals.Search;
 
 public sealed class SearchProfessionalsHandler
+    : IRequestHandler<SearchProfessionalsQuery, IReadOnlyCollection<ProfessionalSearchResultDTO>>
 {
     private readonly IProfessionalQueries _queries;
 

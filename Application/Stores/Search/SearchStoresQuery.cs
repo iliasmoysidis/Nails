@@ -1,3 +1,7 @@
+using Application.Common.DTO;
+using Application.Stores.Common.DTO;
+using MediatR;
+
 namespace Application.Stores.Search;
 
 public sealed record SearchStoresQuery(
@@ -6,4 +10,4 @@ public sealed record SearchStoresQuery(
     string? CountryCode,
     int? Page,
     int? Limit
-);
+) : IRequest<PagedResult<StoreListItemDTO>>;

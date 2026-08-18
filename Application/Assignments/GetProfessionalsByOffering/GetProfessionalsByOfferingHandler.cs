@@ -1,9 +1,11 @@
 using Application.Assignments.Common.Queries;
 using Application.Common.DTO;
+using MediatR;
 
 namespace Application.Assignments.GetProfessionalsByOffering;
 
 public sealed class GetProfessionalsByOfferingHandler
+    : IRequestHandler<GetProfessionalsByOfferingQuery, PagedResult<ProfessionalSummaryDTO>>
 {
     private readonly IAssignmentRegistryQueries _queries;
 

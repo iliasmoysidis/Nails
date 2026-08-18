@@ -1,9 +1,11 @@
 using Application.Stores.Common.Queries;
 using Application.Common.Exceptions;
+using MediatR;
 
 namespace Application.Stores.GetDetails;
 
 public sealed class GetStoreDetailsHandler
+    : IRequestHandler<GetStoreDetailsQuery, StoreDetailsDTO>
 {
     private readonly IStoreQueries _queries;
 

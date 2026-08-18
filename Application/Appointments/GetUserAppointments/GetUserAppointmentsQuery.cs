@@ -1,3 +1,7 @@
+using Application.Appointments.Common.DTO;
+using Application.Common.DTO;
+using MediatR;
+
 namespace Application.Appointments.GetUserAppointments;
 
 public sealed record GetUserAppointmentsQuery(
@@ -6,4 +10,4 @@ public sealed record GetUserAppointmentsQuery(
     DateOnly To,
     int? Page,
     int? Limit
-);
+) : IRequest<PagedResult<AppointmentListItemDTO>>;

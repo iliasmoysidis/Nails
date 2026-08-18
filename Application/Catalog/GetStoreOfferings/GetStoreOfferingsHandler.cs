@@ -1,9 +1,11 @@
 using Application.Catalog.Common.DTO;
 using Application.Catalog.Common.Queries;
+using MediatR;
 
 namespace Application.Catalog.GetStoreOfferings;
 
 public sealed class GetStoreOfferingsHandler
+    : IRequestHandler<GetStoreOfferingsQuery, IReadOnlyCollection<OfferingDTO>>
 {
     private readonly IStoreCatalogQueries _queries;
 

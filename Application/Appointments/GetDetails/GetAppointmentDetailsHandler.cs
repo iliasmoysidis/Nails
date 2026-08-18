@@ -1,6 +1,9 @@
+using MediatR;
+
 namespace Application.Appointments.GetDetails;
 
 public sealed class GetAppointmentDetailsHandler
+    : IRequestHandler<GetAppointmentDetailsQuery, AppointmentDetailsDTO>
 {
     private readonly GetAppointmentDetailsContext _context;
 

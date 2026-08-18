@@ -1,9 +1,11 @@
 using Application.Users.Common.Queries;
 using Application.Common.Exceptions;
+using MediatR;
 
 namespace Application.Users.GetDetails;
 
 public sealed class GetUserDetailsHandler
+    : IRequestHandler<GetUserDetailsQuery, UserDTO>
 {
     private readonly IUserQueries _queries;
 

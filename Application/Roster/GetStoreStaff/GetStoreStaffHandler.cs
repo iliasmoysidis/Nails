@@ -1,9 +1,11 @@
 using Application.Common.DTO;
 using Application.Roster.Common.Queries;
+using MediatR;
 
 namespace Application.Roster.GetStoreStaff;
 
 public sealed class GetStoreStaffHandler
+    : IRequestHandler<GetStoreStaffQuery, PagedResult<StaffMemberDTO>>
 {
     private readonly IStaffQueries _queries;
 

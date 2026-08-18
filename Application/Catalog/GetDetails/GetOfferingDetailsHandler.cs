@@ -2,10 +2,12 @@ using Application.Catalog.Common.DTO;
 using Application.Catalog.Common.Queries;
 using Application.Catalog;
 using Application.Common.Exceptions;
+using MediatR;
 
 namespace Application.Catalog.GetDetails;
 
 public sealed class GetOfferingDetailsHandler
+    : IRequestHandler<GetOfferingDetailsQuery, OfferingDTO>
 {
     private readonly IStoreCatalogQueries _queries;
 

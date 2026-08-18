@@ -1,5 +1,6 @@
 using Api.Common.Auth;
 using Api.Common.Errors;
+using Application.Appointments;
 using Application.Assignments;
 using Application.Common.Abstractions.Events;
 using Application.Common.Contexts;
@@ -44,6 +45,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddUsers();
 builder.Services.AddProfessionals();
 builder.Services.AddAssignments();
+builder.Services.AddAppointments();
 
 var app = builder.Build();
 

@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Users.GetDetails;
 
-public sealed record GetUserDetailsQuery(int UserId);
+public sealed record GetUserDetailsQuery(int UserId) : IRequest<UserDTO>;

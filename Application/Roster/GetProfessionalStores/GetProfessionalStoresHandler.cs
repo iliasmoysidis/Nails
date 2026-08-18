@@ -1,8 +1,10 @@
 using Application.Roster.Common.Queries;
+using MediatR;
 
 namespace Application.Roster.GetProfessionalStores;
 
 public sealed class GetProfessionalStoresHandler
+    : IRequestHandler<GetProfessionalStoresQuery, IReadOnlyCollection<ProfessionalStoreDTO>>
 {
     private readonly IStaffQueries _queries;
 

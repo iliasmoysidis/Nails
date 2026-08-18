@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace Application.Professionals.Search;
 
 public sealed record SearchProfessionalsQuery(
@@ -5,4 +7,4 @@ public sealed record SearchProfessionalsQuery(
     int? OfferingId,
     string? City,
     int? StoreId
-);
+) : IRequest<IReadOnlyCollection<ProfessionalSearchResultDTO>>;
