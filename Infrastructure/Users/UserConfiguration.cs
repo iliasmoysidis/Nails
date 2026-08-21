@@ -35,6 +35,8 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasColumnName("Email")
                 .HasMaxLength(Email.MaxLength)
                 .IsRequired();
+
+            email.HasIndex(x => x.Value).IsUnique();
         });
 
         builder.OwnsOne(x => x.Phone, phone =>
@@ -48,6 +50,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasColumnName("PhoneNationalNumber")
                 .HasMaxLength(Phone.NationalNumberMaxLength)
                 .IsRequired();
+
+            phone.Ignore(x => x.Value);
+
+            phone.HasIndex(x => new { x.CountryCode, x.NationalNumber }).IsUnique();
         });
 
         builder.Property(x => x.IsDeleted)
@@ -69,9 +75,5 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Navigation(x => x.Phone)
             .IsRequired();
 
-        builder.HasIndex("Email").IsUnique();
-
-        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber")
-            .IsUnique();
     }
 }

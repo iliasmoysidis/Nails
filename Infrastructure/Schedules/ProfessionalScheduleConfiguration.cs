@@ -46,7 +46,7 @@ public sealed class ProfessionalScheduleConfiguration : IEntityTypeConfiguration
                 .HasForeignKey(x => x.StoreId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            calendars.OwnsMany(x => x.WorkingDays, workingDays =>
+            calendars.OwnsMany<WorkingDay>("StaffCalendarWorkingDay", x => x.WorkingDays, workingDays =>
             {
                 workingDays.ToTable("StaffCalendarWorkingDays");
 
@@ -59,7 +59,7 @@ public sealed class ProfessionalScheduleConfiguration : IEntityTypeConfiguration
                     .HasConversion<int>()
                     .IsRequired();
 
-                workingDays.OwnsMany(x => x.TimeRanges, ranges =>
+                workingDays.OwnsMany<TimeRange>("StaffCalendarWorkingDayTimeRanges", x => x.TimeRanges, ranges =>
                 {
                     ranges.ToTable("StaffCalendarWorkingDayTimeRanges");
 
@@ -81,7 +81,7 @@ public sealed class ProfessionalScheduleConfiguration : IEntityTypeConfiguration
                 });
             });
 
-            calendars.OwnsMany(x => x.Exceptions, exceptions =>
+            calendars.OwnsMany<CalendarException>("StaffCalendarException", x => x.Exceptions, exceptions =>
             {
                 exceptions.ToTable("StaffCalendarExceptions");
 
@@ -93,7 +93,7 @@ public sealed class ProfessionalScheduleConfiguration : IEntityTypeConfiguration
 
                 exceptions.HasKey("ProfessionalId", "StoreId", nameof(CalendarException.Date));
 
-                exceptions.OwnsMany(x => x.TimeRanges, ranges =>
+                exceptions.OwnsMany<TimeRange>("StaffCalendarExceptionTimeRange", x => x.TimeRanges, ranges =>
                 {
                     ranges.ToTable("StaffCalendarExceptionTimeRanges");
 

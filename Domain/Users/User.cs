@@ -7,11 +7,13 @@ namespace Domain.Users;
 public class User
 {
     public int Id { get; private set; }
-    public FullName FullName { get; private set; }
-    public Email Email { get; private set; }
-    public Phone Phone { get; private set; }
+    public FullName FullName { get; private set; } = default!;
+    public Email Email { get; private set; } = default!;
+    public Phone Phone { get; private set; } = default!;
     public bool IsDeleted { get; private set; }
     public UtcDateTime? DeletedAt { get; private set; }
+
+    private User() { }
 
     public User(
         FullName fullName,

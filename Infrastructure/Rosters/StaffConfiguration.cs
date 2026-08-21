@@ -1,5 +1,6 @@
 using Domain.Professionals;
 using Domain.Rosters;
+using Domain.Rosters.Entities;
 using Domain.Rosters.ValueObjects;
 using Domain.Stores;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,7 @@ public sealed class StaffConfiguration : IEntityTypeConfiguration<Staff>
             members.WithOwner()
                 .HasForeignKey("StoreId");
 
-            members.HasKey(x => x.ProfessionalId);
+            members.HasKey("StoreId", nameof(StaffMember.ProfessionalId));
 
             members.Property(x => x.ProfessionalId)
                 .ValueGeneratedNever();

@@ -23,6 +23,8 @@ public sealed class AssignmentRegistryConfiguration : IEntityTypeConfiguration<A
             .HasForeignKey<AssignmentRegistry>(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Ignore(x => x.Assignments);
+
         builder.OwnsMany<Assignment>("_assignments", assignments =>
         {
             assignments.ToTable("Assignments");
@@ -46,7 +48,7 @@ public sealed class AssignmentRegistryConfiguration : IEntityTypeConfiguration<A
         });
 
         builder.Metadata
-            .FindNavigation(nameof(AssignmentRegistry.Assignments))!
+            .FindNavigation("_assignments")!
             .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

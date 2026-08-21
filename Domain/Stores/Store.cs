@@ -10,14 +10,16 @@ public class Store : Entity
 {
     public int Id { get; private set; }
 
-    public StoreName Name { get; private set; }
-    public Address Address { get; private set; }
-    public TaxIdentificationNumber TaxIdNumber { get; private set; }
-    public Email Email { get; private set; }
-    public Phone Phone { get; private set; }
+    public StoreName Name { get; private set; } = default!;
+    public Address Address { get; private set; } = default!;
+    public TaxIdentificationNumber TaxIdNumber { get; private set; } = default!;
+    public Email Email { get; private set; } = default!;
+    public Phone Phone { get; private set; } = default!;
 
     public bool IsClosed { get; private set; }
     public UtcDateTime? ClosedAt { get; private set; }
+
+    private Store() { }
 
     public Store(
         StoreName name,

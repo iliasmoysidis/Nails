@@ -5,9 +5,11 @@ namespace Domain.Common.ValueObjects.Calendars;
 public sealed class CalendarException
 {
     public DateOnly Date { get; }
-    public IReadOnlyCollection<TimeRange> TimeRanges { get; }
+    public IReadOnlyCollection<TimeRange> TimeRanges { get; } = default!;
 
     public bool IsDayOff => !TimeRanges.Any();
+
+    private CalendarException() { }
 
     private CalendarException(DateOnly date, IReadOnlyCollection<TimeRange> ranges)
     {

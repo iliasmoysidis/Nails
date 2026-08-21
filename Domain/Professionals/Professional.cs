@@ -8,12 +8,14 @@ public class Professional
 {
     public int Id { get; private set; }
 
-    public FullName FullName { get; private set; }
-    public Email Email { get; }
-    public Phone Phone { get; private set; }
-    public TaxIdentificationNumber TaxIdNumber { get; }
+    public FullName FullName { get; private set; } = default!;
+    public Email Email { get; } = default!;
+    public Phone Phone { get; private set; } = default!;
+    public TaxIdentificationNumber TaxIdNumber { get; } = default!;
     public bool IsDeleted { get; private set; }
     public UtcDateTime? DeletedAt { get; private set; }
+
+    private Professional() { }
 
     public Professional(
         FullName fullName,

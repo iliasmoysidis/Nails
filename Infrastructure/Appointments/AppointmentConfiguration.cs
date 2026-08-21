@@ -48,6 +48,8 @@ public sealed class AppointmentConfiguration
                 .HasColumnName("StartAt")
                 .HasColumnType("datetime2")
                 .IsRequired();
+
+            startAt.HasIndex(x => x.Value);
         });
 
 
@@ -108,12 +110,5 @@ public sealed class AppointmentConfiguration
         builder.HasIndex(x => x.ProfessionalId);
 
         builder.HasIndex(x => x.StoreId);
-
-        builder.HasIndex("StartAt");
-
-        builder.HasIndex(
-            nameof(Appointment.ProfessionalId),
-            "StartAt"
-        );
     }
 }

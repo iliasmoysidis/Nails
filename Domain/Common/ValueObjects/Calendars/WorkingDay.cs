@@ -5,9 +5,11 @@ namespace Domain.Common.ValueObjects.Calendars;
 public sealed class WorkingDay
 {
     public DayOfWeek Day { get; }
-    public IReadOnlyCollection<TimeRange> TimeRanges { get; }
+    public IReadOnlyCollection<TimeRange> TimeRanges { get; } = default!;
 
     public bool IsDayOff => !TimeRanges.Any();
+
+    private WorkingDay() { }
 
     private WorkingDay(DayOfWeek day, IReadOnlyCollection<TimeRange> ranges)
     {

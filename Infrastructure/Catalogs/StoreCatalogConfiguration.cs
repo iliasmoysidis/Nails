@@ -70,8 +70,6 @@ public sealed class StoreCatalogConfiguration : IEntityTypeConfiguration<StoreCa
                     .IsRequired();
             });
 
-            offerings.HasIndex("StoreId", "Name").IsUnique();
-
             offerings.Navigation(x => x.Name)
                 .IsRequired();
 

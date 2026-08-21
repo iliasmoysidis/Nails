@@ -14,12 +14,12 @@ public class Appointment
     public int OfferingId { get; }
     public int StoreId { get; }
 
-    public UtcDateTime StartAt { get; }
-    public Duration Duration { get; }
+    public UtcDateTime StartAt { get; } = default!;
+    public Duration Duration { get; } = default!;
     public UtcDateTime EndAt => StartAt.AddMinutes(Duration.Minutes);
 
-    public Money Price { get; private set; }
-    public Notes Notes { get; private set; }
+    public Money Price { get; private set; } = default!;
+    public Notes Notes { get; private set; } = default!;
     public AppointmentStatus Status { get; private set; }
     public UtcDateTime? CanceledAt { get; private set; }
 
@@ -42,6 +42,8 @@ public class Appointment
         => Status is AppointmentStatus.Completed
            or AppointmentStatus.Canceled
            or AppointmentStatus.NoShow;
+
+    private Appointment() { }
 
     private Appointment(
         int userId,

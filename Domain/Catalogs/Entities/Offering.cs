@@ -10,10 +10,12 @@ public class Offering
     public int Id { get; private set; }
     public int StoreId { get; }
 
-    public OfferingName Name { get; private set; }
-    public Money Price { get; private set; }
-    public Duration Duration { get; private set; }
-    public Description Description { get; private set; }
+    public OfferingName Name { get; private set; } = default!;
+    public Money Price { get; private set; } = default!;
+    public Duration Duration { get; private set; } = default!;
+    public Description Description { get; private set; } = default!;
+
+    private Offering() { }
 
     public Offering(
         int storeId,

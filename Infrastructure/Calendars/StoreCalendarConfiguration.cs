@@ -20,9 +20,9 @@ public sealed class StoreCalendarConfiguration : IEntityTypeConfiguration<StoreC
             .HasForeignKey<StoreCalendar>(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.OwnsMany(x => x.WorkingDays, workingDays =>
+        builder.OwnsMany<WorkingDay>("StoreCalendarWorkingDay",x => x.WorkingDays, workingDays =>
         {
-            workingDays.ToTable("StoreWorkingDays");
+            workingDays.ToTable("StoreCalendarWorkingDays");
             workingDays.WithOwner()
                 .HasForeignKey("StoreId");
 
@@ -32,9 +32,9 @@ public sealed class StoreCalendarConfiguration : IEntityTypeConfiguration<StoreC
 
             workingDays.HasKey("StoreId", nameof(WorkingDay.Day));
 
-            workingDays.OwnsMany(x => x.TimeRanges, ranges =>
+            workingDays.OwnsMany<TimeRange>("StoreCalendarWorkingDayTimeRange", x => x.TimeRanges, ranges =>
             {
-                ranges.ToTable("StoreWorkingDayTimeRanges");
+                ranges.ToTable("StoreCalendarWorkingDayTimeRanges");
 
                 ranges.WithOwner()
                     .HasForeignKey("StoreId", "Day");
@@ -54,7 +54,7 @@ public sealed class StoreCalendarConfiguration : IEntityTypeConfiguration<StoreC
             });
         });
 
-        builder.OwnsMany(x => x.Exceptions, exceptions =>
+        builder.OwnsMany<CalendarException>("StoreCalendarException", x => x.Exceptions, exceptions =>
         {
             exceptions.ToTable("StoreCalendarExceptions");
 
@@ -66,7 +66,7 @@ public sealed class StoreCalendarConfiguration : IEntityTypeConfiguration<StoreC
 
             exceptions.HasKey("StoreId", nameof(CalendarException.Date));
 
-            exceptions.OwnsMany(x => x.TimeRanges, ranges =>
+            exceptions.OwnsMany<TimeRange>("StoreCalendarExceptionTimeRanges", x => x.TimeRanges, ranges =>
             {
                 ranges.ToTable("StoreExceptionTimeRanges");
 

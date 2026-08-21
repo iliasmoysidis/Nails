@@ -66,6 +66,8 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
                 .HasColumnName("TaxIdNumber")
                 .HasMaxLength(TaxIdentificationNumber.TaxIdNumberMaxLength)
                 .IsRequired();
+
+            taxIdNumber.HasIndex(x => new { x.CountryCode, x.Value }).IsUnique();
         });
 
         builder.OwnsOne(x => x.Email, email =>
@@ -74,6 +76,8 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
                 .HasColumnName("Email")
                 .HasMaxLength(Email.MaxLength)
                 .IsRequired();
+
+            email.HasIndex(x => x.Value).IsUnique();
         });
 
         builder.OwnsOne(x => x.Phone, phone =>
@@ -87,6 +91,10 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
                 .HasColumnName("PhoneNationalNumber")
                 .HasMaxLength(Phone.NationalNumberMaxLength)
                 .IsRequired();
+
+            phone.HasIndex(x => new { x.CountryCode, x.NationalNumber }).IsUnique();
+
+            phone.Ignore(x => x.Value);
         });
 
         builder.Property(x => x.IsClosed)
@@ -114,12 +122,5 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
         builder.Navigation(x => x.Phone)
             .IsRequired();
 
-        builder.HasIndex("Email").IsUnique();
-
-        builder.HasIndex("TaxCountryCode", "TaxIdNumber")
-            .IsUnique();
-
-        builder.HasIndex("PhoneCountryCode", "PhoneNationalNumber")
-            .IsUnique();
     }
 }
