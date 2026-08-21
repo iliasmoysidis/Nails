@@ -78,7 +78,7 @@ public sealed class ProfessionalConfiguration : IEntityTypeConfiguration<Profess
         {
             deletedAt.Property(x => x.Value)
                 .HasColumnName("DeletedAt")
-                .HasColumnType("datetime2")
+                .HasColumnType("timestamp with time zone")
                 .IsRequired();
         });
 

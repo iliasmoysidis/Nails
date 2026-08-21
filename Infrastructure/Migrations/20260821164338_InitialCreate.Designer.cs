@@ -3,16 +3,16 @@ using System;
 using Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260821162558_InitialCreate")]
+    [Migration("20260821164338_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -21,32 +21,32 @@ namespace Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Domain.Appointments.Appointment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProfessionalId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -62,7 +62,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Assignments.AssignmentRegistry", b =>
                 {
                     b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("StoreId");
 
@@ -72,7 +72,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Calendars.StoreCalendar", b =>
                 {
                     b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("StoreId");
 
@@ -82,7 +82,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Catalogs.StoreCatalog", b =>
                 {
                     b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("StoreId");
 
@@ -93,12 +93,12 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -108,7 +108,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Rosters.Staff", b =>
                 {
                     b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("StoreId");
 
@@ -118,7 +118,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Schedules.ProfessionalSchedule", b =>
                 {
                     b.Property<int>("ProfessionalId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("ProfessionalId");
 
@@ -129,12 +129,12 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsClosed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -145,12 +145,12 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -180,10 +180,10 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.UtcDateTime", "CanceledAt", b1 =>
                         {
                             b1.Property<int>("AppointmentId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateTime>("Value")
-                                .HasColumnType("datetime2")
+                                .HasColumnType("timestamp with time zone")
                                 .HasColumnName("CanceledAt");
 
                             b1.HasKey("AppointmentId");
@@ -197,10 +197,10 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Duration", "Duration", b1 =>
                         {
                             b1.Property<int>("AppointmentId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Minutes")
-                                .HasColumnType("int")
+                                .HasColumnType("integer")
                                 .HasColumnName("DurationMinutes");
 
                             b1.HasKey("AppointmentId");
@@ -214,17 +214,17 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Money", "Price", b1 =>
                         {
                             b1.Property<int>("AppointmentId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<decimal>("Amount")
                                 .HasPrecision(18, 2)
-                                .HasColumnType("decimal(18,2)")
+                                .HasColumnType("numeric(18,2)")
                                 .HasColumnName("PriceAmount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("PriceCurrency");
 
                             b1.HasKey("AppointmentId");
@@ -238,10 +238,10 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.UtcDateTime", "StartAt", b1 =>
                         {
                             b1.Property<int>("AppointmentId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateTime>("Value")
-                                .HasColumnType("datetime2")
+                                .HasColumnType("timestamp with time zone")
                                 .HasColumnName("StartAt");
 
                             b1.HasKey("AppointmentId");
@@ -257,12 +257,12 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Appointments.ValueObjects.Notes", "Notes", b1 =>
                         {
                             b1.Property<int>("AppointmentId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)")
+                                .HasColumnType("character varying(500)")
                                 .HasColumnName("Notes");
 
                             b1.HasKey("AppointmentId");
@@ -299,16 +299,16 @@ namespace Infrastructure.Migrations
                     b.OwnsMany("Domain.Assignments.ValueObjects.Assignment", "_assignments", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("OfferingId")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("OfferingId"));
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("OfferingId"));
 
                             b1.HasKey("StoreId", "ProfessionalId", "OfferingId");
 
@@ -340,7 +340,7 @@ namespace Infrastructure.Migrations
                     b.OwnsMany("StoreCalendarException", "Exceptions", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateOnly>("Date")
                                 .HasColumnType("date");
@@ -356,23 +356,23 @@ namespace Infrastructure.Migrations
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
-                                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b2.Property<int>("Id"));
+                                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
 
                                     b2.Property<DateOnly>("Date")
                                         .HasColumnType("date");
 
                                     b2.Property<TimeSpan>("End")
-                                        .HasColumnType("time")
+                                        .HasColumnType("interval")
                                         .HasColumnName("End");
 
                                     b2.Property<TimeSpan>("Start")
-                                        .HasColumnType("time")
+                                        .HasColumnType("interval")
                                         .HasColumnName("Start");
 
                                     b2.Property<int>("StoreId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.HasKey("Id");
 
@@ -390,10 +390,10 @@ namespace Infrastructure.Migrations
                     b.OwnsMany("StoreCalendarWorkingDay", "WorkingDays", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Day")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("StoreId", "Day");
 
@@ -406,23 +406,23 @@ namespace Infrastructure.Migrations
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
-                                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b2.Property<int>("Id"));
+                                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
 
                                     b2.Property<int>("Day")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<TimeSpan>("End")
-                                        .HasColumnType("time")
+                                        .HasColumnType("interval")
                                         .HasColumnName("End");
 
                                     b2.Property<TimeSpan>("Start")
-                                        .HasColumnType("time")
+                                        .HasColumnType("interval")
                                         .HasColumnName("Start");
 
                                     b2.Property<int>("StoreId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.HasKey("Id");
 
@@ -454,12 +454,12 @@ namespace Infrastructure.Migrations
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
 
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("Id");
 
@@ -473,10 +473,10 @@ namespace Infrastructure.Migrations
                             b1.OwnsOne("Domain.Common.ValueObjects.Duration", "Duration", b2 =>
                                 {
                                     b2.Property<int>("OfferingId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<int>("Minutes")
-                                        .HasColumnType("int")
+                                        .HasColumnType("integer")
                                         .HasColumnName("DurationMinutes");
 
                                     b2.HasKey("OfferingId");
@@ -490,17 +490,17 @@ namespace Infrastructure.Migrations
                             b1.OwnsOne("Domain.Common.ValueObjects.Money", "Price", b2 =>
                                 {
                                     b2.Property<int>("OfferingId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<decimal>("Amount")
                                         .HasPrecision(18, 2)
-                                        .HasColumnType("decimal(18,2)")
+                                        .HasColumnType("numeric(18,2)")
                                         .HasColumnName("PriceAmount");
 
                                     b2.Property<string>("Currency")
                                         .IsRequired()
                                         .HasMaxLength(3)
-                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnType("character varying(3)")
                                         .HasColumnName("PriceCurrency");
 
                                     b2.HasKey("OfferingId");
@@ -514,12 +514,12 @@ namespace Infrastructure.Migrations
                             b1.OwnsOne("Domain.Catalogs.ValueObjects.Description", "Description", b2 =>
                                 {
                                     b2.Property<int>("OfferingId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<string>("Value")
                                         .IsRequired()
                                         .HasMaxLength(500)
-                                        .HasColumnType("nvarchar(500)")
+                                        .HasColumnType("character varying(500)")
                                         .HasColumnName("Description");
 
                                     b2.HasKey("OfferingId");
@@ -533,12 +533,12 @@ namespace Infrastructure.Migrations
                             b1.OwnsOne("Domain.Catalogs.ValueObjects.OfferingName", "Name", b2 =>
                                 {
                                     b2.Property<int>("OfferingId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<string>("Value")
                                         .IsRequired()
                                         .HasMaxLength(200)
-                                        .HasColumnType("nvarchar(200)")
+                                        .HasColumnType("character varying(200)")
                                         .HasColumnName("Name");
 
                                     b2.HasKey("OfferingId");
@@ -570,10 +570,10 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.UtcDateTime", "DeletedAt", b1 =>
                         {
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateTime>("Value")
-                                .HasColumnType("datetime2")
+                                .HasColumnType("timestamp with time zone")
                                 .HasColumnName("DeletedAt");
 
                             b1.HasKey("ProfessionalId");
@@ -587,12 +587,12 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(320)
-                                .HasColumnType("nvarchar(320)")
+                                .HasColumnType("character varying(320)")
                                 .HasColumnName("Email");
 
                             b1.HasKey("ProfessionalId");
@@ -609,18 +609,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.FullName", "FullName", b1 =>
                         {
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("FirstName")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("FirstName");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("LastName");
 
                             b1.HasKey("ProfessionalId");
@@ -634,18 +634,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Phone", "Phone", b1 =>
                         {
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("CountryCode")
                                 .IsRequired()
                                 .HasMaxLength(5)
-                                .HasColumnType("nvarchar(5)")
+                                .HasColumnType("character varying(5)")
                                 .HasColumnName("PhoneCountryCode");
 
                             b1.Property<string>("NationalNumber")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
+                                .HasColumnType("character varying(50)")
                                 .HasColumnName("PhoneNationalNumber");
 
                             b1.HasKey("ProfessionalId");
@@ -662,18 +662,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.TaxIdentificationNumber", "TaxIdNumber", b1 =>
                         {
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("CountryCode")
                                 .IsRequired()
                                 .HasMaxLength(30)
-                                .HasColumnType("nvarchar(30)")
+                                .HasColumnType("character varying(30)")
                                 .HasColumnName("TaxCountryCode");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
+                                .HasColumnType("character varying(50)")
                                 .HasColumnName("TaxIdNumber");
 
                             b1.HasKey("ProfessionalId");
@@ -713,10 +713,10 @@ namespace Infrastructure.Migrations
                     b.OwnsMany("Domain.Rosters.Entities.StaffMember", "Members", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("StoreId", "ProfessionalId");
 
@@ -736,13 +736,13 @@ namespace Infrastructure.Migrations
                             b1.OwnsMany("Domain.Rosters.ValueObjects.RoleAssignment", "Roles", b2 =>
                                 {
                                     b2.Property<int>("StoreId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<int>("ProfessionalId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<int>("Role")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.HasKey("StoreId", "ProfessionalId", "Role");
 
@@ -769,10 +769,10 @@ namespace Infrastructure.Migrations
                     b.OwnsMany("Domain.Schedules.Entities.StaffCalendar", "Calendars", b1 =>
                         {
                             b1.Property<int>("ProfessionalId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("ProfessionalId", "StoreId");
 
@@ -792,10 +792,10 @@ namespace Infrastructure.Migrations
                             b1.OwnsMany("StaffCalendarException", "Exceptions", b2 =>
                                 {
                                     b2.Property<int>("ProfessionalId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<int>("StoreId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<DateOnly>("Date")
                                         .HasColumnType("date");
@@ -811,26 +811,26 @@ namespace Infrastructure.Migrations
                                         {
                                             b3.Property<int>("Id")
                                                 .ValueGeneratedOnAdd()
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
-                                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b3.Property<int>("Id"));
+                                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b3.Property<int>("Id"));
 
                                             b3.Property<DateOnly>("Date")
                                                 .HasColumnType("date");
 
                                             b3.Property<TimeSpan>("End")
-                                                .HasColumnType("time")
+                                                .HasColumnType("interval")
                                                 .HasColumnName("End");
 
                                             b3.Property<int>("ProfessionalId")
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
                                             b3.Property<TimeSpan>("Start")
-                                                .HasColumnType("time")
+                                                .HasColumnType("interval")
                                                 .HasColumnName("Start");
 
                                             b3.Property<int>("StoreId")
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
                                             b3.HasKey("Id");
 
@@ -848,13 +848,13 @@ namespace Infrastructure.Migrations
                             b1.OwnsMany("StaffCalendarWorkingDay", "WorkingDays", b2 =>
                                 {
                                     b2.Property<int>("ProfessionalId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<int>("StoreId")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.Property<int>("Day")
-                                        .HasColumnType("int");
+                                        .HasColumnType("integer");
 
                                     b2.HasKey("ProfessionalId", "StoreId", "Day");
 
@@ -867,26 +867,26 @@ namespace Infrastructure.Migrations
                                         {
                                             b3.Property<int>("Id")
                                                 .ValueGeneratedOnAdd()
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
-                                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b3.Property<int>("Id"));
+                                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b3.Property<int>("Id"));
 
                                             b3.Property<int>("Day")
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
                                             b3.Property<TimeSpan>("End")
-                                                .HasColumnType("time")
+                                                .HasColumnType("interval")
                                                 .HasColumnName("End");
 
                                             b3.Property<int>("ProfessionalId")
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
                                             b3.Property<TimeSpan>("Start")
-                                                .HasColumnType("time")
+                                                .HasColumnType("interval")
                                                 .HasColumnName("Start");
 
                                             b3.Property<int>("StoreId")
-                                                .HasColumnType("int");
+                                                .HasColumnType("integer");
 
                                             b3.HasKey("Id");
 
@@ -914,36 +914,36 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Address", "Address", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("City");
 
                             b1.Property<string>("CountryCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("CountryCode");
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("PostalCode");
 
                             b1.Property<string>("State")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("State");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
+                                .HasColumnType("character varying(200)")
                                 .HasColumnName("Street");
 
                             b1.HasKey("StoreId");
@@ -957,10 +957,10 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.UtcDateTime", "ClosedAt", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateTime>("Value")
-                                .HasColumnType("datetime2")
+                                .HasColumnType("timestamp with time zone")
                                 .HasColumnName("ClosedAt");
 
                             b1.HasKey("StoreId");
@@ -974,12 +974,12 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(320)
-                                .HasColumnType("nvarchar(320)")
+                                .HasColumnType("character varying(320)")
                                 .HasColumnName("Email");
 
                             b1.HasKey("StoreId");
@@ -996,18 +996,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Phone", "Phone", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("CountryCode")
                                 .IsRequired()
                                 .HasMaxLength(5)
-                                .HasColumnType("nvarchar(5)")
+                                .HasColumnType("character varying(5)")
                                 .HasColumnName("PhoneCountryCode");
 
                             b1.Property<string>("NationalNumber")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
+                                .HasColumnType("character varying(50)")
                                 .HasColumnName("PhoneNationalNumber");
 
                             b1.HasKey("StoreId");
@@ -1024,18 +1024,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.TaxIdentificationNumber", "TaxIdNumber", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("CountryCode")
                                 .IsRequired()
                                 .HasMaxLength(30)
-                                .HasColumnType("nvarchar(30)")
+                                .HasColumnType("character varying(30)")
                                 .HasColumnName("TaxCountryCode");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
+                                .HasColumnType("character varying(50)")
                                 .HasColumnName("TaxIdNumber");
 
                             b1.HasKey("StoreId");
@@ -1052,12 +1052,12 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Stores.ValueObjects.StoreName", "Name", b1 =>
                         {
                             b1.Property<int>("StoreId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("StoreName");
 
                             b1.HasKey("StoreId");
@@ -1091,10 +1091,10 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.UtcDateTime", "DeletedAt", b1 =>
                         {
                             b1.Property<int>("UserId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<DateTime>("Value")
-                                .HasColumnType("datetime2")
+                                .HasColumnType("timestamp with time zone")
                                 .HasColumnName("DeletedAt");
 
                             b1.HasKey("UserId");
@@ -1108,12 +1108,12 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Email", "Email", b1 =>
                         {
                             b1.Property<int>("UserId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(320)
-                                .HasColumnType("nvarchar(320)")
+                                .HasColumnType("character varying(320)")
                                 .HasColumnName("Email");
 
                             b1.HasKey("UserId");
@@ -1130,18 +1130,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.FullName", "FullName", b1 =>
                         {
                             b1.Property<int>("UserId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("FirstName")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("FirstName");
 
                             b1.Property<string>("LastName")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("LastName");
 
                             b1.HasKey("UserId");
@@ -1155,18 +1155,18 @@ namespace Infrastructure.Migrations
                     b.OwnsOne("Domain.Common.ValueObjects.Phone", "Phone", b1 =>
                         {
                             b1.Property<int>("UserId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("CountryCode")
                                 .IsRequired()
                                 .HasMaxLength(5)
-                                .HasColumnType("nvarchar(5)")
+                                .HasColumnType("character varying(5)")
                                 .HasColumnName("PhoneCountryCode");
 
                             b1.Property<string>("NationalNumber")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
+                                .HasColumnType("character varying(50)")
                                 .HasColumnName("PhoneNationalNumber");
 
                             b1.HasKey("UserId");

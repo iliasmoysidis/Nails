@@ -63,7 +63,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         {
             deletedAt.Property(x => x.Value)
                 .HasColumnName("DeletedAt")
-                .HasColumnType("datetime2");
+                .HasColumnType("timestamp with time zone");
         });
 
         builder.Navigation(x => x.FullName)

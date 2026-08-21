@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,17 +16,17 @@ namespace Infrastructure.Migrations
                 name: "Professionals",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: false),
-                    PhoneCountryCode = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
-                    PhoneNationalNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    TaxCountryCode = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    TaxIdNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
+                    PhoneCountryCode = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
+                    PhoneNationalNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    TaxCountryCode = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    TaxIdNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -36,21 +37,21 @@ namespace Infrastructure.Migrations
                 name: "Stores",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StoreName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Street = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PostalCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    State = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CountryCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    TaxCountryCode = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    TaxIdNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: false),
-                    PhoneCountryCode = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
-                    PhoneNationalNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    IsClosed = table.Column<bool>(type: "bit", nullable: false),
-                    ClosedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StoreName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Street = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    PostalCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    State = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CountryCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    TaxCountryCode = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    TaxIdNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
+                    PhoneCountryCode = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
+                    PhoneNationalNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    IsClosed = table.Column<bool>(type: "boolean", nullable: false),
+                    ClosedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -61,15 +62,15 @@ namespace Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(320)", maxLength: 320, nullable: false),
-                    PhoneCountryCode = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
-                    PhoneNationalNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
+                    PhoneCountryCode = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
+                    PhoneNationalNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,7 +81,7 @@ namespace Infrastructure.Migrations
                 name: "ProfessionalSchedules",
                 columns: table => new
                 {
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false)
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,7 +98,7 @@ namespace Infrastructure.Migrations
                 name: "AssignmentRegistries",
                 columns: table => new
                 {
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,7 +115,7 @@ namespace Infrastructure.Migrations
                 name: "Staff",
                 columns: table => new
                 {
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -131,7 +132,7 @@ namespace Infrastructure.Migrations
                 name: "StoreCalendars",
                 columns: table => new
                 {
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,7 +149,7 @@ namespace Infrastructure.Migrations
                 name: "StoreCatalogs",
                 columns: table => new
                 {
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -165,19 +166,19 @@ namespace Infrastructure.Migrations
                 name: "Appointments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    OfferingId = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false),
-                    StartAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DurationMinutes = table.Column<int>(type: "int", nullable: false),
-                    PriceAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    PriceCurrency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CanceledAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    OfferingId = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false),
+                    StartAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DurationMinutes = table.Column<int>(type: "integer", nullable: false),
+                    PriceAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    PriceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CanceledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -206,8 +207,8 @@ namespace Infrastructure.Migrations
                 name: "StaffCalendars",
                 columns: table => new
                 {
-                    StoreId = table.Column<int>(type: "int", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false),
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -230,10 +231,10 @@ namespace Infrastructure.Migrations
                 name: "Assignments",
                 columns: table => new
                 {
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    OfferingId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    OfferingId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -256,8 +257,8 @@ namespace Infrastructure.Migrations
                 name: "StaffMembers",
                 columns: table => new
                 {
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -281,7 +282,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -298,8 +299,8 @@ namespace Infrastructure.Migrations
                 name: "StoreCalendarWorkingDays",
                 columns: table => new
                 {
-                    Day = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    Day = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -316,14 +317,14 @@ namespace Infrastructure.Migrations
                 name: "Offerings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StoreId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    PriceAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    PriceCurrency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
-                    DurationMinutes = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StoreId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    PriceAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    PriceCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    DurationMinutes = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -341,14 +342,14 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StaffCalendarExceptions", x => new { x.ProfessionalId, x.StoreId, x.Date });
                     table.ForeignKey(
-                        name: "FK_StaffCalendarExceptions_StaffCalendars_ProfessionalId_StoreId",
+                        name: "FK_StaffCalendarExceptions_StaffCalendars_ProfessionalId_Store~",
                         columns: x => new { x.ProfessionalId, x.StoreId },
                         principalTable: "StaffCalendars",
                         principalColumns: new[] { "ProfessionalId", "StoreId" },
@@ -359,15 +360,15 @@ namespace Infrastructure.Migrations
                 name: "StaffCalendarWorkingDays",
                 columns: table => new
                 {
-                    Day = table.Column<int>(type: "int", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    Day = table.Column<int>(type: "integer", nullable: false),
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StaffCalendarWorkingDays", x => new { x.ProfessionalId, x.StoreId, x.Day });
                     table.ForeignKey(
-                        name: "FK_StaffCalendarWorkingDays_StaffCalendars_ProfessionalId_StoreId",
+                        name: "FK_StaffCalendarWorkingDays_StaffCalendars_ProfessionalId_Stor~",
                         columns: x => new { x.ProfessionalId, x.StoreId },
                         principalTable: "StaffCalendars",
                         principalColumns: new[] { "ProfessionalId", "StoreId" },
@@ -378,9 +379,9 @@ namespace Infrastructure.Migrations
                 name: "StaffMemberRoles",
                 columns: table => new
                 {
-                    Role = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false)
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false),
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -397,18 +398,18 @@ namespace Infrastructure.Migrations
                 name: "StoreExceptionTimeRanges",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Start = table.Column<TimeSpan>(type: "time", nullable: false),
-                    End = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Start = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    End = table.Column<TimeSpan>(type: "interval", nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StoreExceptionTimeRanges", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StoreExceptionTimeRanges_StoreCalendarExceptions_StoreId_Date",
+                        name: "FK_StoreExceptionTimeRanges_StoreCalendarExceptions_StoreId_Da~",
                         columns: x => new { x.StoreId, x.Date },
                         principalTable: "StoreCalendarExceptions",
                         principalColumns: new[] { "StoreId", "Date" },
@@ -419,18 +420,18 @@ namespace Infrastructure.Migrations
                 name: "StoreCalendarWorkingDayTimeRanges",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Start = table.Column<TimeSpan>(type: "time", nullable: false),
-                    End = table.Column<TimeSpan>(type: "time", nullable: false),
-                    Day = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Start = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    End = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    Day = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StoreCalendarWorkingDayTimeRanges", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StoreCalendarWorkingDayTimeRanges_StoreCalendarWorkingDays_StoreId_Day",
+                        name: "FK_StoreCalendarWorkingDayTimeRanges_StoreCalendarWorkingDays_~",
                         columns: x => new { x.StoreId, x.Day },
                         principalTable: "StoreCalendarWorkingDays",
                         principalColumns: new[] { "StoreId", "Day" },
@@ -441,19 +442,19 @@ namespace Infrastructure.Migrations
                 name: "StaffCalendarExceptionTimeRanges",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Start = table.Column<TimeSpan>(type: "time", nullable: false),
-                    End = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Start = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    End = table.Column<TimeSpan>(type: "interval", nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StaffCalendarExceptionTimeRanges", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StaffCalendarExceptionTimeRanges_StaffCalendarExceptions_ProfessionalId_StoreId_Date",
+                        name: "FK_StaffCalendarExceptionTimeRanges_StaffCalendarExceptions_Pr~",
                         columns: x => new { x.ProfessionalId, x.StoreId, x.Date },
                         principalTable: "StaffCalendarExceptions",
                         principalColumns: new[] { "ProfessionalId", "StoreId", "Date" },
@@ -464,19 +465,19 @@ namespace Infrastructure.Migrations
                 name: "StaffCalendarWorkingDayTimeRanges",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Start = table.Column<TimeSpan>(type: "time", nullable: false),
-                    End = table.Column<TimeSpan>(type: "time", nullable: false),
-                    Day = table.Column<int>(type: "int", nullable: false),
-                    ProfessionalId = table.Column<int>(type: "int", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Start = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    End = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    Day = table.Column<int>(type: "integer", nullable: false),
+                    ProfessionalId = table.Column<int>(type: "integer", nullable: false),
+                    StoreId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StaffCalendarWorkingDayTimeRanges", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StaffCalendarWorkingDayTimeRanges_StaffCalendarWorkingDays_ProfessionalId_StoreId_Day",
+                        name: "FK_StaffCalendarWorkingDayTimeRanges_StaffCalendarWorkingDays_~",
                         columns: x => new { x.ProfessionalId, x.StoreId, x.Day },
                         principalTable: "StaffCalendarWorkingDays",
                         principalColumns: new[] { "ProfessionalId", "StoreId", "Day" },

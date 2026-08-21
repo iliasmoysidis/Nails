@@ -18,6 +18,8 @@ using Application.Users;
 using Infrastructure.Common;
 using MediatR;
 
+DotNetEnv.Env.TraversePath().Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();

@@ -46,7 +46,7 @@ public sealed class AppointmentConfiguration
         {
             startAt.Property(x => x.Value)
                 .HasColumnName("StartAt")
-                .HasColumnType("datetime2")
+                .HasColumnType("timestamp with time zone")
                 .IsRequired();
 
             startAt.HasIndex(x => x.Value);
@@ -68,7 +68,7 @@ public sealed class AppointmentConfiguration
         {
             canceledAt.Property(x => x.Value)
                 .HasColumnName("CanceledAt")
-                .HasColumnType("datetime2");
+                .HasColumnType("timestamp with time zone");
         });
 
 

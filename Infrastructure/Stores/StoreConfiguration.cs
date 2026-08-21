@@ -104,7 +104,7 @@ public sealed class StoreConfiguration : IEntityTypeConfiguration<Store>
         {
             closedAt.Property(x => x.Value)
                 .HasColumnName("ClosedAt")
-                .HasColumnType("datetime2");
+                .HasColumnType("timestamp with time zone");
         });
 
         builder.Navigation(x => x.Name)
